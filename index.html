@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Bagga Lax</title>
+<meta name="description" content="Bagga Lax: a pixel lacrosse game by Takeover Lacrosse. Play in your browser or add it to your home screen.">
+<meta name="theme-color" content="#0b0f14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Bagga Lax">
+<meta property="og:title" content="Bagga Lax">
+<meta property="og:description" content="Pixel lacrosse. Faceoffs, rockets, a full season. By Takeover Lacrosse.">
+<meta property="og:image" content="og.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png?v=4002">
+<link rel="icon" href="icon-192.png?v=4002">
+<link rel="stylesheet" href="style.css?v=4002">
+</head>
+<body>
+<div id="intro30"></div>
+<div id="stage"><canvas id="game" aria-label="Bagga Lax game"></canvas><div id="ui"></div></div>
+<div id="rotate"><div class="phone"></div><p>TURN YOUR PHONE SIDEWAYS</p><small>BAGGA LAX PLAYS IN LANDSCAPE</small></div>
+<script>window.__rl_ios=true</script><script src="v41ios.js?v=4100"></script><!-- V41 iOS app glue: must load first -->
+<script src="roster.js?v=4002"></script>
+<script src="names31.js?v=4002"></script>
+<script src="v401names.js?v=4002"></script>
+<script src="v4011pc.js?v=4002"></script>
+<script src="v401h.js?v=4002"></script>
+<script src="sprites12.js?v=4002"></script>
+<script src="dir211.js?v=4002"></script>
+<script src="audio12.js?v=4002"></script>
+<script src="game.js?v=4002"></script>
+<script src="intro30.js?v=4002"></script>
+<script src="ghosts16.js?v=4002"></script>
+<script src="items17.js?v=4026"></script>
+<script src="uni21.js?v=4002"></script>
+<script src="net.js?v=4002"></script>
+<script src="practice18.js?v=4002"></script>
+<script src="v20.js?v=4002"></script>
+<script src="cards22.js?v=4002"></script>
+<script src="acct23.js?v=4002"></script>
+<script src="tour2317.js?v=4002"></script>
+<script src="v232.js?v=4002"></script>
+<script src="trade24.js?v=4002"></script>
+<script src="col25data.js?v=4002"></script>
+<script src="v38col.js?v=4002"></script>
+<script src="v4011rn.js?v=4002"></script>
+<script src="names31b.js?v=4002"></script>
+<script src="college25.js?v=4002"></script>
+<script src="v29r.js?v=4002"></script>
+<script src="honors25.js?v=4036"></script>
+<script src="show25.js?v=4002"></script>
+<script src="shot26.js?v=4002"></script>
+<script src="tut26.js?v=4002"></script>
+<script src="v27.js?v=4002"></script>
+<script src="v28.js?v=4002"></script>
+<script src="c30.js?v=4002"></script>
+<script src="d30.js?v=4002"></script>
+<script src="v33.js?v=4002"></script>
+<script src="v331.js?v=4002"></script>
+<script src="v333.js?v=4002"></script>
+<script src="v332.js?v=4002"></script>
+<script src="v34.js?v=4002"></script>
+<script src="v35.js?v=4002"></script>
+<script src="v35u.js?v=4002"></script>
+<script src="v35s.js?v=4002"></script>
+<script src="v35st.js?v=4002"></script>
+<script src="v35na.js?v=4002"></script>
+<script src="v35sc.js?v=4002"></script>
+<script src="v35dr.js?v=4002"></script>
+<script src="v35ct.js?v=4002"></script>
+<script src="v35sb.js?v=4002"></script>
+<script src="v35ag.js?v=4002"></script>
+<script src="v36ai.js?v=4002"></script>
+<script src="v36dg.js?v=4002"></script>
+<script src="v36dr.js?v=4002"></script>
+<script src="v361.js?v=4002"></script>
+<script src="v361d.js?v=4002"></script>
+<script src="v361s.js?v=4002"></script>
+<script src="v361p.js?v=4002"></script>
+<script src="v37m.js?v=4029"></script>
+<script src="v37a.js?v=4002"></script>
+<script src="v37s.js?v=4002"></script>
+<script src="v37c.js?v=4002"></script>
+<script src="v38d.js?v=4002"></script>
+<script src="v38g.js?v=4002"></script>
+<script src="v38p.js?v=4002"></script>
+<script src="v38a.js?v=4002"></script>
+<script src="v38h.js?v=4002"></script>
+<script src="v38t.js?v=4002"></script>
+<script src="v38art.js?v=4002"></script>
+<script src="ads39.js?v=4002"></script>
+<script src="v39b.js?v=4002"></script>
+<script src="v39fd.js?v=4002"></script>
+<script src="v39aw.js?v=4002"></script>
+<script src="v39cur.js?v=4002"></script>
+<script src="v39d.js?v=4002"></script>
+<script src="v39fo.js?v=4002"></script>
+<script src="v39pb.js?v=4002"></script>
+<script src="v40home.js?v=4002"></script>
+<script src="v40card.js?v=4002"></script>
+<script src="v40letty.js?v=4002"></script>
+<script src="v40promo.js?v=4002"></script>
+<script src="v40ref.js?v=4002"></script>
+<script src="v40nm.js?v=4002"></script>
+<script src="v40cr.js?v=4002"></script>
+<script src="v40msg.js?v=4002"></script>
+<script src="v40odds.js?v=4002"></script>
+<script src="v40coin.js?v=4002"></script>
+<script src="v401coin.js?v=4002"></script>
+<script src="v401nm.js?v=4002"></script>
+<script src="v401ed.js?v=4002"></script>
+<script src="v401fld.js?v=4002"></script>
+<script src="v4011set.js?v=4002"></script>
+<script src="v4012tut.js?v=4008"></script>
+<script src="v4013mus.js?v=4002"></script>
+<script src="v406m.js?v=4007"></script>
+<script src="v4014coach.js?v=40144"></script>
+<script src="v4015dime.js?v=4002"></script>
+<script src="v4021disc.js?v=4002"></script>
+<script src="v4023bl.js?v=4002"></script>
+<script src="v42crew.js?v=4003"></script>
+<script src="v42pd.js?v=4029"></script>
+<script src="v404g.js?v=4005"></script>
+<script src="v404d.js?v=4004"></script>
+<script src="v404t.js?v=4005"></script>
+<script src="v406b.js?v=4008"></script>
+<script src="v409s.js?v=4009"></script>
+<script src="v410d.js?v=4010"></script>
+<script src="v411l.js?v=4011"></script>
+<script src="v413m.js?v=4013"></script>
+<script src="v415r.js?v=4015"></script>
+<script src="v414b.js?v=4014"></script>
+<script src="v416p.js?v=4016"></script>
+<script src="v417k.js?v=4017"></script>
+<script src="v418t.js?v=4018"></script>
+<script src="v419c.js?v=4019"></script>
+<script src="v420c.js?v=4029"></script>
+<script src="v421s.js?v=4031"></script>
+<script src="v422st.js?v=4028"></script>
+<script src="v423ob.js?v=4023"></script>
+<script src="v424rs.js?v=4029"></script>
+<script src="v425sp.js?v=4029"></script>
+<script src="v428as.js?v=4031"></script>
+<script src="v431dh.js?v=4031"></script>
+<script src="v432cq.js?v=4032"></script>
+<script src="v433np.js?v=4033"></script>
+<script src="v434at.js?v=4034"></script>
+<script src="v435ig.js?v=4035"></script>
+<script src="v436hb.js?v=4036"></script>
+<script src="v437qa.js?v=4037"></script>
+<script src="v438ol.js?v=4038"></script>
+<script src="v427pm.js?v=4029"></script>
+<script src="v41ugc.js?v=4100"></script>
+<script src="v41del.js?v=4100"></script>
+<script src="v41iap.js?v=4100"></script>
+<script src="v429st.js?v=4029"></script>
+<script src="v430mt.js?v=4030"></script>
+<script src="v439pv.js?v=4039"></script>
+<script src="v440md.js?v=4040"></script>
+<script src="v441num.js?v=4042"></script>
+<script src="v442anim.js?v=4046"></script>
+<script src="v444ball.js?v=4044"></script>
+<script src="v445fit.js?v=4045"></script>
+<script src="v446fitpick.js?v=4047"></script>
+<script src="v441dg.js?v=4041"></script>
+<script src="v447out.js?v=4047"></script>
+<script src="v448ai.js?v=4048"></script>
+<script src="v449ride.js?v=4049"></script>
+<script src="v450slow.js?v=4050"></script>
+<script src="v451ridefix.js?v=4051"></script>
+<script src="v452hard.js?v=4052"></script>
+<script src="v453fo.js?v=4053"></script>
+<script src="v454force.js?v=4054"></script>
+<script src="v455gk.js?v=4055"></script>
+<script src="v456ult.js?v=4056"></script>
+</body>
+</html>
