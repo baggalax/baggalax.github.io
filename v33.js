@@ -22,7 +22,7 @@ const V33 = (() => {
    o = null;
   }
   if (!o || typeof o !== 'object' || Array.isArray(o)) o = {};
-  for (const k of [ 'pro', 'col' ]) o[k] = Array.isArray(o[k]) ? o[k].filter(t => t && typeof t === 'object' && /^SZ0[PC][1-8][0-9A-Z]$/.test(String(t.id || ''))) : [];
+  for (const k of [ 'pro', 'col' ]) o[k] = Array.isArray(o[k]) ? o[k].filter(t => t && typeof t === 'object' && /^SZ0[PC][1-9A-Z][0-9A-Z]$/.test(String(t.id || ''))) : [];
   if (!o.v) o.v = 1;
   return o;
  }

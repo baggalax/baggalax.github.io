@@ -5177,6 +5177,13 @@ const V17 = (() => {
     return pc;
    }
   }
+  if (it.x489 && window.UNI21X && UNI21X.icon) {
+   const xc = UNI21X.icon(it, sil);
+   if (xc) {
+    artCache.set(key, xc);
+    return xc;
+   }
+  }
   const [cv2, x] = mkc(20, 20);
   iconArt(x, it, sil);
   artCache.set(key, cv2);
@@ -6525,6 +6532,9 @@ const V17 = (() => {
   try {
    if (U.g27 && U.g27() && typeof GH_REG !== 'undefined' && GH_REG.GHO && window.GHO16 && GHO16.on() && (GHO16.owned() || U.has('GHO', 2) || U.has('GHO', 3))) out.push('GHO');
   } catch (e) {}
+  try {
+   if (window.UNI21X && UNI21X.lockerTeams && !window.__rl_no489vets) for (const t of UNI21X.lockerTeams()) if (!out.includes(t)) out.push(t);
+  } catch (e) {}
   return out;
  }
  function uniIcon17(tid, k) {
@@ -6547,12 +6557,13 @@ const V17 = (() => {
   return u;
  }
  function uniWhere17(tid, k) {
+  if (T(tid).vets489) return 'IN THE HONOR PACK';
   return k === 7 || T(tid).gho16 && k >= 2 ? 'HALLOWEEN PACK' : 'FROM CARD PACKS';
  }
  const on2319 = () => !window.__rl_no2319 && !window.__rl_v124gb;
  function uniTile2319(tid, k, cur) {
   const U = UNI21, own = U.has(tid, k);
-  return '<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + esc(tid) + '|' + k + '" aria-label="' + esc(T(tid).name.toUpperCase() + ' ' + U.STY[k] + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc(T(tid).gho16 && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>';
+  return '<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + esc(tid) + '|' + k + '" aria-label="' + esc(T(tid).name.toUpperCase() + ' ' + (T(tid).vets489 && U.styN ? U.styN(tid, k) : U.STY[k]) + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc((T(tid).gho16 || T(tid).vets489) && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>';
  }
  const on286lc = () => !window.__rl_no286lockcol && !window.__rl_v124gb && on2319();
  let uniGrp286 = null;
@@ -6613,7 +6624,7 @@ const V17 = (() => {
   for (let k = 0; k < N; k++) {
    const own = U.has(tid, k);
    if (own) un++;
-   tiles.push('<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + k + '" aria-label="' + esc(U.STY[k] + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc(T(tid).gho16 && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>');
+   tiles.push('<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + k + '" aria-label="' + esc(U.STY[k] + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc((T(tid).gho16 || T(tid).vets489) && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>');
   }
   const det = '<div class="det17">EVERY TEAM\'S UNIFORMS. BASIC + WHITE ARE ALWAYS UNLOCKED, THE OTHERS COME FROM CARD PACKS. TAP ONE = THAT TEAM WEARS IT.</div>' + '<div class="row uni17t">' + btn('< PREV TEAM', 'v17unit', '-1', 'd') + '<b class="uni17n">' + esc(t.name.toUpperCase()) + (mine ? ' (YOUR SEASON TEAM)' : '') + '</b>' + btn('NEXT TEAM >', 'v17unit', '1', 'd') + '</div>';
   const body = '<div class="sec17"><div class="sh17">UNIFORMS <span>' + un + ' / ' + N + '</span></div><div class="grid17">' + tiles.join('') + '</div></div>';
@@ -6640,7 +6651,7 @@ const V17 = (() => {
    return false;
   }
   U.save(tid, k);
-  toast('WEARING: ' + (T(tid).gho16 && U.styN ? U.styN(tid, k) : U.STY[k]), '#7dff7a');
+  toast('WEARING: ' + ((T(tid).gho16 || T(tid).vets489) && U.styN ? U.styN(tid, k) : U.STY[k]), '#7dff7a');
   return true;
  }
  function stk2319(k, list) {

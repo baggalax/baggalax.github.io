@@ -39,7 +39,7 @@
   2: 'WHITE GHOST',
   3: 'SKELETON'
  };
- const styN = (tid, k) => TT(tid).gho16 && g27() && G27N[k | 0] ? G27N[k | 0] : (k | 0) === 8 && alt8(tid) ? alt8(tid).name : STY[k] || STY[0];
+ const styN = (tid, k) => X489(tid) ? X489(tid).styN(tid, k) : TT(tid).gho16 && g27() && G27N[k | 0] ? G27N[k | 0] : (k | 0) === 8 && alt8(tid) ? alt8(tid).name : STY[k] || STY[0];
  const adv = (tid, k, d, N) => {
   let n = 0;
   do {
@@ -47,9 +47,10 @@
   } while (!okK(tid, k) && n++ < N);
   return k;
  };
- const nK = tid => TT(tid).gho16 ? g27() ? 4 : 2 : alt8(tid) ? 9 : nK0(tid);
+ const X489 = tid => { try { const x = !window.__rl_no489vets && window.UNI21X; return x && x.own(tid) ? x : null; } catch (e) { return null; } };
+ const nK = tid => X489(tid) ? X489(tid).nK(tid) : TT(tid).gho16 ? g27() ? 4 : 2 : alt8(tid) ? 9 : nK0(tid);
  const nK0 = tid => hw7(tid) && (has(tid, 7) || window.V17 && V17.hw16 && V17.hw16.on()) ? 8 : 7;
- const okK = (tid, k) => k != null && k >= 0 && (TT(tid).gho16 ? k <= (g27() ? 3 : 1) : k <= 6 || k === 7 && hw7(tid) || k === 8 && !!alt8(tid));
+ const okK = (tid, k) => k != null && k >= 0 && (X489(tid) ? k < X489(tid).nK(tid) : TT(tid).gho16 ? k <= (g27() ? 3 : 1) : k <= 6 || k === 7 && hw7(tid) || k === 8 && !!alt8(tid));
  const WHITE = '#f4f4f4';
  const on = () => !window.__rl_no21 && !window.__rl_v124gb;
  const reg = () => typeof SZ_REG !== 'undefined' ? SZ_REG : {};
@@ -67,6 +68,7 @@
  };
  const itemId = (tid, k) => 'uni21|' + base(tid) + '|' + k;
  function kitOf(tid, k) {
+  if (X489(tid)) { const xk = X489(tid).kitOf(tid, k); if (xk) return xk; }
   const t = TT(tid), c1 = t.c1, c2 = t.c2;
   if (t.gho16 && g27() && (k | 0) === 2) return {
    jersey: '#f7f7f8',

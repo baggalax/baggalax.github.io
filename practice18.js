@@ -1081,6 +1081,14 @@ var __x=self.__x||(self.__x=(function(){var c=Object.create(null);return functio
     bg: '#8fe3f0'
    });
   }
+  if (window.V463PZ && window.V463PZ.on()) {
+   // v463pz: practice pause follows the game's top-left pause.
+   const pb = window.V463PZ.box();
+   if (GAME_SCREENS.includes(screen)) hit('PAUSE', pb.x, pb.y, pb.w, pb.h, () => {
+    paused = true;
+   });
+   window.V463PZ.draw(pb);
+  } else {
   const sy = typeof sa2403Dy === 'function' ? sa2403Dy(H - 10, 10) : 0;
   if (GAME_SCREENS.includes(screen)) hit('PAUSE', cx - 9, H - 10 - sy, 18, 10, () => {
    paused = true;
@@ -1088,6 +1096,7 @@ var __x=self.__x||(self.__x=(function(){var c=Object.create(null);return functio
   rect(cx - 7, H - 8 - sy, 14, 8, 'rgba(0,0,0,.55)');
   rect(cx - 3, H - 7 - sy, 2, 6, '#fff');
   rect(cx + 1, H - 7 - sy, 2, 6, '#fff');
+  }
  }
  wrap('drawHUD', function(o, a) {
   if (prac()) return drawPracHud();

@@ -2,9 +2,7 @@
    Replaces the unshipped v443keys.js (keyboard part only; its mouse layer is NOT carried:
    the game's own pointer handlers already treat a mouse exactly like a finger).
    Charlie's map (Nov 9 2026): W A S D = move; Left = split left, Right = split right,
-   Up = swim, Down = toe drag. V41.3.1 (Nov 9 10:12 PM, Charlie: "No more arrows to dodge"): the default dodge
-   keys moved next to WASD - Q = split left, E = split right, R = swim, F = toe drag (KDEF below; the internal
-   tokens in DODGE_K / dodgeKey keep their old Arrow names). Arrows are unbound by default; saved binds stay. Extra kept from v443: Shift = check (tap) / big hit (hold) on
+   Up = swim, Down = toe drag. Extra kept from v443: Shift = check (tap) / big hit (hold) on
    defense (v443's E = sub and Esc = pause were dropped: not part of the spec, untested).
    Input only: every key calls the same game function the touch control calls
    (setRun = joystick, doDodge = dodge swipe, dCheck/dHit = defense hold).
@@ -17,7 +15,7 @@
  const off = () => !!window.__rl_no467keys;
  const K = { w: 0, a: 0, s: 0, d: 0 };
  // V41.3 (v468ctl): keys come from rl_binds467 (CONTROLS > KEYS), else Charlie's defaults.
- const KDEF = { up: 'w', left: 'a', down: 's', right: 'd', splitL: 'q', splitR: 'e', swim: 'r', toe: 'f', check: 'Shift', foSet: ' ', pass: '', creaseTL: '1', creaseBL: '2', creaseTR: '3', creaseBR: '4' };   // pass: v468ctl PASSER PRO pass bind
+ const KDEF = { up: 'w', left: 'a', down: 's', right: 'd', splitL: 'ArrowLeft', splitR: 'ArrowRight', swim: 'ArrowUp', toe: 'ArrowDown', check: 'Shift', foSet: ' ' };
  const MOVE = { up: 'w', left: 'a', down: 's', right: 'd' }, DODGE_K = { splitL: 'ArrowLeft', splitR: 'ArrowRight', swim: 'ArrowUp', toe: 'ArrowDown' };
  let B = null;
  function binds() {

@@ -19,9 +19,9 @@
  'use strict';
  if (window.__rl_no468ctl) return;
  const KB_KEY = 'rl_binds467', PAD_KEY = 'rl_pad468';
- const KDEF = { up: 'w', left: 'a', down: 's', right: 'd', splitL: 'q', splitR: 'e', swim: 'r', toe: 'f', check: 'Shift', foSet: ' ', pass: '', creaseTL: '1', creaseBL: '2', creaseTR: '3', creaseBR: '4' };   // V41.3.1: crease = the 4 finish circles (v483pull); pass = PASSER PRO pass (key or MouseN), unbound by default;: dodges Q E R F (was the arrows), same as v467keys KDEF
- const PDEF = { pass: 0, shoot: 7, sw: 0, check: 2, hit: 11, foSet: 2, creaseTL: 6, creaseBL: 4, creaseTR: 7, creaseBR: 5 };   // crease*: Charlie Nov 9 10:33 PM (read by v484pad)
- const PGRP = { pass: 'o', shoot: 'o', sw: 'd', check: 'd', hit: 'd', foSet: 'f', creaseTL: 'c', creaseBL: 'c', creaseTR: 'c', creaseBR: 'c' };   // crease rows swap among themselves only (they share R2 with SHOOT by design: circles only show at the crease)
+ const KDEF = { up: 'w', left: 'a', down: 's', right: 'd', splitL: 'ArrowLeft', splitR: 'ArrowRight', swim: 'ArrowUp', toe: 'ArrowDown', check: 'Shift', foSet: ' ' };
+ const PDEF = { pass: 0, shoot: 7, sw: 0, check: 2, hit: 11, foSet: 2 };
+ const PGRP = { pass: 'o', shoot: 'o', sw: 'd', check: 'd', hit: 'd', foSet: 'f' };
  const PADN = [ 'CROSS / A', 'CIRCLE / B', 'SQUARE / X', 'TRIANGLE / Y', 'L1 / LB', 'R1 / RB', 'L2 / LT', 'R2 / RT', 'SHARE / BACK', 'OPTIONS / START', 'L3 / LS', 'R3 / RS', 'D-PAD UP', 'D-PAD DOWN', 'D-PAD LEFT', 'D-PAD RIGHT', 'PS / HOME' ];
  const st = { open: false, tab: 'keys', cap: null, mode: null, sawKey: false, sawMouse: false, lastDraw: 0, padOn: false, pad: null, log: [], last: null, fo: { sel: null, kv: [ 0, 0 ] } };
  window.__rl468 = st;
@@ -35,18 +35,13 @@
  function savePad(o) { try { localStorage.setItem(PAD_KEY, JSON.stringify(o)); } catch (e) {} }
  function keyName(k) {
   if (k === ' ') return 'SPACE';
-  if (!k) return '-';
-  const m = { Mouse0: 'L-CLICK', Mouse1: 'M-CLICK', Mouse2: 'R-CLICK', Mouse3: 'MOUSE 4', Mouse4: 'MOUSE 5', ArrowLeft: '<', ArrowRight: '>', ArrowUp: '^', ArrowDown: 'v', Shift: 'SHIFT', Enter: 'ENTER', Tab: 'TAB', Control: 'CTRL', Alt: 'ALT', Backspace: 'BKSP', CapsLock: 'CAPS' };
+  const m = { ArrowLeft: '<', ArrowRight: '>', ArrowUp: '^', ArrowDown: 'v', Shift: 'SHIFT', Enter: 'ENTER', Tab: 'TAB', Control: 'CTRL', Alt: 'ALT', Backspace: 'BKSP', CapsLock: 'CAPS' };
   if (m[k]) return m[k];
   return String(k).toUpperCase().replace(/[^A-Z0-9<>^,.\/;:'\[\]\-=+]/g, '').slice(0, 6) || '?';
  }
  const padName = i => PADN[i] || 'BUTTON ' + i;
  window.V468CTL = { st: st, kb: kb, pb: pb, keyName: keyName, padName: padName, KDEF: KDEF, PDEF: PDEF };
- V468CTL.aimedMate = (L, list) => aimedMate(L, list);
- // V41.3.1: read-only views for other controller files (v484pad): the current binds and the last pad state
- V468CTL.binds = () => ({ keys: Object.assign({}, kb()), pad: Object.assign({}, pb()) });
- try { if (!window.V468) Object.defineProperty(window, 'V468', { configurable: true, value: { get binds() { return { keys: Object.assign({}, kb()), pad: Object.assign({}, pb()) }; }, get pad() { return V468CTL.padState(); }, KDEF: KDEF, PDEF: PDEF, keyName: keyName, padName: padName } }); } catch (e) {}
- V468CTL.padState = () => { try { return { connected: padConnected(), mode: st.inputMode(), prev: (P.prev || []).slice(), padL: st.padL || null, open: !!st.open, cap: st.cap || null }; } catch (e) { return null; } };   // v472pass: the same pass-target picker for touch PASSER PRO + the ring
+ V468CTL.aimedMate = (L, list) => aimedMate(L, list);   // v472pass: the same pass-target picker for touch PASSER PRO + the ring
 
  // ---------------- input mode ----------------
  function pads() { try { return Array.from(navigator.getGamepads ? navigator.getGamepads() : []).filter(p => p && p.connected !== false); } catch (e) { return []; } }
@@ -106,35 +101,25 @@
   button(capLabel(name, cur, wait), x, y, w, h, () => { st.cap = wait ? null : { kind: kind, act: act, t0: performance.now() }; note('capture', st.cap); try { SFX.tap && SFX.tap(); } catch (e) {} }, { bg: wait ? '#ffd23a' : '#2cc4dc', fg: '#0b1a20', fit: true });
  }
  function info(name, val, x, y, w) { text(name + ': ' + val, x + 3, y + 2, 1, '#8fe3f0'); }
- // V41.3.1: the settings screen is drawn inside game.js sa2403Band(), which moves every y up by a stepped band on phones with a
- // home bar (SA2403BANDS) but keeps heights: tight rows landed on each other ("Controller menu very scuffed"). The panel
- // lays itself out above the home bar instead (sa2403().db), so it is drawn with the band off.
  function drawControls(inGame) {
-  let SB = null; try { SB = window.SA2403B; window.SA2403B = null; } catch (e) {}
-  try { return drawControls0(inGame); } finally { try { window.SA2403B = SB; } catch (e) {} }
- }
- function drawControls0(inGame) {
   if (inGame) rect(0, 0, W, H, 'rgba(0,0,0,.86)'); else bgStripes(true);
   const isDesk = desk(), pad = padConnected();
   if (st.tab === 'pad' && !pad) st.tab = 'keys';
   if (!isDesk && !pad) st.tab = 'none';
   else if (st.tab === 'none') st.tab = pad && !isDesk ? 'pad' : 'keys';
   if (!isDesk && pad && st.tab === 'keys') st.tab = 'pad';
-  text('CONTROLS', W / 2, st.tab === 'none' ? 5 : 3, 2, '#2cc4dc', 'center', '#000');
-  const line = st.cap ? (st.cap.kind === 'pad' ? 'PRESS A CONTROLLER BUTTON NOW. ESC CANCELS.' : st.cap.act === 'pass' ? 'PRESS A KEY OR A MOUSE BUTTON NOW. ESC CANCELS.' : 'PRESS A KEY NOW. ESC CANCELS.') : st.tab === 'none' ? 'TURN THE AUTO HELPERS ON OR OFF.' : st.tab === 'pad' ? 'TAP A BLUE ROW, THEN PRESS A BUTTON TO REBIND IT.' : 'CLICK A BLUE ROW, THEN PRESS A KEY TO REBIND IT.';
-  text(line, W / 2, st.tab === 'none' ? 21 : 17, 1, st.cap ? '#ffe14d' : '#cfe', 'center');
+  text('CONTROLS', W / 2, 5, 2, '#2cc4dc', 'center', '#000');
+  const line = st.cap ? (st.cap.kind === 'pad' ? 'PRESS A CONTROLLER BUTTON NOW. ESC CANCELS.' : 'PRESS A KEY NOW. ESC CANCELS.') : st.tab === 'none' ? 'TURN THE AUTO HELPERS ON OR OFF.' : st.tab === 'pad' ? 'TAP AN ACTION, THEN PRESS A BUTTON TO REBIND IT.' : 'TAP AN ACTION, THEN PRESS A KEY TO REBIND IT.';
+  text(line, W / 2, 21, 1, st.cap ? '#ffe14d' : '#cfe', 'center');
   const PM = window.V472PASS && !window.__rl_no472pass ? V472PASS : null;   // v472pass hook
-  const x0 = 8, gw = W - 16, ty = st.tab === 'none' ? (PM ? 36 : 50) : 27, th = st.tab === 'none' ? (PM ? 16 : 18) : 11, w3 = Math.floor((gw - 6) / 3);
+  const x0 = 8, gw = W - 16, ty = st.tab === 'none' ? (PM ? 36 : 50) : 30, th = st.tab === 'none' ? (PM ? 16 : 18) : 10, w3 = Math.floor((gw - 6) / 3);
   tog('AUTO SWITCH', !!SET171.autoSw, x0, ty, w3, th, v => { SET171.autoSw = v; set171Save(); });
   if (hasV17()) {
    tog('AUTO CHIRP', !!V17.autoChirp(), x0 + w3 + 3, ty, w3, th, v => V17.autoChirp(v));
    tog('AUTO CELLY', !!V17.autoCelly(), x0 + 2 * (w3 + 3), ty, gw - 2 * (w3 + 3), th, v => V17.autoCelly(v));
   }
   if (st.tab !== 'none') {
-   // V41.3.1 layout (Charlie, Nov 9 10:29 PM: "Controller menu very scuffed"): every row is its own fixed slot (name left,
-   // key / button right), section headers sit above their rows, nothing is drawn through button() (whose bottom safe-area
-   // nudge moved buttons onto the rows above on iPhones), the rows share the height left above the one big DONE.
-   const yt = 41, tw = Math.floor((gw - 6) / 3);
+   const yt = 44, tw = Math.floor((gw - 6) / 3);
    const tab = (lbl, k, x, w) => button(lbl, x, yt, w, 10, () => { st.tab = k; st.cap = null; try { SFX.tap && SFX.tap(); } catch (e) {} }, { bg: st.tab === k ? '#ffe14d' : '#3a4a55', fg: st.tab === k ? '#0b1a20' : '#cfe' });
    if (isDesk) tab('KEYS', 'keys', x0, tw);
    if (pad) tab('CONTROLLER', 'pad', isDesk ? x0 + tw + 3 : x0, tw);
@@ -145,89 +130,24 @@
     note('reset', st.tab);
     try { SFX.tap && SFX.tap(); } catch (e) {}
    }, { bg: '#ff8a5a', fg: '#0b1a20', fit: true });
-   let db = 0; try { db = Math.max(0, Math.ceil(sa2403().db || 0)); } catch (e) {}
-   const doneY = H - db - 21, top = yt + 14, bottom = doneY - 3;
-   const cw = Math.floor((gw - 6) / 2), xr = x0 + cw + 6;
-   const passer = !!(PM && PM.mode() === 'passer');
-   const L = [], R = [];
-   const CREASE = [ [ 'creaseTL', 'TL', 'TOP LEFT' ], [ 'creaseBL', 'BL', 'BOTTOM LEFT' ], [ 'creaseTR', 'TR', 'TOP RIGHT' ], [ 'creaseBR', 'BR', 'BOTTOM RIGHT' ] ];
-   const hd = (C, s) => C.push({ h: s });
-   const bindR = (C, kind, act, name, cur) => C.push({ kind: kind, act: act, name: name, cur: cur });
-   const infoR = (C, name, val) => C.push({ name: name, val: val });
-   const actR = (C, name, val, fn, on) => C.push({ name: name, val: val, fn: fn, on: on });
-   const togglePass = () => { try { PM.setMode(PM.mode() === 'passer' ? 'shooter' : 'passer'); SFX.tap && SFX.tap(); } catch (e) {} };
+   const cw = Math.floor((gw - 6) / 2), xr = x0 + cw + 6, rh = 9, rs = 10, y0 = 66;
+   text('PLAY', x0, 58, 1, '#ffe14d'); text('FACEOFF', xr, 58, 1, '#ffe14d');
    if (st.tab === 'keys') {
-    const b = kb(), K = keyName;
-    hd(L, 'PLAY');
-    KROWS.forEach(r => bindR(L, 'key', r[0], r[1], K(b[r[0]])));
-    hd(R, 'MOUSE + MORE');
-    infoR(R, 'SHOOT', 'L-CLICK + PULL');
-    infoR(R, 'DODGE', 'R-CLICK + FLICK');
-    infoR(R, 'ROLL', K(b.left) + ' + ' + K(b.up) + ' TOGETHER');
-    if (PM) actR(R, 'PASS MODE', passer ? 'PASSER PRO' : 'SHOOTER PRO', togglePass, passer);
-    if (passer) bindR(R, 'key', 'pass', 'PASS (PASSER PRO)', K(b.pass)); else infoR(R, 'PASS', 'CLICK A MATE');
-    R.push({ quad: CREASE.map(c => ({ kind: 'key', act: c[0], short: c[1], name: 'CREASE ' + c[2], cur: K(b[c[0]]) })), name: 'CREASE' });
-    infoR(R, 'FO PICK / PULL', [ b.up, b.left, b.down, b.right ].map(K).join(' '));
-    infoR(R, 'FO MOVE PICKED', [ b.splitL, b.splitR, b.swim, b.toe ].map(K).join(' '));
-    bindR(R, 'key', 'foSet', 'SET + SPAM TO TAP', K(b.foSet));
+    const b = kb();
+    KROWS.forEach((r, i) => bindBtn('key', r[0], r[1], keyName(b[r[0]]), x0, y0 + i * rs, cw, rh));
+    kbInfo(b).forEach((r, i) => r[2] ? bindBtn('key', r[2], r[0], keyName(b[r[2]]), xr, y0 + i * rs, cw, rh) : info(r[0], r[1], xr, y0 + i * rs, cw));
    } else {
     const b = pb();
-    hd(L, 'PLAY');
-    PROWS.forEach(r => r[2] ? bindR(L, 'pad', r[2], r[0], padName(b[r[2]])) : infoR(L, r[0], r[1]));
-    hd(R, 'FACEOFF');
-    PFO.forEach(r => r[2] ? bindR(R, 'pad', 'fo_' + r[2], 'FO ' + r[0], padName(b[r[2]])) : infoR(R, r[0], r[1]));
-    hd(R, 'CREASE CIRCLES');
-    R.push({ quad: CREASE.map(c => ({ kind: 'pad', act: c[0], short: c[1], name: 'CREASE ' + c[2], cur: String(padName(b[c[0]])).split(' / ')[0] })), name: 'CREASE' });
-    hd(R, 'PASS MODE');
-    infoR(R, 'CONTROLLER', 'ALWAYS PASSER PRO');
-    if (PM) actR(R, 'TOUCH / MOUSE', passer ? 'PASSER PRO' : 'SHOOTER PRO', togglePass, passer);
+    PROWS.forEach((r, i) => r[2] ? bindBtn('pad', r[2], r[1] == null ? r[0] : r[0], padName(b[r[2]]), x0, y0 + i * rs, cw, rh) : info(r[0], r[1], x0, y0 + i * rs, cw));
+    PFO.forEach((r, i) => r[2] ? bindBtn('pad', 'fo_' + r[2], 'FO ' + r[0], padName(b[r[2]]), xr, y0 + i * rs, cw, rh) : info(r[0], r[1], xr, y0 + i * rs, cw));
    }
-   const HH = 8;   // header slot
-   const pitchOf = C => { const nh = C.filter(r => r.h).length, nr = C.length - nh; return Math.max(8, Math.min(13, Math.floor((bottom - top - nh * HH) / Math.max(1, nr)))); };
-   const pitch = Math.min(pitchOf(L), pitchOf(R)), rh = pitch - 2;
-   const drawCol = (C, x) => {
-    let y = top;
-    for (const r of C) {
-     if (r.h) { text(r.h, x + 1, y + 1, 1, '#ffe14d'); y += HH; continue; }
-     if (r.quad) {   // four small bind buttons in one slot (the crease circles)
-      const n = r.quad.length, gap = 2, qw = Math.floor((cw - gap * (n - 1)) / n);
-      r.quad.forEach((q, i) => {
-       const qx = x + i * (qw + gap), wait = st.cap && st.cap.kind === q.kind && st.cap.act === q.act, lbl = q.short + ' ' + (wait ? '...' : q.cur);
-       rect(qx, y + 1, qw, rh, '#000'); rect(qx, y, qw, rh, wait ? '#ffd23a' : '#2cc4dc'); rect(qx, y, qw, 1, 'rgba(255,255,255,.35)');
-       const ty3 = y + Math.round((rh - 5) / 2);
-       if (textW(lbl, 1) <= qw - 2) text(lbl, qx + qw / 2, ty3, 1, '#0b1a20', 'center'); else textMini(lbl, qx + qw / 2, ty3 + 1, '#0b1a20');
-       const cl = capLabel(q.name, q.cur, wait);
-       hit(cl, qx, y, qw, rh, () => { st.cap = wait ? null : { kind: q.kind, act: q.act, t0: performance.now() }; note('capture', st.cap); try { SFX.tap && SFX.tap(); } catch (e) {} }, cl);
-      });
-      y += pitch; continue;
-     }
-     const wait = r.act && st.cap && st.cap.kind === r.kind && st.cap.act === r.act;
-     const val = wait ? 'PRESS...' : r.cur != null ? r.cur : r.val;
-     const tap = !!(r.act || r.fn);
-     const bg = wait ? '#ffd23a' : r.act ? '#2cc4dc' : r.fn ? (r.on ? '#ffe14d' : '#3a4a55') : 'rgba(255,255,255,.07)';
-     const fg = (wait || r.act || (r.fn && r.on)) ? '#0b1a20' : r.fn ? '#cfe' : '#8fe3f0';
-     if (tap) rect(x, y + 1, cw, rh, '#000');
-     rect(x, y, cw, rh, bg);
-     if (tap) rect(x, y, cw, 1, 'rgba(255,255,255,.35)');
-     const ty2 = y + Math.round((rh - 5) / 2), vw = textW(val, 1), nw = textW(r.name, 1);
-     if (nw + vw + 10 <= cw) { text(r.name, x + 3, ty2, 1, fg); text(val, x + cw - 3, ty2, 1, fg, 'right'); }
-     else textMini(r.name + ': ' + val, x + cw / 2, ty2 + 1, fg);
-     if (r.act) hit(capLabel(r.name, r.cur, wait), x, y, cw, rh, () => { st.cap = wait ? null : { kind: r.kind, act: r.act, t0: performance.now() }; note('capture', st.cap); try { SFX.tap && SFX.tap(); } catch (e) {} }, capLabel(r.name, r.cur, wait));
-     else if (r.fn) hit(r.name + ': ' + r.val, x, y, cw, rh, r.fn, r.name + ': ' + r.val);
-     y += pitch;
-    }
-   };
-   drawCol(L, x0); drawCol(R, xr);
-   button(inGame ? 'BACK TO SETTINGS' : 'DONE', W / 2 - 50, doneY, 100, 18, () => { st.open = false; st.cap = null; try { SFX.tap && SFX.tap(); } catch (e) {} }, { bg: '#7dff7a', fg: '#0b1a20' });
-   return;
   }
-  if (PM) try { PM.drawCtl({ x0: x0, gw: gw, phone: true, pad: pad, desk: isDesk }); } catch (e) { console.warn(e); }   // v472pass hook (phones: the PASS MODE pair)
-  button(inGame ? 'BACK TO SETTINGS' : 'DONE', W / 2 - 50, 120, 100, 31, () => { st.open = false; st.cap = null; try { SFX.tap && SFX.tap(); } catch (e) {} }, { bg: '#7dff7a', fg: '#0b1a20' });
+  if (PM) try { PM.drawCtl({ x0: x0, gw: gw, phone: st.tab === 'none', pad: pad, desk: isDesk }); } catch (e) { console.warn(e); }   // v472pass hook
+  button(inGame ? 'BACK TO SETTINGS' : 'DONE', W / 2 - 50, st.tab === 'none' ? 120 : 158, 100, st.tab === 'none' ? 31 : 18, () => { st.open = false; st.cap = null; try { SFX.tap && SFX.tap(); } catch (e) {} }, { bg: '#7dff7a', fg: '#0b1a20' });
  }
  function setKb(act, k) {
   const b = Object.assign({}, kb()), old = b[act];
-  const SHARE = { pass: 'foSet', foSet: 'pass' };   // V41.3.1: PASS (live play) and FACEOFF SET (faceoffs only) may share a key
-  for (const a in b) if (a !== act && b[a] === k && SHARE[act] !== a) b[a] = old;   // already used: swap
+  for (const a in b) if (a !== act && b[a] === k) b[a] = old;   // already used: swap
   b[act] = k; saveKb(b); note('bindKey', { act: act, key: k });
  }
  function setPad(act, i) {
@@ -247,46 +167,6 @@
   try { SFX.tap && SFX.tap(); } catch (er) {}
  }, true);
  window.addEventListener('keyup', e => { if (!off() && st.open && (st.cap || st.capUp)) { e.stopImmediatePropagation(); st.capUp = false; } }, true);
- // V41.3.1 (Charlie, Nov 9 10:18 PM): with PASSER PRO the PASS bind takes any key OR any mouse button (stored as 'Mouse' + button)
- let swallowUp = false;
- window.addEventListener('pointerdown', e => {
-  if (off() || !st.open || !st.cap || st.cap.kind !== 'key' || st.cap.act !== 'pass' || e.pointerType !== 'mouse') return;
-  if (performance.now() - st.cap.t0 < 250) return;   // the click that opened the capture
-  e.preventDefault(); e.stopImmediatePropagation(); swallowUp = true;
-  setKb('pass', 'Mouse' + e.button); st.cap = null;
-  try { SFX.tap && SFX.tap(); } catch (er) {}
- }, true);
- let clickUntil = 0;
- window.addEventListener('pointerup', e => { if (swallowUp && e.pointerType === 'mouse') { e.preventDefault(); e.stopImmediatePropagation(); swallowUp = false; clickUntil = performance.now() + 300; } }, true);
- for (const ev of [ 'click', 'auxclick' ]) window.addEventListener(ev, e => { if (performance.now() < clickUntil) { e.preventDefault(); e.stopImmediatePropagation(); clickUntil = 0; } }, true);
- function passerOn() { return !!(window.V472PASS && !window.__rl_no472pass && V472PASS.mode() === 'passer'); }
- function kbPass(via) {
-  if (screen !== 'live' || !canShoot() || !passerOn()) { note('kbPass', { ok: false, via: via }); return false; }
-  let m = null; try { m = V472PASS.target(); } catch (e) {}
-  if (!m) { const list = liveMates(); m = list.length ? aimedMate({ x: 0, y: 0, m: 0 }, list) : null; }
-  if (!m) { note('kbPass', { ok: false, why: 'no mate', via: via }); return false; }
-  try { lastTap = { kind: 'pass', to: m.idx, via: via }; } catch (e) {}
-  throwPass(m);
-  note('kbPass', { ok: true, to: m.idx, via: via });
-  return true;
- }
- st.kbPass = kbPass;
- window.addEventListener('keydown', e => {
-  if (off() || st.open || !e.isTrusted || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-  const b = kb(); if (!b.pass || /^Mouse/.test(b.pass)) return;
-  const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
-  if (k !== b.pass) return;
-  if (screen === 'live' && passerOn()) { e.preventDefault(); kbPass('key'); }
- }, false);
- // a mouse button bound to PASS: in live play (PASSER PRO, your ball) it passes instead of reaching the game
- window.addEventListener('pointerdown', e => {
-  if (off() || st.open || e.pointerType !== 'mouse') return;
-  const b = kb(); if (!b.pass || b.pass !== 'Mouse' + e.button) return;
-  let ok = false; try { ok = screen === 'live' && e.target === cv && passerOn() && canShoot(); } catch (er) {}
-  if (!ok) return;
-  e.preventDefault(); e.stopImmediatePropagation(); swallowUp = true;
-  kbPass('mouse' + e.button);
- }, true);
 
  // ---------------- virtual pointer: the touch path, driven by keys / pad ----------------
  function cssOf(lx, ly) { const r = cv.getBoundingClientRect(); return { clientX: r.left + lx / W * r.width, clientY: r.top + ly / H * r.height }; }

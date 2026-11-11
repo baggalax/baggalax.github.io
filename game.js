@@ -11972,7 +11972,14 @@ function drawHUD() {
   g.globalAlpha = 1;
  }
  drawTimeoutBtn(bw);
- {
+ if (window.V463PZ && window.V463PZ.on()) {
+  // v463pz: PAUSE moved to the field's top-left corner (bottom-center got hit while steering the bottom wing on faceoffs).
+  const pb = window.V463PZ.box();
+  if (screen !== 'final' && GAME_SCREENS.includes(screen)) hit('PAUSE', pb.x, pb.y, pb.w, pb.h, () => {
+   paused = true;
+  });
+  window.V463PZ.draw(pb);
+ } else {
   const sy = sa2403Dy(H - 10, 10);
   if (screen !== 'final' && GAME_SCREENS.includes(screen)) hit('PAUSE', cx - 9, H - 10 - sy, 18, 10, () => {
    paused = true;
