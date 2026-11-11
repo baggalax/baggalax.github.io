@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bagga Lax live ops</title>
+<style>
+ body { margin: 0; background: #10141a; color: #f4f4f4; font: 18px/1.35 system-ui, sans-serif; }
+ header, main { padding: 14px; max-width: 720px; margin: 0 auto; }
+ h1 { font-size: 28px; margin: 0 0 6px; }
+ h2 { font-size: 20px; margin: 22px 0 8px; }
+ p, label { color: #d7dbe0; }
+ button, input, select, textarea { font: inherit; }
+ button { min-height: 48px; padding: 10px 14px; border: 3px solid #111; background: #ffe14d; color: #111; font-weight: 700; width: 100%; margin: 6px 0; }
+ button.g { background: #c9d6d9; }
+ button.off { background: #3a4a55; color: #cfe; }
+ .card { background: #1a2430; border: 2px solid #34506a; padding: 10px; margin: 8px 0; }
+ .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+ .row > * { flex: 1; min-width: 120px; }
+ input, select, textarea { width: 100%; box-sizing: border-box; padding: 10px; background: #0e141b; color: #fff; border: 2px solid #34506a; }
+ .tag { display: inline-block; background: #c8102e; color: #fff; font-size: 12px; padding: 2px 6px; margin-left: 6px; }
+ .preview { background: #14181e; color: #ffe14d; border: 2px solid #ffe14d; padding: 12px; text-align: center; }
+ .warn { color: #ff9a8a; }
+ small { color: #9ab; display: block; }
+</style>
+</head>
+<body>
+<header>
+ <h1>Bagga Lax live ops</h1>
+ <p>Turn shop items and special games on or off. Times are New York time. The save goes to the website config, not into the app.</p>
+</header>
+<main>
+ <h2>1. Your key</h2>
+ <p>Paste the GitHub token once. It stays in this browser only. It is not saved in the game.</p>
+ <input id="token" type="password" autocomplete="off" placeholder="GitHub token">
+ <button type="button" class="g" id="saveToken">Save token on this phone</button>
+
+ <h2>2. Shop now</h2>
+ <input id="findShop" placeholder="Search the shop">
+ <div id="shop"></div>
+
+ <h2>3. Past shop items</h2>
+ <p>These already left the shop. Bring one back, and set an end time if it should leave again.</p>
+ <input id="findPast" placeholder="Search past items">
+ <div id="past"></div>
+
+ <h2>4. Special games</h2>
+ <div id="modes"></div>
+ <h2>Past special games</h2>
+ <div id="pastModes"></div>
+
+ <h2>5. Good Stick roster</h2>
+ <p>Petr's players are the real ones. Names tagged FILLER are made up so the team has a full bench. You can edit any row.</p>
+ <label><input id="gsOn" type="checkbox"> Show the Good Stick pack in the Collab tab</label>
+ <div id="roster"></div>
+ <button type="button" class="g" id="addPlayer">Add a player</button>
+
+ <h2>6. Good Stick promo</h2>
+ <label><input id="prOn" type="checkbox"> Show the promo line</label>
+ <label>Line. Use {code} and {percent} where the code and percent go.<textarea id="prText" rows="3"></textarea></label>
+ <div class="row">
+  <label>Code<input id="prCode"></label>
+  <label>Percent<input id="prPercent"></label>
+ </div>
+ <label>Website<input id="prUrl"></label>
+ <div class="preview" id="prPreview"></div>
+
+ <h2>7. Check, then save</h2>
+ <div class="card" id="preview"></div>
+ <button type="button" id="download">Download JSON</button>
+ <button type="button" id="publish">Save to the website</button>
+ <p id="msg"></p>
+</main>
+<script>
+const TZ = 'America/New_York';
+const REPO = 'baggalax/baggalax.github.io';
+const PATH = 'config/liveops.json';
+let catalog = [];
+let live = null;
+
+function nyParts(ms) {
+ const f = new Intl.DateTimeFormat('en-US', { timeZone: TZ, hour12: false, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+ const o = {};
+ for (const p of f.formatToParts(new Date(ms))) if (p.type !== 'literal') o[p.type] = p.value;
+ if (o.hour === '24') o.hour = '00';
+ return o;
+}
+function toLocalInput(iso) {
+ if (!iso) return '';
+ const t = Date.parse(iso);
+ if (isNaN(t)) return '';
+ const p = nyParts(t);
+ return p.year + '-' + p.month + '-' + p.day + 'T' + p.hour + ':' + p.minute;
+}
+function fromLocalInput(s) {
+ if (!s) return '';
+ const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s);
+ if (!m) return '';
+ const Y = +m[1], M = +m[2], D = +m[3], h = +m[4], mi = +m[5];
+ let ms = Date.UTC(Y, M - 1, D, h, mi);
+ for (let i = 0; i < 4; i++) {
+  const p = nyParts(ms);
+  const got = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+  const want = Date.UTC(Y, M - 1, D, h, mi);
+  ms += want - got;
+ }
+ return new Date(ms).toISOString();
+}
+function say(t, bad) { const n = document.getElementById('msg'); n.textContent = t; n.className = bad ? 'warn' : ''; }
+function token() { return localStorage.getItem('baggalax_liveops_token') || ''; }
+document.getElementById('token').value = token();
+document.getElementById('saveToken').onclick = () => {
+ localStorage.setItem('baggalax_liveops_token', document.getElementById('token').value.trim());
+ say('Token saved on this phone.');
+};
+
+function inShop(id) { return (live.shop || []).some(r => r.id === id); }
+function inMode(id) { return (live.specials || []).some(r => r.id === id); }
+function rowOf(list, id) { return (list || []).find(r => r.id === id) || { id: id }; }
+
+function card(c, on, listName) {
+ const row = rowOf(listName === 'specials' ? live.specials : live.shop, c.id);
+ const box = document.createElement('div');
+ box.className = 'card';
+ box.innerHTML = '<b>' + c.name + '</b>' + (c.past ? '<span class="tag">PAST</span>' : '') +
+  '<small>' + (c.text || '') + '</small>' +
+  '<div class="row"><label>Price<input data-k="price" type="number" min="0" value="' + (row.price != null ? row.price : (c.price || 0)) + '"></label>' +
+  '<label>Section<input data-k="section" value="' + (row.section || c.section || 'shop') + '"></label></div>' +
+  '<div class="row"><label>Starts (New York)<input data-k="start" type="datetime-local" value="' + toLocalInput(row.start) + '"></label>' +
+  '<label>Ends (New York)<input data-k="end" type="datetime-local" value="' + toLocalInput(row.end) + '"></label></div>' +
+  '<button type="button" class="' + (on ? '' : 'g') + '" data-go="' + (on ? '0' : '1') + '">' + (on ? 'TAKE OUT OF THE SHOP' : 'BRING BACK') + '</button>';
+ box.querySelector('button').onclick = () => {
+  readCard(box, c.id, listName);
+  const list = live[listName];
+  const i = list.findIndex(r => r.id === c.id);
+  if (on) { if (i >= 0) list.splice(i, 1); }
+  else if (i < 0) list.push(readCard(box, c.id, listName));
+  draw();
+ };
+ box.querySelectorAll('input').forEach(el => el.onchange = () => { if (on) readCard(box, c.id, listName); drawPreview(); });
+ return box;
+}
+function readCard(box, id, listName) {
+ const list = live[listName];
+ let row = list.find(r => r.id === id);
+ if (!row) { row = { id: id }; }
+ const price = box.querySelector('[data-k="price"]').value;
+ const section = box.querySelector('[data-k="section"]').value.trim();
+ const start = fromLocalInput(box.querySelector('[data-k="start"]').value);
+ const end = fromLocalInput(box.querySelector('[data-k="end"]').value);
+ if (price !== '') row.price = Math.max(0, +price || 0); else delete row.price;
+ if (section) row.section = section; else delete row.section;
+ if (start) row.start = start; else delete row.start;
+ if (end) row.end = end; else delete row.end;
+ delete row.windowHours;
+ delete row.anchor;
+ return row;
+}
+
+function draw() {
+ const q1 = document.getElementById('findShop').value.toLowerCase();
+ const q2 = document.getElementById('findPast').value.toLowerCase();
+ const shop = document.getElementById('shop');
+ const past = document.getElementById('past');
+ const modes = document.getElementById('modes');
+ const pastModes = document.getElementById('pastModes');
+ shop.innerHTML = past.innerHTML = modes.innerHTML = pastModes.innerHTML = '';
+ catalog.filter(c => c.kind !== 'mode').forEach(c => {
+  const on = inShop(c.id);
+  const hit = (c.name + ' ' + c.id).toLowerCase();
+  if (on && hit.includes(q1)) shop.appendChild(card(c, true, 'shop'));
+  if (!on && c.past && hit.includes(q2)) past.appendChild(card(c, false, 'shop'));
+ });
+ catalog.filter(c => c.kind === 'mode').forEach(c => {
+  (inMode(c.id) ? modes : pastModes).appendChild(card(c, inMode(c.id), 'specials'));
+ });
+ drawRoster();
+ drawPreview();
+}
+function drawRoster() {
+ const box = document.getElementById('roster');
+ box.innerHTML = '';
+ document.getElementById('gsOn').checked = !!(live.goodstick && live.goodstick.enabled);
+ (live.goodstick.roster || []).forEach((r, i) => {
+  const d = document.createElement('div');
+  d.className = 'card';
+  d.innerHTML = '<b>#' + (i + 1) + '</b>' + (r.filler ? '<span class="tag">FILLER</span>' : '') +
+   '<div class="row"><label>Name<input data-f="name" value="' + r.name + '"></label><label>Number<input data-f="number" type="number" value="' + r.number + '"></label>' +
+   '<label>Spot<select data-f="position">' + [ 'A', 'M', 'FO', 'D', 'LSM', 'G' ].map(p => '<option' + (p === r.position ? ' selected' : '') + '>' + p + '</option>').join('') + '</select></label></div>' +
+   '<button type="button" class="g" data-x="' + i + '">Remove</button>';
+  d.querySelector('[data-x]').onclick = () => { live.goodstick.roster.splice(i, 1); draw(); };
+  d.querySelectorAll('input,select').forEach(el => el.onchange = () => {
+   r.name = d.querySelector('[data-f="name"]').value.toUpperCase().slice(0, 16);
+   r.number = Math.max(0, Math.min(99, d.querySelector('[data-f="number"]').value | 0));
+   r.position = d.querySelector('[data-f="position"]').value;
+  });
+  box.appendChild(d);
+ });
+}
+document.getElementById('addPlayer').onclick = () => {
+ live.goodstick.roster.push({ name: 'NEW', number: 0, position: 'M', filler: true });
+ draw();
+};
+document.getElementById('gsOn').onchange = () => { live.goodstick.enabled = document.getElementById('gsOn').checked; if (live.goodstick.enabled && !inShop('pack_goodstick')) live.shop.push({ id: 'pack_goodstick', section: 'collab' }); draw(); };
+
+function promoLine() {
+ const text = document.getElementById('prText').value || '';
+ return text.replace(/\{code\}/g, document.getElementById('prCode').value).replace(/\{percent\}/g, document.getElementById('prPercent').value);
+}
+function readPromo() {
+ live.goodstick.promo = {
+  enabled: document.getElementById('prOn').checked,
+  text: document.getElementById('prText').value.trim(),
+  code: document.getElementById('prCode').value,
+  percent: document.getElementById('prPercent').value,
+  url: document.getElementById('prUrl').value.trim() || 'https://thegoodstick.co'
+ };
+ document.getElementById('prPreview').textContent = live.goodstick.promo.enabled ? promoLine() : 'Promo is hidden.';
+}
+[ 'prOn', 'prText', 'prCode', 'prPercent', 'prUrl' ].forEach(id => document.getElementById(id).addEventListener('input', readPromo));
+function fillPromo() {
+ const p = live.goodstick.promo || {};
+ document.getElementById('prOn').checked = p.enabled !== false;
+ document.getElementById('prText').value = p.text || 'Use code "{code}" at thegoodstick.co for {percent}% off';
+ document.getElementById('prCode').value = p.code == null ? '____' : p.code;
+ document.getElementById('prPercent').value = p.percent == null ? '__' : p.percent;
+ document.getElementById('prUrl').value = p.url || 'https://thegoodstick.co';
+ readPromo();
+}
+function drawPreview() {
+ readPromo();
+ const shop = (live.shop || []).map(r => r.id + (r.end ? ' until ' + r.end : '')).join(', ') || 'nothing';
+ const modes = (live.specials || []).map(r => r.id).join(', ') || 'nothing';
+ document.getElementById('preview').innerHTML = '<b>Shop</b><small>' + shop + '</small><b>Special games</b><small>' + modes + '</small><b>Good Stick pack</b><small>' + (live.goodstick.enabled ? 'ON' : 'hidden') + '</small><b>Promo</b><small>' + document.getElementById('prPreview').textContent + '</small>';
+}
+document.getElementById('findShop').oninput = draw;
+document.getElementById('findPast').oninput = draw;
+
+function payload() {
+ document.querySelectorAll('#shop .card, #modes .card').forEach(box => {
+  const btn = box.querySelector('button');
+  if (!btn || btn.textContent.indexOf('TAKE OUT') < 0) return;
+ });
+ readPromo();
+ live.goodstick.enabled = document.getElementById('gsOn').checked;
+ return JSON.stringify(live, null, 2);
+}
+document.getElementById('download').onclick = () => {
+ const blob = new Blob([ payload() ], { type: 'application/json' });
+ const a = document.createElement('a');
+ a.href = URL.createObjectURL(blob);
+ a.download = 'liveops.json';
+ a.click();
+ say('Downloaded liveops.json. Put it at config/liveops.json on the website.');
+};
+document.getElementById('publish').onclick = async () => {
+ const key = document.getElementById('token').value.trim();
+ if (!key) { say('Paste the token first.', true); return; }
+ localStorage.setItem('baggalax_liveops_token', key);
+ const body = payload();
+ say('Saving...');
+ try {
+  const base = 'https://api.github.com/repos/' + REPO + '/contents/' + PATH;
+  let sha = '';
+  const got = await fetch(base, { headers: { Authorization: 'Bearer ' + key, Accept: 'application/vnd.github+json' } });
+  if (got.ok) sha = (await got.json()).sha;
+  else if (got.status !== 404) throw new Error('Could not read the file (' + got.status + ')');
+  const put = await fetch(base, {
+   method: 'PUT',
+   headers: { Authorization: 'Bearer ' + key, Accept: 'application/vnd.github+json', 'Content-Type': 'application/json' },
+   body: JSON.stringify({ message: 'Update Bagga Lax live ops', content: btoa(unescape(encodeURIComponent(body))), sha: sha || undefined })
+  });
+  if (!put.ok) throw new Error('Save failed (' + put.status + ')');
+  say('Saved. The game will pick it up the next time it opens the shop.');
+ } catch (e) { say(e.message + ' You can still use Download JSON.', true); }
+};
+
+async function boot() {
+ try { catalog = (await (await fetch('catalog.json')).json()).items || []; } catch (e) { catalog = []; }
+ try { live = await (await fetch('liveops.json')).json(); } catch (e) { live = { shop: [], specials: [], goodstick: { enabled: false, roster: [], promo: {} } }; }
+ live.shop = live.shop || [];
+ live.specials = live.specials || [];
+ live.goodstick = live.goodstick || { enabled: false, roster: [], promo: {} };
+ if (!catalog.length) say('catalog.json did not load. Past items will be empty until that file sits next to this page.', true);
+ fillPromo();
+ draw();
+}
+boot();
+</script>
+</body>
+</html>

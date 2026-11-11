@@ -1,0 +1,61 @@
+{
+  "shop": [
+    { "id": "pack_daily" },
+    { "id": "pack_basic" },
+    { "id": "pack_rare" },
+    { "id": "pack_legendary" },
+    { "id": "pack_stickfree" },
+    { "id": "pack_pass" },
+    { "id": "pack_tape" },
+    { "id": "pack_chirp" },
+    { "id": "pack_gear" },
+    { "id": "pack_crew" },
+    { "id": "pack_stick" },
+    { "id": "pack_unip" },
+    { "id": "pack_unic" },
+    { "id": "pack_uniw" },
+    { "id": "pack_pc38c" },
+    { "id": "pack_pc38r" },
+    { "id": "pack_pc38l" },
+    { "id": "pack_cu38" },
+    { "id": "pack_relax" },
+    { "id": "pack_fit45" },
+    { "id": "pack_halloween", "windowHours": 72, "anchor": "hw493start" },
+    { "id": "pack_vets489", "windowHours": 96, "anchor": "vets489start" }
+  ],
+  "specials": [
+    { "id": "mode_vets489", "windowHours": 96, "anchor": "vets489start" }
+  ],
+  "goodstick": {
+    "enabled": false,
+    "roster": [
+      { "name": "PEPCA", "number": 7, "position": "A" },
+      { "name": "JACK", "number": 9, "position": "A" },
+      { "name": "TOPPER", "number": 11, "position": "A" },
+      { "name": "BRIAN", "number": 22, "position": "M" },
+      { "name": "GECKO", "number": 23, "position": "M" },
+      { "name": "PIMPI", "number": 4, "position": "FO" },
+      { "name": "STUCKIE", "number": 33, "position": "D" },
+      { "name": "BARKY", "number": 44, "position": "D" },
+      { "name": "MAXIM", "number": 55, "position": "D" },
+      { "name": "KACKA", "number": 1, "position": "G" },
+      { "name": "WING", "number": 80, "position": "A", "filler": true },
+      { "name": "CREASE", "number": 81, "position": "A", "filler": true },
+      { "name": "DODGE", "number": 82, "position": "A", "filler": true },
+      { "name": "BOX", "number": 83, "position": "M", "filler": true },
+      { "name": "RIDE", "number": 84, "position": "M", "filler": true },
+      { "name": "SLIDE", "number": 85, "position": "M", "filler": true },
+      { "name": "POLE", "number": 86, "position": "D", "filler": true },
+      { "name": "CHECK", "number": 87, "position": "D", "filler": true },
+      { "name": "LONG", "number": 88, "position": "LSM", "filler": true },
+      { "name": "NET", "number": 89, "position": "G", "filler": true }
+    ],
+    "promo": {
+      "enabled": true,
+      "text": "Use code \"{code}\" at thegoodstick.co for {percent}% off",
+      "code": "____",
+      "percent": "__",
+      "url": "https://thegoodstick.co"
+    }
+  }
+}
