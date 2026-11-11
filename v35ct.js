@@ -206,6 +206,9 @@ const V35CT = (() => {
   try {
    if (U.g27 && U.g27() && typeof GH_REG !== 'undefined' && GH_REG.GHO && window.GHO16 && GHO16.on() && (GHO16.owned() || U.has('GHO', 2) || U.has('GHO', 3))) out.add('GHO');
   } catch (e) {}
+  try {
+   if (!window.__rl_no489vets && window.VETS489 && VETS489.ids) for (const id of VETS489.ids) if (T(id)) out.add(U.base(id));
+  } catch (e) {}
   return out;
  }
  const uniPickOn = () => on() && !!window.UNI21 && UNI21.on && UNI21.on() && !!UNI21.nK && !!(window.V17 && V17.uniIcon17);

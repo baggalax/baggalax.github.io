@@ -88,7 +88,7 @@
    const n = b - a + 1;
    if (back) {} else if (front) { if (n >= 3) { rows[y][a] = 'Z'; rows[y][a + 1] = 's'; rows[y][b] = 'Z'; if (n >= 4) rows[y][b - 1] = 's'; } else rows[y][a] = 'Z'; }
    else { rows[y][b] = 'Z'; if (n >= 3) rows[y][b - 1] = 's'; if (n >= 4) rows[y][b - 2] = 'Z'; }
-   for (let x = a; x <= b; x++) { const u = at(x, y + 1); if (u === 'o' || u === '.') { set(x, y + 1, 'K'); if (!A.cleat) T[x + ',' + (y + 1)] = F.flop; } }
+   for (let x = a; x <= b; x++) { const u = at(x, y + 1); if (u === 'o' || u === '.') { set(x, y + 1, 'K'); T[x + ',' + (y + 1)] = A.cleat && A.cleatCol ? A.cleatCol : F.flop; } }
   }
   if (crown && front) {
    let ty = -1; for (let y = 0; y < belt; y++) if (rows[y].filter(isJ).length >= 3) { ty = y; break; }
@@ -122,7 +122,9 @@
   const nn = padFrame(name); if (!nn) return null;
   const g2 = Object.assign({}, gr || {});
   if (kit.fit45 === 'whale' && !g2.legs) g2.legs = 'shorts_short';
-  act = { kit: kit, fit: kit.fit45, view: viewOf(name), legs: g2.legs === 'shorts_short' ? 'short' : g2.legs === 'shorts_baggy' ? 'baggy' : '', cleat: !!g2.cleats };
+  let cleatCol = null;
+  try { if (g2.cleats && window.V17 && V17.BY && V17.BY[g2.cleats]) cleatCol = V17.BY[g2.cleats].col; } catch (e) {}
+  act = { kit: kit, fit: kit.fit45, view: viewOf(name), legs: g2.legs === 'shorts_short' ? 'short' : g2.legs === 'shorts_baggy' ? 'baggy' : '', cleat: !!g2.cleats, cleatCol: cleatCol };
   try { return V17.bakeGear(nn, kit, flip, skin | 0, g2, false, nostick || nopad ? { nopad: true, nostick: !!nostick } : undefined); }
   finally { act = null; }
  }
@@ -139,7 +141,13 @@
   if (!isFit(kit) || !R.FR[name] || /^prop_|^coach|^ref|^ump/.test(name)) return draw0.apply(this, arguments);
   try {
    const o = opts || {}; x = Math.round(x); y = Math.round(y);
-   const c = bakeFit(name, kit, !faceRight, o.skin, {}, false, true);
+   let gr = {};
+   try {
+    const pid = window.__v17hp || (window.__v17p && window.__v17p.pl && window.__v17p.pl.id);
+    if (pid && window.V17 && V17.heroGear) gr = V17.heroGear(pid, kit) || {};
+    else if (window.__v17p && V17.gearOfP) gr = V17.gearOfP(window.__v17p.pl, kit) || {};
+   } catch (e2) {}
+   const c = bakeFit(name, kit, !faceRight, o.skin, gr, false, true);
    if (!c) return draw0.apply(this, arguments);
    if (o.shadow !== false) { gx.fillStyle = 'rgba(0,0,0,.25)'; gx.fillRect(x - 4, y, 9, 2); }
    blit(gx, c, name, x, y, faceRight, o.alpha);

@@ -23,7 +23,7 @@
 (function () {
  'use strict';
  const W = window;
- const APP_VER = '1.2';
+ const APP_VER = '1.3';
  const URL0 = 'https://retrolax.sites.tab.bot/minver.json';
  const STORE = 'https://apps.apple.com/us/app/bagga-lax/id6829999730';
  const TIMEOUT = 4000, EVERY = 10 * 60 * 1000;

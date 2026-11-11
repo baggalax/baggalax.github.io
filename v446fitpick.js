@@ -90,7 +90,7 @@
    if (heroOn && !gray && isFit(kit) && /__w45$/.test(name)) {
     try {
      const base = name.slice(0, -5), pid = window.__v17hp;
-     let gr = null; try { gr = pid && V17.gearOfP ? V17.gearOfP(pid, kit) : null; } catch (e) {}
+     let gr = null; try { gr = pid && V17.heroGear ? V17.heroGear(pid, kit) : pid && V17.gearOfP ? V17.gearOfP(pid, kit) : null; } catch (e) {}
      const c = F.bakeFit(base, kit, !!flip, skin | 0, gr || {}, false, true);
      if (c) return c;
     } catch (e) {}

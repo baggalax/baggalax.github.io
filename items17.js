@@ -3185,6 +3185,13 @@ const V17 = (() => {
  let lastEarn = null;
  function matchReturn() {
   if (ST.ipend && !no2314()) return;
+  try {
+   const Sz = typeof season !== 'undefined' ? season : null, ros = Sz && Sz.team && Sz.rosters && Sz.rosters[Sz.team];
+   if (ros && ST.mequip) {
+    const on = new Set(ros);
+    for (const pid of Object.keys(ST.mequip)) if (on.has(pid) && ST.mequip[pid] && typeof ST.mequip[pid] === 'object') ST.equip[pid] = Object.assign({}, ST.mequip[pid], ST.equip[pid] || {});
+   }
+  } catch (e) {}
   if (Object.keys(ST.mequip || {}).length) {
    ST.mequip = {};
    save();
@@ -5942,9 +5949,13 @@ const V17 = (() => {
   if (!o.gearOnly && typeof homeQuick16 === 'function' && homeQuick16() && !no2314() && !(typeof qsz286 === 'function' && qsz286())) {
    if (window.V29R && V29R.wq()) EQ = 'world'; else {
     const q = qTeam16();
-    EQ = 'match';
-    MTEAM = q;
-    if (!ST.tequip[q] || typeof ST.tequip[q] !== 'object') ST.tequip[q] = {};
+    const Sz = typeof season !== 'undefined' ? season : null;
+    if (Sz && Sz.team && q === Sz.team) EQ = 'main';
+    else {
+     EQ = 'match';
+     MTEAM = q;
+     if (!ST.tequip[q] || typeof ST.tequip[q] !== 'object') ST.tequip[q] = {};
+    }
    }
   }
   if (!o.gearOnly && !game) matchReturn();
@@ -8415,7 +8426,7 @@ const V17 = (() => {
   try {
    const S = typeof season !== 'undefined' ? season : null, ros = S && S.rosters && S.rosters[S.team];
    if (!S) {
-    for (const pid of Object.keys(ST.equip)) drop(ST.equip, pid, '');
+    // 1.3: a missing season save (app resume before the season object is back) must not strip season gear
    } else if (ros && S.phase !== 'draft') {
     const on = new Set(ros);
     for (const pid of Object.keys(ST.equip)) if (!on.has(pid)) drop(ST.equip, pid, '');

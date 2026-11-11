@@ -163,8 +163,12 @@
    const back = s === 'U' ? live ? MIDX - 55 : MIDX - 55 : live ? MIDX + 55 : MIDX + 55;
    const ride = s === 'U' ? MIDX + 44 : MIDX - 44;
    const rx = role === 'D' ? back : ride;
-   p = farMk(s, role, role === 'D' ? s === 'U' ? MIDX - 6 : MIDX + 6 : s === 'U' ? MIDX + 6 : MIDX - 6, bx[1], pl);
-   p.rest = [ rx, CY - 44 + 44 * (L.length % 3) ];
+   const yLane = CY - 44 + 44 * (L.length % 3);
+   // 1.3: attackmen re-entering a clear take their ride lane, not the top (left) sideline box
+   const sx = role === 'D' ? s === 'U' ? MIDX - 6 : MIDX + 6 : rx;
+   const sy = role === 'D' ? bx[1] : yLane;
+   p = farMk(s, role, sx, sy, pl);
+   p.rest = [ rx, yLane ];
    L.push(p);
    try {
     farPair(G);

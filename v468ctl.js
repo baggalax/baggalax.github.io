@@ -386,31 +386,54 @@
    if (st.open && st.cap && st.cap.kind === 'pad') {
     const i = cur.findIndex((v, j) => v && !P.prev[j]);
     if (i >= 0) { setPad(st.cap.act, i); st.cap = null; }
-   } else if (!st.open) {
-    if (edge.down(9) && game && game.tutorial) { vDown('pad468tap', W / 2, 40); vUp('pad468tap'); note('padTutTap', true); }
-    else if (foActive()) padFo(p, L, R, edge, dt);
-    else {
-     padMove(L);
-     const b = pb();
-     if (screen === 'live') {
-      if (edge.down(b.shoot)) shotStart();
+   } else if (!st.open && foActive()) padFo(p, L, R, edge, dt);
+   else if (!st.open && inPlay()) {
+    padMove(L);
+    const b = pb();
+    const tutOn = game && game.tutorial && !game.tutorial.complete;
+    const cardStep = tutOn && typeof tutIsCard === 'function' && tutIsCard(game.tutorial.step);
+    if (tutOn && (edge.down(b.pass) || edge.down(9)) && (cardStep || game.tutorial.doneT > 0 || (screen === 'live' && !canShoot()))) {
+     if (game.tutorial.doneT > 0 && typeof tutAdvance === 'function') tutAdvance();
+     else if (cardStep) { vDown('pad468tap', W / 2, H / 2); vUp('pad468tap'); }
+     else if (typeof tutSkip === 'function') tutSkip();
+     note('padTutX', true);
+    } else if (screen === 'live') {
+     if (edge.down(b.shoot)) shotStart();
+     const r3 = pressed(p, b.hit);
+     if (r3) P.cutArm = true;
+     if ((P.cutArm && !P.shot) || (P.cutSent && R.m >= .4)) {
+      P.rs = null;
+      const m = window.V472PASS && V472PASS.target && V472PASS.target();
+      if (P.cutArm && m && R.m > .5 && !P.cutSent && typeof startCut181 === 'function') { startCut181(m, R.x, R.y); P.cutSent = true; note('padCut', { to: m.idx, x: +R.x.toFixed(2), y: +R.y.toFixed(2) }); }
+     } else {
       if (P.shot) { shotTick(R); if (!cur[b.shoot]) shotEnd(); }
       else rsGesture(R);
       if (edge.down(b.pass)) padPass(L);
-     } else if (screen === 'defense') {
-      P.rs = null;
-      if (game.ball && game.ball.state === 'clear') { if (edge.down(b.pass)) padClear(L); }
-      else if (edge.down(b.sw)) defSwitch(L);
-      if (edge.down(b.check)) defCheck(false);
-      if (edge.down(b.hit)) defCheck(true);
      }
-     if (screen !== 'live' && P.shot) { vUp('pad468shot', true); P.shot = null; }
+     if (!r3) {
+      P.cutArm = false;
+      if (P.cutSent) { P.rs = null; if (R.m < .4) P.cutSent = false; }
+      else P.cutSent = false;
+     }
+    } else if (screen === 'defense') {
+     P.rs = null;
+     if (game.ball && game.ball.state === 'clear') { if (edge.down(b.pass)) padClear(L); }
+     else if (edge.down(b.sw)) defSwitch(L);
+     if (edge.down(b.check)) defCheck(false);
+     if (edge.down(b.hit)) defCheck(true);
     }
+    if (screen !== 'live' && P.shot) { vUp('pad468shot', true); P.shot = null; }
+   } else if (!st.cap) {
+    if ((edge.down(9) || edge.down(pb().pass)) && game && game.tutorial && !game.tutorial.complete) {
+     if (game.tutorial.doneT > 0 && typeof tutAdvance === 'function') tutAdvance();
+     else { vDown('pad468tap', W / 2, H / 2); vUp('pad468tap'); }
+     note('padTutX', 'menu');
+    } else if (window.__rl500menu) window.__rl500menu(p, L, edge);
    }
   } catch (e) { console.warn('v468ctl pad', e); }
   P.prev = cur;
  }
- function padStart() { if (st.padOn || off()) return; if (!padConnected()) return; st.padOn = true; lastT = 0; note('pad', 'on'); requestAnimationFrame(poll); }
+ function padStart() { if (st.padOn || off()) return; if (!padConnected()) return; st.padOn = true; st.padUsed = true; setMode('pad'); lastT = 0; note('pad', 'on'); requestAnimationFrame(poll); }
  window.addEventListener('gamepadconnected', padStart);
  window.addEventListener('gamepaddisconnected', () => { st.padUsed = padConnected() && st.padUsed; });
  // keyboard faceoff move tick (only runs while a key is held on a faceoff)

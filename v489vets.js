@@ -12,7 +12,7 @@
      tile/toast names, where-to-get line, icon art). Special looks are per-pixel recolours through RL12.g27 (the same
      path the Ghosts' skeleton kit uses), so equipped store items (helmets, visors, gloves, sticks, cleats...) still draw
      ON TOP: the gear bake paints item pixels first and only asks g27 for the rest -> the ITEM WINS over the uniform helmet.
-   - Time limit: the pack + tournament show for 48 h from the first time this device opens the game with this file
+   - Time limit: the pack + tournament show for 96 h (the original 48 h plus 2 days in 1.3) from the first time this device opens the game with this file
      (rl_vets489start), or until VETS_END_ABS when that constant is set. After that they are hidden; teams, uniforms and
      the HONOR MEDAL already earned stay.
    New save keys: rl_vets489start, rl_vets489own, rl_vets489trophy, rl_vets489tour (bracket), rl_vets489pop (popup seen).
@@ -25,7 +25,7 @@
 
  // ---------- constants Charlie can change ----------
  const PACK_COST = 10;               // dimes
- const VETS_HOURS = 48;              // how long the pack + tournament stay, from the first open with this file
+ const VETS_HOURS = 96;              // 1.3: the same per-device clock, plus 2 days (was 48 h)
  const VETS_END_ABS = null;          // e.g. new Date(2026, 10, 14, 23, 59, 59).getTime(): wins over the 48 h when set
  const PACK_KEY = 'vets489', TOKEN = 'vets489_teams', TROPHY = 'trophy_vets489';
  const EXTRAS = 'RWB STICKS, CHOPPER EXTRACT CELLY, FIREWORKS CELLY';
@@ -185,6 +185,7 @@
   else if (o.g27 && off()) delete o.g27;
   return o;
  }
+ V.kitOf = kitOf;
  const uniItem = (tid, k) => 'uni21|' + tid + '|' + k;
  const PACK_UNIS = [];
  for (const tid of IDS) for (let k = 2; k < KITS[tid].length; k++) PACK_UNIS.push(uniItem(tid, k));
