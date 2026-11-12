@@ -47,7 +47,13 @@
  let start = null;
  try { start = LS.get('vets489start', null); if (!start) { start = Date.now(); LS.set('vets489start', start); } } catch (e) { start = Date.now(); }
  const endAt = () => window.__rl489endTest != null ? +window.__rl489endTest : VETS_END_ABS != null ? +VETS_END_ABS : (+start || Date.now()) + VETS_HOURS * 3600e3;
- const live = () => !off() && Date.now() < endAt();
+ const live = () => {
+  if (off()) return false;
+  try {
+   if (window.LIVEOPS && LIVEOPS.ready && LIVEOPS.specialOn) return !!LIVEOPS.specialOn('mode_vets489');
+  } catch (e) {}
+  return Date.now() < endAt();
+ };
  function leftTxt() {
   const ms = Math.max(0, endAt() - Date.now()), m = Math.floor(ms / 60000), d = Math.floor(m / 1440), h = Math.floor(m % 1440 / 60), mm = m % 60;
   return 'LEAVES IN ' + (d > 0 ? d + 'D ' + h + 'H' : h > 0 ? h + 'H ' + mm + 'M' : Math.max(1, mm) + 'M');
@@ -378,8 +384,9 @@
  function tileHtml() {
   if (!packOk() || !V17.PACKS[PACK_KEY]) return '';
   const own = owns();
-  if (!live() && !own) return '';
-  if (!live()) return '';
+  const shopVis = () => { try { if (window.LIVEOPS && LIVEOPS.ready && LIVEOPS.shopOn) return !!LIVEOPS.shopOn('pack_vets489'); } catch (e) {} return live(); };
+  if (!shopVis() && !own) return '';
+  if (!shopVis()) return '';
   const P = V17.PACKS[PACK_KEY], S = ST(), ok = !own && S && S.chinos >= P.cost;
   const minis = [ TOKEN ].concat(PACK_UNIS).map(id => '<span class="hwi16" style="border-color:#ffcc33"><img alt="" src="' + V17.iconUrl(id) + '"></span>').join('');
   return '<div class="hw16 b2504 vt489" id="vets489tile" style="border-color:#ffcc33;background:linear-gradient(90deg,rgba(200,16,46,.5),rgba(10,16,24,.92) 45%,rgba(28,63,140,.6));box-shadow:0 0 10px rgba(255,204,51,.5)">' +

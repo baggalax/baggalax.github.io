@@ -85,7 +85,7 @@
   W[name] = function () {
    const r = f.apply(this, arguments);
    try {
-    const G = W.game, d = G && G.dctl;
+    const G = (typeof game !== 'undefined' ? game : null), d = G && G.dctl;
     if (!off() && d) { d.stun = 0; d.lunge = null; }
    } catch (e) {}
    return r;
@@ -97,7 +97,7 @@
    const ud = W.updateDefense;
    W.updateDefense = function () {
     try {
-     const G = W.game, d = G && G.dctl;
+     const G = (typeof game !== 'undefined' ? game : null), d = G && G.dctl;
      if (!off() && d && d.chkT0 != null && (typeof menuT !== 'number' || menuT - d.chkT0 < 1.2)) { d.stun = 0; d.lunge = null; }
     } catch (e) {}
     return ud.apply(this, arguments);
@@ -202,6 +202,15 @@
   if (!SW[w]) SW[w] = swatch(w);
   return '<button type="button" class="c17 uni17 v500fit' + (on ? ' wr17' : '') + '" data-a="v500fit" data-v="' + tid + '" aria-label="' + nm + (on ? ' (WEARING)' : '') + '"><div class="art"><img src="' + SW[w] + '" alt=""></div><div class="nm">' + nm + '</div><div class="rr">' + (on ? 'WEARING' : 'TAP TO WEAR') + '</div></button>';
  }
+ // the set's grid is pointer-events:none (v35ct: a tap anywhere on a set picks the set) - the Whale/Crown tile takes its own taps
+ try {
+  if (!document.getElementById('v500fitcss')) {
+   const st = document.createElement('style');
+   st.id = 'v500fitcss';
+   st.textContent = '#panel .ct35ur .grid17 .v500fit{pointer-events:auto;position:relative;z-index:3;cursor:pointer}';
+   (document.head || document.documentElement).appendChild(st);
+  }
+ } catch (e) { fail('fitcss', e); }
  function addFits(h) {
   if (off() || typeof h !== 'string' || h.indexOf('ct35ug') < 0) return h;
   const w = W.V445 && V445.pick && V445.pick();
@@ -235,6 +244,8 @@
     const w = W.V445 && V445.pick && V445.pick();
     if (w !== 'whale' && w !== 'crown') return;
     fitSet(v, !fitOn(v));
+    // wearing it on a set also picks that set for the card team (the tap no longer falls through to the set)
+    try { if (fitOn(v) && typeof PANEL_ACT.ct35uput === 'function') { const sec = document.querySelector('#panel .sec17.ct35ur[data-v="' + v + '"]'); if (sec && !sec.classList.contains('on')) PANEL_ACT.ct35uput(v); } } catch (e) { fail('fitput', e); }
     try { if (W.V17 && V17.toast) V17.toast((fitOn(v) ? 'WEARING ' : 'OFF ') + (w === 'whale' ? 'THE WHALE' : 'THE CROWN'), '#7dff7a'); } catch (e) {}
    };
   }

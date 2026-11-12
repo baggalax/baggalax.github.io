@@ -209,6 +209,9 @@ const V35CT = (() => {
   try {
    if (!window.__rl_no489vets && window.VETS489 && VETS489.ids) for (const id of VETS489.ids) if (T(id)) out.add(U.base(id));
   } catch (e) {}
+  try {
+   if (window.GSC501 && GSC501.ids) for (const id of GSC501.ids()) if (T(id)) out.add(U.base(id));
+  } catch (e) {}
   return out;
  }
  const uniPickOn = () => on() && !!window.UNI21 && UNI21.on && UNI21.on() && !!UNI21.nK && !!(window.V17 && V17.uniIcon17);
@@ -239,7 +242,9 @@ const V35CT = (() => {
  }
  const kitName = (tid, k) => {
   try {
-   return T(tid).gho16 && UNI21.styN ? UNI21.styN(tid, k) : UNI21.STY[k];
+   const t = T(tid);
+   if ((t.gho16 || t.vets489 || t.gsc501) && UNI21.styN) return UNI21.styN(tid, k);
+   return UNI21.STY[k];
   } catch (e) {
    return '';
   }
@@ -261,7 +266,7 @@ const V35CT = (() => {
   }).join('');
   return '<div class="sec17 ct35ur' + (tid === cur ? ' on' : '') + '" data-a="ct35uput" data-v="' + esc(tid) + '" data-t="' + esc(tid) + '" role="button" aria-label="' + esc('UNIFORM SET ' + nmOf(tid)) + '">' + '<div class="sh17">' + esc(nmOf(tid)) + ' <span>' + ks.length + '/' + N + '</span>' + (tid === cur ? '<b class="ct35cur">' + (bad ? 'CURRENT - NOT UNLOCKED' : 'CURRENT') + '</b>' : '') + '</div><div class="grid17 ct35ug">' + tiles + '</div></div>';
  }
- const GO = [ 'PRO', 'WORLD', 'COLLEGE', 'N/A' ];
+ const GO = [ 'PRO', 'WORLD', 'COLLEGE', 'N/A', 'COLLAB' ];
  function grpOf(tid, groups) {
   for (const k of Object.keys(groups)) if (groups[k].includes(tid)) return k;
   return null;

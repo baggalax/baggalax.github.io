@@ -46,7 +46,12 @@
    const P = V17.PACKS;
    if (!P) return;
    if (off()) { for (const k in pulled) if (!P[k]) P[k] = pulled[k]; return; }
-   for (const k of COL) if (P[k]) { pulled[k] = P[k]; delete P[k]; }
+   for (const k of COL) {
+    let back = false;
+    try { back = !!(window.LIVEOPS && LIVEOPS.ready && LIVEOPS.shopOn && LIVEOPS.shopOn('pack_' + k)); } catch (e) {}
+    if (back) { if (!P[k] && pulled[k]) P[k] = pulled[k]; continue; }
+    if (P[k]) { pulled[k] = P[k]; delete P[k]; }
+   }
   } catch (e) { fail('col', e); }
  }
  colTick();
@@ -57,12 +62,13 @@
  let hwStart = lsGet('hw493start', null);
  if (!hwStart) { hwStart = Date.now(); lsSet('hw493start', hwStart); }
  const hwEnd = () => W0.__rl493hwEndTest != null ? +W0.__rl493hwEndTest : (+hwStart || Date.now()) + HW_HOURS * 3600e3;
- const hwLive = () => Date.now() < hwEnd();
+ const hwLive = () => { try { if (window.LIVEOPS && LIVEOPS.ready && LIVEOPS.shopOn) return !!LIVEOPS.shopOn('pack_halloween'); } catch (e) {} return Date.now() < hwEnd(); };
  const hwLeft = () => left(hwEnd() - Date.now());
  let hwByUs = false;
  function hwTick() {
   try {
    if (off()) { if (hwByUs) { W0.__rl_32hwOff = false; hwByUs = false; dirty(); } return; }
+   if (hwLive() && hwByUs && W0.__rl_32hwOff) { W0.__rl_32hwOff = false; hwByUs = false; note('halloween back'); dirty(); }
    if (!hwLive() && !W0.__rl_32hwOff) { W0.__rl_32hwOff = true; hwByUs = true; note('halloween gone'); dirty(); }
   } catch (e) { fail('hw', e); }
  }
@@ -149,7 +155,7 @@
   }
   const GR0 = V17.grant;
   if (typeof GR0 === 'function') V17.grant = function (id) {
-   try { if (!off() && GU.includes(id) && !uniOk(id)) { V.blocked.push('grant ' + id); return; } } catch (e) {}
+   try { if (!off() && GU.includes(id) && !uniOk(id) && !(window.LIVEOPS && LIVEOPS.ready && LIVEOPS.shopOn && LIVEOPS.shopOn(id))) { V.blocked.push('grant ' + id); return; } } catch (e) {}
    return GR0.apply(this, arguments);
   };
  } catch (e) { fail('uniguard', e); }

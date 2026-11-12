@@ -675,7 +675,11 @@
    ST.wind++;
   }
   if (!key) return null;
-  draw0(g2, key, x, y, kit, faceRight, { skin: sk });
+  let body = false;
+  try {
+   if (window.V17 && typeof V17._drawP0 === 'function' && p && p.pl) body = !!V17._drawP0(g2, key, p, kit, faceRight);
+  } catch (e) {}
+  if (!body) draw0(g2, key, x, y, kit, faceRight, { skin: sk });
   const lean = sh ? (shotPose(sh.e) || [ 0, 0 ])[1] : w > .4 ? -1 : 0;
   if (sh && sh.e > .03 && sh.e < .22) for (let j = 2; j >= 1; j--) {
    const Kp = keyAt(sh.type, Math.max(0, sh.e - j * .025));

@@ -148,6 +148,13 @@ const V33 = (() => {
   } catch (e) {}
   if (!g['N/A'].length && typeof GH_REG !== 'undefined') g['N/A'] = Object.keys(GH_REG);
   for (const k in g) g[k] = g[k].filter(id => !kindOf(id) && T(id) && T(id).id === id);
+  try {
+   const ids = window.GSC501 && GSC501.ids ? GSC501.ids().filter(id => T(id) && T(id).id === id) : [];
+   if (ids.length) {
+    g.COLLAB = ids.slice();
+    for (const k in g) if (k !== 'COLLAB') g[k] = g[k].filter(id => ids.indexOf(id) < 0);
+   } else if (!g.COLLAB) g.COLLAB = [];
+  } catch (e) {}
   return g;
  }
  const uniOk = id => !!id && Object.values(uniGroups()).some(a => a.includes(id));

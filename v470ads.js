@@ -25,6 +25,7 @@
  const CFG = W.RL470 = {
   DAILY_DIMES: 25,          // DAILY DIMES reward
   PACKS_PER_DAY: 3,         // FREE PACK ads per local day
+  PACKS_PER_AD: 1,          // basic packs per FREE PACK ad (Charlie Nov 11 9:58 PM)
   PACK_KIND: 'basic',       // the standard pack (items17 PACKS.basic, "BASIC PACK")
   APP_ID: 'ca-app-pub-2404264066146536~1162742034',   // goes in Info.plist GADApplicationIdentifier (not used by JS)
   UNIT_PACK: 'ca-app-pub-2404264066146536/5539749557',  // rewarded "Free Pack"
@@ -33,7 +34,7 @@
  };
  const KEY = 'rl_ads470';
  const EV = { REWARD: 'onRewardedVideoAdReward', DISMISS: 'onRewardedVideoAdDismissed', FAIL_LOAD: 'onRewardedVideoAdFailedToLoad', FAIL_SHOW: 'onRewardedVideoAdFailedToShow' };
- const A = W.ADS470 = { log: [], on: false, busy: false, ready: false };
+ const A = W.ADS470 = { log: [], on: false, busy: false, ready: false, kinds: {} };   // kinds: extra rewarded kinds (V51.4 v514adfree.js)
  const lg = m => { A.log.push(Date.now() % 1e7 + ' ' + m); if (A.log.length > 60) A.log.shift(); };
  // ---------- where it runs ----------
  function plugin() {
@@ -69,13 +70,25 @@
   if (!r || r.granted) { lg('reward ignored (no open request or already granted)'); return; }
   const ST = st();
   if (!ST) { lg('reward: no save'); return; }
+  const X = A.kinds[r.kind];
+  if (X) {   // V51.4: a kind registered by v514adfree.js - same rule: granted only here, once per request
+   if (!X.can()) { lg('reward: ' + r.kind + ' not available'); return; }
+   r.granted = true;
+   try { X.grant(data); } catch (e) { lg('grant ' + r.kind + ' ' + (e && e.message)); }
+   try { V17.save(); } catch (e) { }
+   lg('GRANTED ' + r.kind + ' ' + JSON.stringify(data || {}));
+   A.grants = (A.grants || 0) + 1;
+   show(X.got);
+   dirty();
+   return;
+  }
   const o = rd();
   if (r.kind === 'pack') {
    if (o.p >= CFG.PACKS_PER_DAY) { lg('reward: pack limit'); return; }
    r.granted = true;
    o.p++; wr(o);
    ST.freePacks = ST.freePacks && typeof ST.freePacks === 'object' ? ST.freePacks : {};
-   ST.freePacks[CFG.PACK_KIND] = (ST.freePacks[CFG.PACK_KIND] || 0) + 1;
+   ST.freePacks[CFG.PACK_KIND] = (ST.freePacks[CFG.PACK_KIND] || 0) + (CFG.PACKS_PER_AD || 1);
   } else {
    if (o.m) { lg('reward: dimes already today'); return; }
    r.granted = true;
@@ -132,7 +145,8 @@
  async function watch(kind) {
   const P = plugin();
   if (!P || A.busy) return;
-  if (kind === 'pack' ? packsLeft() <= 0 : !dimesReady()) { show(kind === 'pack' ? 'packdone' : 'dimesdone'); return; }
+  const X = A.kinds[kind];
+  if (X ? !X.can() : kind === 'pack' ? packsLeft() <= 0 : !dimesReady()) { show(X ? X.done : kind === 'pack' ? 'packdone' : 'dimesdone'); return; }
   A.busy = true;
   req = { kind: kind, id: ++seq, granted: false, dismissed: false };
   const my = req;
@@ -140,7 +154,7 @@
   try {
    await setup(P);
    if (req !== my) return;
-   const unit = testAds() ? CFG.UNIT_TEST : kind === 'pack' ? CFG.UNIT_PACK : CFG.UNIT_DIMES;
+   const unit = testAds() ? CFG.UNIT_TEST : X ? X.unit || CFG.UNIT_PACK : kind === 'pack' ? CFG.UNIT_PACK : CFG.UNIT_DIMES;
    await P.prepareRewardVideoAd({ adId: unit, isTesting: testAds() });
    if (req !== my || scr !== 'wait') { A.busy = false; return; }   // the player tapped CANCEL while it loaded
    await P.showRewardVideoAd();   // resolves on the reward too, but the grant is the event's job, never this promise's
@@ -183,8 +197,8 @@
  function cancelWait() { if (req && !req.granted) req.cancelled = true; A.busy = false; close(); }
  // every screen: a title, one sentence, one big button
  const SCREENS = {
-  wait: () => [ '\u23F3', 'AD LOADING', 'WATCH THE WHOLE AD TO GET YOUR ' + (req && req.kind === 'pack' ? 'FREE PACK.' : CFG.DAILY_DIMES + ' DIMES.'), 'CANCEL', 'CANCEL THE AD', cancelWait ],
-  gotpack: () => [ '\uD83C\uDF81', 'FREE PACK!', 'A BASIC PACK IS YOURS. ' + (packsLeft() ? packsLeft() + ' MORE FREE ' + (packsLeft() === 1 ? 'PACK' : 'PACKS') + ' TODAY.' : 'COME BACK TOMORROW FOR MORE.'), 'OPEN IT', 'OPEN YOUR FREE PACK', openPack ],
+  wait: () => [ '\u23F3', 'AD LOADING', 'WATCH THE WHOLE AD TO GET YOUR ' + (req && req.kind === 'pack' ? (CFG.PACKS_PER_AD > 1 ? CFG.PACKS_PER_AD + ' FREE PACKS.' : 'FREE PACK.') : req && A.kinds[req.kind] ? A.kinds[req.kind].prize : CFG.DAILY_DIMES + ' DIMES.'), 'CANCEL', 'CANCEL THE AD', cancelWait ],
+  gotpack: () => [ '\uD83C\uDF81', (CFG.PACKS_PER_AD > 1 ? CFG.PACKS_PER_AD + ' FREE PACKS!' : 'FREE PACK!'), (CFG.PACKS_PER_AD > 1 ? CFG.PACKS_PER_AD + ' BASIC PACKS ARE YOURS. ' : 'A BASIC PACK IS YOURS. ') + (packsLeft() ? packsLeft() + ' MORE ' + (CFG.PACKS_PER_AD > 1 ? 'AD' : 'FREE PACK') + (packsLeft() === 1 ? '' : 'S') + ' TODAY.' : 'COME BACK TOMORROW FOR MORE.'), 'OPEN IT', 'OPEN YOUR FREE PACK', openPack ],
   gotdimes: () => [ '\uD83E\uDE99', '+' + CFG.DAILY_DIMES + ' DIMES', 'THANKS FOR WATCHING. YOUR DAILY DIMES ARE BACK TOMORROW.', 'NICE', 'CLOSE', close ],
   noreward: () => [ '\u270B', 'NO REWARD', 'THE AD CLOSED BEFORE THE END, SO NOTHING WAS ADDED.', 'OK', 'CLOSE', close ],
   noad: () => [ '\uD83D\uDCE1', 'NO AD RIGHT NOW', 'THERE IS NO AD TO SHOW YET. TRY AGAIN IN A LITTLE BIT.', 'OK', 'CLOSE', close ],
@@ -207,9 +221,10 @@
   box.style.display = 'flex';
  }
  A.show = show;
+ A.screens = SCREENS; A.close = close; A.native = () => !!plugin();   // V51.4 hooks for v514adfree.js
  function tileHtml() {
   const pl = packsLeft(), dr = dimesReady();
-  return '<div class="ad470c"><b>FREE PACK</b><small>' + (pl ? 'WATCH A SHORT AD FOR A BASIC PACK - ' + pl + ' LEFT TODAY' : 'ALL ' + CFG.PACKS_PER_DAY + ' USED - BACK TOMORROW') + '</small>' +
+  return '<div class="ad470c"><b>FREE PACK</b><small>' + (pl ? 'WATCH A SHORT AD FOR ' + (CFG.PACKS_PER_AD > 1 ? CFG.PACKS_PER_AD + ' BASIC PACKS' : 'A BASIC PACK') + ' - ' + pl + ' LEFT TODAY' : 'ALL ' + CFG.PACKS_PER_DAY + ' USED - BACK TOMORROW') + '</small>' +
    '<button type="button" class="y' + (pl ? '' : ' d') + '" id="ad470pack" aria-label="FREE PACK: WATCH AD">FREE PACK: WATCH AD</button></div>' +
    '<div class="ad470c"><b>DAILY DIMES</b><small>' + (dr ? 'WATCH A SHORT AD FOR +' + CFG.DAILY_DIMES + ' DIMES, ONCE A DAY' : 'CLAIMED TODAY - BACK TOMORROW') + '</small>' +
    '<button type="button" class="y' + (dr ? '' : ' d') + '" id="ad470dimes" aria-label="DAILY DIMES: WATCH AD">DAILY DIMES: WATCH AD</button></div>';

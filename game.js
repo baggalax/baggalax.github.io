@@ -14470,6 +14470,12 @@ function drawHelp() {
 }
 
 let gridNA16 = false;
+function gscTab501(which) {
+ window.__gscCollab = which === 'COLLAB';
+ gridWorld16 = which === 'WORLD';
+ gridNA16 = which === 'N/A';
+ gridCol2504 = which === 'COLLEGE';
+}
 
 let gridWorld16 = false;
 
@@ -14743,6 +14749,10 @@ function teamGrid(title, sub, onPick, opts = {}) {
   if (W / 2 - w2 / 2 >= L && W / 2 + w2 / 2 <= R) text(title, W / 2, 4, 2, '#fff', 'center', '#000'); else if (R - L >= w2) text(title, Math.round((L + R) / 2), 4, 2, '#fff', 'center', '#000'); else text(title, Math.round((L + R) / 2), 6, 1, '#fff', 'center', '#000');
  }
  if (opts.col29 && typeof colGrid2504 === 'function') return colGrid2504(onPick, opts);
+ if (window.__gscCollab && opts.world && !opts.pool && window.GSC501 && GSC501.drawPick) {
+  GSC501.drawPick(onPick, opts);
+  return;
+ }
  if (opts.world && WTEAMS.length) {
   const g16 = !opts.pool && !!(window.GHO16 && GHO16.on()), sh = g16 ? 30 : 0;
   if (cv4) {
@@ -14789,9 +14799,16 @@ function teamGrid(title, sub, onPick, opts = {}) {
   }
   if (g16) button('N/A', W - 34, 3, 28, 11, () => {
    gridNA16 = true;
+   window.__gscCollab = false;
   }, {
    bg: na ? '#b48aff' : '#3a4a55',
    fg: na ? '#0b1a20' : '#cfe'
+  });
+  if (window.GSC501 && GSC501.on && GSC501.on()) button('COLLAB', 2, 16, 48, 11, () => {
+   gscTab501('COLLAB');
+  }, {
+   bg: '#3a4a55',
+   fg: '#cfe'
   });
  }
  if (cl) return colGrid2504(onPick, opts);

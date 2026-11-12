@@ -1309,7 +1309,9 @@ const V17 = (() => {
   const it = BY[id], p = PP(pid);
   if (!it || !p || !it.slot) return 'NOT GEAR';
   if (it.fo && p.pos !== 'FO') return 'FACEOFF STICKS ARE FOR FOGOS';
-  if (it.slot === 'stick' && !it.fo && p.pos === 'G') return 'GOALIES KEEP THEIR GOALIE STICK';
+  if (it.gscGk && p.pos !== 'G') return 'GOALIES ONLY';
+  if (it.gscField && p.pos === 'G') return 'FIELD PLAYERS ONLY - NOT GOALIES';
+  if (it.slot === 'stick' && !it.fo && p.pos === 'G' && !it.gscGk) return 'GOALIES KEEP THEIR GOALIE STICK';
   if (it.tew25) return window.HON25 ? HON25.canWear(pid) : 'NOT GEAR';
   if (it.b35) return window.V35 && V35.b35 ? V35.b35.canWear(pid, id) : 'NOT GEAR';
   const cur = eqOf(pid)[it.slot];
@@ -1942,7 +1944,13 @@ const V17 = (() => {
  }
  const HW_PACK = {
   n: 'HALLOWEEN PACK',
-  cost: 15
+  get cost() {
+   try {
+    const p = window.LIVEOPS && LIVEOPS.price && LIVEOPS.price('pack_halloween');
+    if (p != null) return p;
+   } catch (e) {}
+   return 15;
+  }
  };
  function buyHw() {
   if (!hwOn()) {
@@ -4854,7 +4862,8 @@ const V17 = (() => {
      helm: c
     };
     const lk286 = !!it.lk286 && !window.__rl_no286uniprev && !window.__rl_v124gb;
-    if (kit.g27 && !sil && !lk286 && typeof RL12 !== 'undefined' && RL12.FR.idle) {
+    const gscLook = kit && (kit.g27 === 'gscH' || kit.g27 === 'gscA');
+    if (kit.g27 && !sil && (!lk286 || gscLook) && typeof RL12 !== 'undefined' && RL12.FR.idle) {
      x.fillStyle = kit.g27 === 'skel' ? '#3a4a3a' : '#2a3442';
      x.fillRect(0, 0, 20, 20);
      RL12.draw(x, 'idle', 9, 21, kit, true, {
@@ -6569,18 +6578,20 @@ const V17 = (() => {
  }
  function uniWhere17(tid, k) {
   if (T(tid).vets489) return 'IN THE HONOR PACK';
+  if (T(tid).gsc501) return 'GOOD STICK PACK';
   return k === 7 || T(tid).gho16 && k >= 2 ? 'HALLOWEEN PACK' : 'FROM CARD PACKS';
  }
  const on2319 = () => !window.__rl_no2319 && !window.__rl_v124gb;
  function uniTile2319(tid, k, cur) {
   const U = UNI21, own = U.has(tid, k);
-  return '<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + esc(tid) + '|' + k + '" aria-label="' + esc(T(tid).name.toUpperCase() + ' ' + (T(tid).vets489 && U.styN ? U.styN(tid, k) : U.STY[k]) + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc((T(tid).gho16 || T(tid).vets489) && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>';
+  return '<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + esc(tid) + '|' + k + '" aria-label="' + esc(T(tid).name.toUpperCase() + ' ' + (T(tid).vets489 && U.styN ? U.styN(tid, k) : U.STY[k]) + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc((T(tid).gho16 || T(tid).vets489 || T(tid).gsc501) && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>';
  }
  const on286lc = () => !window.__rl_no286lockcol && !window.__rl_v124gb && on2319();
  let uniGrp286 = null;
- const UNI_G286 = [ [ 'col', 'COLLEGE' ], [ 'pro', 'PRO' ], [ 'world', 'WORLD' ], [ 'na', 'N/A' ] ];
+ const UNI_G286 = [ [ 'col', 'COLLEGE' ], [ 'pro', 'PRO' ], [ 'world', 'WORLD' ], [ 'na', 'N/A' ], [ 'cb', 'COLLAB' ] ];
  function uniGrpOf286(tid) {
   const t = T(tid);
+  if (t && (t.gsc501 || t.lg === 'COLLAB')) return 'cb';
   if (!t || t.gho16) return 'na';
   if (t.col25) return 'col';
   if (typeof TEAMS !== 'undefined' && TEAMS.some(x => x.id === tid)) return 'pro';
@@ -6635,7 +6646,7 @@ const V17 = (() => {
   for (let k = 0; k < N; k++) {
    const own = U.has(tid, k);
    if (own) un++;
-   tiles.push('<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + k + '" aria-label="' + esc(U.STY[k] + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc((T(tid).gho16 || T(tid).vets489) && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>');
+   tiles.push('<button type="button" class="c17 uni17' + (own ? '' : ' lk') + (own && k === cur ? ' wr17' : '') + '" data-a="v17uni" data-v="' + k + '" aria-label="' + esc(U.STY[k] + (own ? k === cur ? ' (WEARING)' : '' : ' (LOCKED)')) + '">' + '<div class="art"><img src="' + uniIcon17(tid, k) + '" alt=""></div><div class="nm">' + esc((T(tid).gho16 || T(tid).vets489 || T(tid).gsc501) && U.styN ? U.styN(tid, k) : U.STY[k]) + '</div>' + '<div class="rr">' + (own ? k === cur ? 'WEARING' : 'TAP TO WEAR' : 'LOCKED') + '</div>' + (own ? '' : '<small class="wh17">' + uniWhere17(tid, k) + '</small>') + '</button>');
   }
   const det = '<div class="det17">EVERY TEAM\'S UNIFORMS. BASIC + WHITE ARE ALWAYS UNLOCKED, THE OTHERS COME FROM CARD PACKS. TAP ONE = THAT TEAM WEARS IT.</div>' + '<div class="row uni17t">' + btn('< PREV TEAM', 'v17unit', '-1', 'd') + '<b class="uni17n">' + esc(t.name.toUpperCase()) + (mine ? ' (YOUR SEASON TEAM)' : '') + '</b>' + btn('NEXT TEAM >', 'v17unit', '1', 'd') + '</div>';
   const body = '<div class="sec17"><div class="sh17">UNIFORMS <span>' + un + ' / ' + N + '</span></div><div class="grid17">' + tiles.join('') + '</div></div>';
@@ -6662,7 +6673,7 @@ const V17 = (() => {
    return false;
   }
   U.save(tid, k);
-  toast('WEARING: ' + ((T(tid).gho16 || T(tid).vets489) && U.styN ? U.styN(tid, k) : U.STY[k]), '#7dff7a');
+  toast('WEARING: ' + ((T(tid).gho16 || T(tid).vets489 || T(tid).gsc501) && U.styN ? U.styN(tid, k) : U.STY[k]), '#7dff7a');
   return true;
  }
  function stk2319(k, list) {
