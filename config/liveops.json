@@ -12,10 +12,6 @@
       "id": "pack_turkey565"
     },
     {
-      "id": "pack_vets489",
-      "end": "2026-11-17T05:33:00.000Z"
-    },
-    {
       "id": "pack_daily"
     },
     {
@@ -221,10 +217,7 @@
         "id": "pack_turkey565",
         "end": ""
       },
-      {
-        "id": "pack_vets489",
-        "end": "2026-11-17T05:33:00.000Z"
-      },
+      null,
       null,
       null,
       null,
