@@ -69,7 +69,11 @@
       "id": "pack_cu38"
     }
   ],
-  "specials": [],
+  "specials": [
+    {
+      "id": "gift_wood565"
+    }
+  ],
   "goodstick": {
     "enabled": false,
     "roster": [
