@@ -9,9 +9,6 @@
       "end": "2026-11-24T04:32:00.000Z"
     },
     {
-      "id": "pack_halloween"
-    },
-    {
       "id": "pack_vets489"
     },
     {
@@ -218,10 +215,7 @@
         "id": "pack_fit45",
         "end": "2026-11-24T04:32:00.000Z"
       },
-      {
-        "id": "pack_halloween",
-        "end": ""
-      },
+      null,
       {
         "id": "pack_vets489",
         "end": ""
