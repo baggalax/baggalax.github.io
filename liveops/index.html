@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bagga Lax Live-Ops Panel</title>
+<style>
+:root{--bg:#10141a;--pn:#1a2430;--ed:#34506a;--y:#ffe14d;--tx:#f4f4f4;--mu:#9ab;--rd:#c8102e;--gn:#2f9e4f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.35 system-ui,sans-serif}
+header{display:flex;gap:10px;align-items:center;padding:10px 14px;border-bottom:2px solid var(--ed);position:sticky;top:0;background:var(--bg);z-index:5;flex-wrap:wrap}
+header h1{font-size:18px;margin:0;flex:1;min-width:160px}
+button{font:inherit;font-weight:700;padding:9px 14px;border:3px solid #111;background:var(--y);color:#111;cursor:pointer}
+button.g{background:#c9d6d9}button.on{background:var(--gn);color:#fff}button.r{background:var(--rd);color:#fff}button:disabled{opacity:.45}
+main{max-width:980px;margin:0 auto;padding:14px}
+.home{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:30px}
+.home button{padding:46px 10px;font-size:22px}
+.sec{margin:18px 0 6px;color:var(--y);font-weight:800;letter-spacing:.5px}
+.grid{display:grid;gap:8px}
+.big{grid-template-columns:1fr}.med{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}.small{grid-template-columns:repeat(auto-fill,minmax(105px,1fr))}
+.slot{background:var(--pn);border:2px solid var(--ed);padding:8px;position:relative;cursor:pointer;display:flex;flex-direction:column;justify-content:center;gap:2px}
+.big .slot{min-height:74px;flex-direction:row;align-items:center;gap:12px}.med .slot{min-height:92px}.small .slot{min-height:64px;font-size:13px}.small .slot .row,.med .slot .row{flex-wrap:wrap}.small .slot .row button{width:100%}
+.slot.empty{border-style:dashed;color:var(--mu);align-items:center;text-align:center}
+.slot.over{border-style:dashed;border-color:#7a5aa8;background:#1b1830}
+.slot b{display:block}.slot small{color:var(--mu)}
+.slot .tm{position:absolute;right:6px;top:4px;font-size:11px;color:#ffd84d}
+.slot .row{display:flex;gap:6px;margin-top:6px}.slot .row button{padding:4px 8px;font-size:12px;border-width:2px}
+.tag{font-size:11px;background:var(--rd);color:#fff;padding:1px 5px;margin-left:4px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;z-index:20;overflow:auto}
+.box{background:var(--pn);border:3px solid var(--ed);padding:14px;width:min(560px,100%)}
+input,select{font:inherit;width:100%;padding:9px;background:#0e141b;color:#fff;border:2px solid var(--ed);margin:4px 0}
+.list{max-height:50vh;overflow:auto;border:2px solid var(--ed);margin-top:6px}
+.li{padding:8px 10px;border-bottom:1px solid #24364a;cursor:pointer}.li:hover{background:#243a52}.li small{color:var(--mu);display:block}
+.msg{padding:8px 0;color:var(--mu)}.warn{color:#ff9a8a}
+.sg{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+.sg .slot{min-height:110px}.sg .slot.act{border-color:var(--gn);background:#173323}
+</style></head><body>
+<header><button class="g" id="back" style="display:none">&larr; HOME</button><h1 id="title">Bagga Lax Live-Ops</h1>
+<button class="g" id="tokb">TOKEN</button><button id="edit" style="display:none">EDIT</button><button id="save" disabled>SAVE LIVE</button></header>
+<main id="app"></main>
+<script>const CAT=[{"id":"pack_daily","kind":"pack","name":"FREE DAILY PACK","price":0,"text":"One free pack a day.","past":false},{"id":"pack_basic","kind":"pack","name":"BASIC PACK","price":5,"text":"5 cards. Mostly commons.","past":false},{"id":"pack_rare","kind":"pack","name":"RARE PACK","price":15,"text":"A guaranteed rare.","past":false},{"id":"pack_legendary","kind":"pack","name":"LEGENDARY PACK","price":50,"text":"The legendary pack.","past":false},{"id":"pack_stickfree","kind":"pack","name":"FREE STICK PACK","price":0,"text":"One free stick pack a day.","past":false},{"id":"pack_pass","kind":"pack","name":"SEASON 1 GAME PASS","price":50,"text":"21 levels. Old Foxworth at the end.","past":false},{"id":"pack_tape","kind":"pack","name":"TAPE PACK","price":3,"text":"Only tape.","past":false},{"id":"pack_chirp","kind":"pack","name":"CHIRP PACK","price":8,"text":"Only chirps.","past":false},{"id":"pack_gear","kind":"pack","name":"GEAR PACK","price":20,"text":"Helmets, visors, collars, shorts, cleats.","past":false},{"id":"pack_crew","kind":"pack","name":"CREW PACK","price":25,"text":"Team crew.","past":false},{"id":"pack_stick","kind":"pack","name":"STICK PACK","price":30,"text":"Sticks and faceoff sticks.","past":false},{"id":"pack_unip","kind":"pack","name":"PRO UNIFORM PACK","price":15,"text":"Pro team uniforms.","past":false},{"id":"pack_unic","kind":"pack","name":"COLLEGE UNIFORM PACK","price":15,"text":"College uniforms.","past":false},{"id":"pack_uniw","kind":"pack","name":"WORLD UNIFORM PACK","price":15,"text":"World team uniforms.","past":false},{"id":"pack_pc38c","kind":"pack","name":"COMMON PLAYER PACK","price":40,"text":"Player cards.","past":false},{"id":"pack_pc38r","kind":"pack","name":"RARE PLAYER PACK","price":70,"text":"Player cards, a rare guaranteed.","past":false},{"id":"pack_pc38l","kind":"pack","name":"LEGENDARY PLAYER PACK","price":120,"text":"Player cards.","past":false},{"id":"pack_cu38","kind":"pack","name":"CUSTOM CARD PACK","price":65,"text":"Custom player cards.","past":false},{"id":"pack_relax","kind":"pack","name":"RELAX PAL","price":30,"text":"The legendary chirp. Buy once.","past":false},{"id":"pack_fit45","kind":"pack","name":"THE WHALE OR THE CROWN","price":200,"text":"Pick one uniform. The other locks.","past":false},{"id":"pack_halloween","kind":"pack","name":"HALLOWEEN PACK","price":15,"text":"Orange stick, Spooky stick, tape, cleats, Waterdogs and Archers Hallow","past":false},{"id":"pack_vets489","kind":"pack","name":"VETERANS DAY HONOR PACK","price":10,"text":"Six service teams, their uniforms (camo, fighter pilot, astronaut, gal","past":false},{"id":"pack_b2504c","kind":"pack","name":"SKY CHROME PACK","price":20,"past":true,"text":"Left the shop in the Veterans drop. SKY CHROME (was CHROME DOME) colle"},{"id":"pack_b2504l","kind":"pack","name":"GOLD CROWN PACK","price":25,"past":true,"text":"Left the shop in the Veterans drop. GOLD CROWN (was LUCKY) college uni"},{"id":"pack_goodstick","kind":"pack","name":"GOOD STICK PACK","price":20,"past":true,"text":"COLLAB. Good Stick Shortie, Goalie Stick, Good Stick Tape, and the Goo"},{"id":"pack_turkey565","kind":"pack","name":"TURKEY TROTTERS PACK","price":45,"past":false,"text":"THANKSGIVING. Turkey Leg Lacrosse Stick, Chicken Dance celly, Turkey T"},{"id":"stick_tk565leg","kind":"item","name":"TURKEY LEG STICK","price":12,"text":"Thanksgiving rare stick. White bone shaft, brown drumstick head.","past":true},{"id":"celly_tk565chk","kind":"item","name":"CHICKEN DANCE","price":10,"text":"Thanksgiving celly.","past":true},{"id":"stick_orange","kind":"item","name":"ORANGE STICK","price":5,"text":"Halloween pack stick. Looks only.","past":true},{"id":"stick_spooky","kind":"item","name":"SPOOKY STICK","price":12,"text":"Halloween pack. Rare stick, purple head, green flame, breaks on 1.2% o","past":true},{"id":"tape_purple","kind":"item","name":"PURPLE TAPE","price":3,"text":"Halloween pack tape.","past":true},{"id":"tape_orange","kind":"item","name":"ORANGE TAPE","price":3,"text":"Halloween pack tape.","past":true},{"id":"cleats_orange","kind":"item","name":"ORANGE CLEATS","price":5,"text":"Halloween pack cleats.","past":true},{"id":"uni21|WAT|7","kind":"item","name":"WATERDOGS HALLOWEEN","price":8,"text":"Halloween uniform. Waterdogs only.","past":true},{"id":"uni21|ARC|7","kind":"item","name":"ARCHERS HALLOWEEN","price":8,"text":"Halloween uniform. Archers only.","past":true},{"id":"uni21|GHO|2","kind":"item","name":"WHITE GHOST","price":15,"text":"Ghosts uniform. Pulled from sale except for Halloween pack owners.","past":true},{"id":"uni21|GHO|3","kind":"item","name":"SKELETON","price":15,"text":"Ghosts uniform. Pulled from sale except for Halloween pack owners.","past":true},{"id":"stick_babyblue","kind":"item","name":"BABY BLUE STICK","price":5,"text":"Was in the Sky Chrome pack.","past":true},{"id":"tape_babyblue","kind":"item","name":"BABY BLUE TAPE","price":3,"text":"Was in the Sky Chrome pack.","past":true},{"id":"cleats_babyblue","kind":"item","name":"BABY BLUE CLEATS","price":5,"text":"Was in the Sky Chrome pack.","past":true},{"id":"uni21|CUNC|8","kind":"item","name":"SKY CHROME UNIFORM","price":10,"text":"Was in the Sky Chrome pack.","past":true},{"id":"stick_green","kind":"item","name":"GREEN STICK","price":5,"text":"Was in the Gold Crown pack.","past":true},{"id":"tape_green","kind":"item","name":"GREEN TAPE","price":3,"text":"Was in the Gold Crown pack.","past":true},{"id":"cleats_green","kind":"item","name":"GREEN CLEATS","price":5,"text":"Was in the Gold Crown pack.","past":true},{"id":"collar_gold","kind":"item","name":"GOLD COLLAR","price":5,"text":"Was in the Gold Crown pack.","past":true},{"id":"uni21|CND|8","kind":"item","name":"GOLD CROWN UNIFORM","price":10,"text":"Was in the Gold Crown pack.","past":true},{"id":"stick_v491ss","kind":"item","name":"STARS + STRIPES STICK","price":8,"text":"Veterans Day Honor Pack stick.","past":true},{"id":"stick_v491rwb","kind":"item","name":"RED WHITE + BLUE STICK","price":8,"text":"Veterans Day Honor Pack stick.","past":true},{"id":"stick_v491hw","kind":"item","name":"HONOR WHITE STICK","price":8,"text":"Veterans Day Honor Pack stick.","past":true},{"id":"stick_gsc_shortie","kind":"item","name":"GOOD STICK SHORTIE","price":10,"text":"Collab stick. Rare effects, COLLAB label. Field players only.","past":true},{"id":"stick_gsc_goalie","kind":"item","name":"GOOD STICK GOALIE STICK","price":10,"text":"Collab stick. Rare effects, COLLAB label. Goalies only.","past":true},{"id":"tape_gsc","kind":"item","name":"GOOD STICK TAPE","price":5,"text":"Collab tape. Rare effects, COLLAB label.","past":true},{"id":"gsc_team","kind":"item","name":"GOOD STICK CO. TEAM","price":0,"text":"Collab team unlock.","past":true},{"id":"mode_vets489","kind":"mode","name":"VETERANS TOURNAMENT","past":false,"text":"Six service teams. Win 3 games for the Honor Medal. The 1.3 clock is 9"},{"id":"mode_turkey565","kind":"mode","name":"TURKEY TROTTERS (THANKSGIVING)","past":true,"text":"Turns on the Turkey Trotters N/A team, uniforms, cards and the Thanksg"},{"id":"gift_wood565","kind":"mode","name":"GIFT: 1 WOODEN STICK FOR EVERYONE","past":true,"text":"Thanksgiving gift. Every player gets 1 Wooden Stick once while this id"},{"id":"mode_ultimate","kind":"mode","name":"ULTIMATE TOURNAMENT","past":true,"text":"Always in PLAY. Listed so it can be featured under Special Games."},{"id":"mode_world","kind":"mode","name":"WORLD GAMES","past":true,"text":"Always in PLAY. Listed so it can be featured under Special Games."},{"id":"mode_college","kind":"mode","name":"COLLEGE TOURNAMENT","past":true,"text":"Always in PLAY. Listed so it can be featured under Special Games."}];
+const TZ='America/New_York',REPO='baggalax/baggalax.github.io',PATH='config/liveops.json',RAW='https://baggalax.github.io/config/liveops.json';
+const BIG=['pack_halloween','pack_relax','pack_b2504c','pack_b2504l','pack_vets489','pack_fit45','pack_goodstick','pack_turkey565'];
+const SMALL=['pack_pc38c','pack_pc38r','pack_pc38l','pack_cu38','pack_unip','pack_unic','pack_uniw'];
+const N={big:4,med:11,small:7},OVER=4,LABEL={big:'BIG SLOTS (banners)',med:'MEDIUM SLOTS (packs)',small:'SMALL SLOTS (specific packs)'};
+const byId={};CAT.forEach(c=>byId[c.id]=c);
+let live={shop:[],specials:[]},sha=null,view='home',edit=false,dirty=false,layout=null,timer=null;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tok=()=>localStorage.getItem('baggalax_liveops_token')||'';
+const say=(t,bad)=>{const n=$('#msg');if(n){n.textContent=t;n.className='msg'+(bad?' warn':'')}};
+function nyParts(ms){const f=new Intl.DateTimeFormat('en-US',{timeZone:TZ,hour12:false,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}),o={};for(const p of f.formatToParts(new Date(ms)))if(p.type!=='literal')o[p.type]=p.value;if(o.hour==='24')o.hour='00';return o}
+function toIn(iso){const t=Date.parse(iso);if(!iso||isNaN(t))return'';const p=nyParts(t);return p.year+'-'+p.month+'-'+p.day+'T'+p.hour+':'+p.minute}
+function fromIn(s){const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s||'');if(!m)return'';const Y=+m[1],M=+m[2],D=+m[3],h=+m[4],mi=+m[5];let ms=Date.UTC(Y,M-1,D,h,mi);for(let i=0;i<4;i++){const p=nyParts(ms);ms+=Date.UTC(Y,M-1,D,h,mi)-Date.UTC(+p.year,+p.month-1,+p.day,+p.hour,+p.minute)}return new Date(ms).toISOString()}
+function left(iso){const ms=Date.parse(iso)-Date.now();if(isNaN(ms))return'';if(ms<=0)return'ended';const m=Math.floor(ms/6e4),d=Math.floor(m/1440),h=Math.floor(m%1440/60);return(d?d+'d ':'')+(h||d?h+'h ':'')+(m%60)+'m left'}
+const tierOf=id=>BIG.includes(id)?'big':SMALL.includes(id)?'small':'med';
+function buildLayout(){
+ const L=live.layout&&live.layout.big?JSON.parse(JSON.stringify(live.layout)):null;
+ if(L){for(const t of['big','med','small']){L[t]=L[t]||[];while(L[t].length<N[t]+OVER)L[t].push(null)}return L}
+ const out={big:[],med:[],small:[]};
+ for(const r of live.shop||[]){if(!byId[r.id])continue;out[tierOf(r.id)].push({id:r.id,end:r.end||''})}
+ for(const t of['big','med','small']){while(out[t].length<N[t])out[t].push(null);while(out[t].length<N[t]+OVER)out[t].push(null)}
+ return out}
+function liveCount(t){return Math.max(N[t],0)}
+function toConfig(){
+ const prev={};(live.shop||[]).forEach(r=>prev[r.id]=r);
+ const shop=[];
+ for(const t of['big','med','small'])layout[t].forEach((s,i)=>{if(!s||i>=N[t])return;const r=Object.assign({},prev[s.id]||{id:s.id});r.id=s.id;delete r.windowHours;delete r.anchor;delete r.enabled;if(s.end)r.end=s.end;else delete r.end;if(!shop.find(x=>x.id===s.id))shop.push(r)});
+ const cfg=Object.assign({},live,{shop:shop,specials:live.specials||[],layout:layout});return cfg}
+async function load(){
+ try{
+  if(tok()){const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+PATH,{headers:{Authorization:'Bearer '+tok(),Accept:'application/vnd.github+json'}});if(!r.ok)throw new Error('GitHub '+r.status);const j=await r.json();sha=j.sha;live=JSON.parse(decodeURIComponent(escape(atob(j.content.replace(/\n/g,'')))))}
+  else{const r=await fetch(RAW+'?t='+Date.now());if(!r.ok)throw new Error('load '+r.status);live=await r.json()}
+ }catch(e){say('Could not load the live config: '+e.message,true)}
+ live.shop=live.shop||[];live.specials=live.specials||[];layout=buildLayout();purge(true);draw()}
+let st=null;
+function queueSave(){dirty=true;$('#save').disabled=false;clearTimeout(st);if(tok())st=setTimeout(save,900);else say('Change staged. Add your token (TOKEN button) to push it live.')}
+async function save(){
+ if(!tok()){say('No token yet: press TOKEN.',true);return}
+ try{
+  if(!sha){const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+PATH,{headers:{Authorization:'Bearer '+tok()}});if(r.ok)sha=(await r.json()).sha}
+  const cfg=toConfig(),body={message:'liveops: panel update',content:btoa(unescape(encodeURIComponent(JSON.stringify(cfg,null,2)+'\n')))};if(sha)body.sha=sha;
+  const r=await fetch('https://api.github.com/repos/'+REPO+'/contents/'+PATH,{method:'PUT',headers:{Authorization:'Bearer '+tok(),Accept:'application/vnd.github+json'},body:JSON.stringify(body)});
+  if(!r.ok)throw new Error('GitHub '+r.status+' '+(await r.text()).slice(0,120));
+  sha=(await r.json()).content.sha;live=cfg;dirty=false;$('#save').disabled=true;say('Live. The game picks it up within a minute or so.')
+ }catch(e){say('Save failed: '+e.message,true)}}
+function purge(quiet){let hit=0;for(const t of['big','med','small'])layout[t].forEach((s,i)=>{if(s&&s.end&&Date.parse(s.end)<=Date.now()){layout[t][i]=null;hit++}});
+ for(const r of live.specials||[])if(r.end&&Date.parse(r.end)<=Date.now()){live.specials=live.specials.filter(x=>x!==r);hit++}
+ if(hit&&!quiet){draw();queueSave()}else if(hit)dirty=true;return hit}
+function slotHtml(t,i){const s=layout[t][i],over=i>=N[t];if(over&&!edit)return'';
+ if(!s)return'<div class="slot empty'+(over?' over':'')+'" data-t="'+t+'" data-i="'+i+'"><span>'+(over?'STAGING SLOT (not live)':'EMPTY')+'</span><small>tap to choose</small></div>';
+ const c=byId[s.id]||{name:s.id};
+ return'<div class="slot'+(over?' over':'')+'" data-t="'+t+'" data-i="'+i+'">'+(s.end?'<span class="tm">&#9201; '+esc(left(s.end))+'</span>':'')+'<div><b>'+esc(c.name)+(c.past?'<span class="tag">OLD</span>':'')+(over?'<span class="tag" style="background:#7a5aa8">STAGED</span>':'')+'</b><small>'+esc(s.id)+(c.price!=null?' &middot; '+c.price+' dimes':'')+'</small></div><div class="row"><button class="g" data-tm="1">'+(s.end?'EDIT TIMER':'SET TIMER')+'</button><button class="g" data-rm="1">CLEAR</button></div></div>'}
+function drawYard(){
+ let h='<div class="msg" id="msg">'+(edit?'EDIT MODE: purple slots are extra staging space (not live). Slot sizes match the game.':'Tap any slot to change it. Changes go live automatically once your token is saved.')+'</div>';
+ for(const t of['big','med','small']){h+='<div class="sec">'+LABEL[t]+'</div><div class="grid '+t+'">';for(let i=0;i<layout[t].length;i++)h+=slotHtml(t,i);h+='</div>'}
+ $('#app').innerHTML=h;
+ document.querySelectorAll('.slot').forEach(el=>{const t=el.dataset.t,i=+el.dataset.i;el.onclick=ev=>{
+  if(ev.target.dataset.rm){layout[t][i]=null;draw();queueSave();return}
+  if(ev.target.dataset.tm){timerModal(t,i);return}
+  pick(t,i)}})}
+function pick(t,i){
+ const m=document.createElement('div');m.className='modal';
+ m.innerHTML='<div class="box"><b>Choose for this '+t+' slot</b><input id="q" placeholder="Search every pack and item that ever existed" autofocus><label style="font-size:13px;color:#9ab"><input type="checkbox" id="onlyPk" checked style="width:auto"> packs, past packs and modes only (uncheck for all 900+ single items)</label><div class="list" id="ls"></div><button class="g" id="cx" style="margin-top:8px">CANCEL</button></div>';
+ document.body.appendChild(m);
+ const ls=m.querySelector('#ls');
+ const fill=()=>{const q=m.querySelector('#q').value.toLowerCase(),only=m.querySelector('#onlyPk').checked;
+  const rows=CAT.filter(c=>c.kind!=='mode'&&(!only||c.kind==='pack'||c.past)&&((c.name||'')+' '+c.id).toLowerCase().includes(q)).slice(0,200);
+  ls.innerHTML=rows.map(c=>'<div class="li" data-id="'+esc(c.id)+'"><b>'+esc(c.name)+'</b>'+(c.past?'<span class="tag">OLD</span>':'')+'<small>'+esc(c.id)+' &middot; '+esc(c.kind)+(c.price!=null?' &middot; '+c.price+' dimes':'')+'</small></div>').join('')||'<div class="li">Nothing matches.</div>'};
+ fill();m.querySelector('#q').oninput=fill;m.querySelector('#onlyPk').onchange=fill;m.querySelector('#cx').onclick=()=>m.remove();
+ ls.onclick=e=>{const li=e.target.closest('.li');if(!li||!li.dataset.id)return;const id=li.dataset.id;
+  for(const tt of['big','med','small'])layout[tt].forEach((s,j)=>{if(s&&s.id===id&&!(tt===t&&j===i))layout[tt][j]=null});
+  layout[t][i]={id:id,end:''};m.remove();draw();queueSave()}}
+function timerModal(t,i){
+ const s=layout[t][i];if(!s)return;const m=document.createElement('div');m.className='modal';
+ m.innerHTML='<div class="box"><b>Timer for '+esc((byId[s.id]||{}).name||s.id)+'</b><p class="msg">When it runs out the item leaves the live game and this slot goes back to empty. New York time.</p><input type="datetime-local" id="dt" value="'+esc(toIn(s.end))+'"><div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0"><button class="g" data-h="1">+1 HOUR</button><button class="g" data-h="24">+1 DAY</button><button class="g" data-h="72">+3 DAYS</button><button class="g" data-h="168">+7 DAYS</button></div><div style="display:flex;gap:8px"><button id="ok">SET</button><button class="g" id="cl">NO TIMER</button><button class="g" id="cx">CANCEL</button></div></div>';
+ document.body.appendChild(m);
+ m.querySelectorAll('[data-h]').forEach(b=>b.onclick=()=>{m.querySelector('#dt').value=toIn(new Date(Date.now()+b.dataset.h*3600e3).toISOString())});
+ m.querySelector('#ok').onclick=()=>{const v=fromIn(m.querySelector('#dt').value);if(!v){return}s.end=v;m.remove();draw();queueSave()};
+ m.querySelector('#cl').onclick=()=>{s.end='';m.remove();draw();queueSave()};m.querySelector('#cx').onclick=()=>m.remove()}
+function drawSpecial(){
+ const modes=CAT.filter(c=>c.kind==='mode'&&c.id.startsWith('mode_')),act=new Set((live.specials||[]).map(r=>r.id));
+ let h='<div class="msg" id="msg">Tap a mode to turn it on in the live game. It replaces whatever Special Game is on now (the SPECIAL GAMES button/banner updates).</div><div class="sg">';
+ for(const c of modes){const on=act.has(c.id);h+='<div class="slot'+(on?' act':'')+'" data-m="'+esc(c.id)+'"><div><b>'+esc(c.name)+(on?'<span class="tag" style="background:#2f9e4f">ACTIVE</span>':'')+'</b><small>'+esc(c.text||'')+'</small><small>'+esc(c.id)+'</small></div></div>'}
+ h+='</div><div class="sec">GIFTS / FLAGS</div><div class="sg">';
+ for(const c of CAT.filter(c=>c.id.startsWith('gift_'))){const on=act.has(c.id);h+='<div class="slot'+(on?' act':'')+'" data-g="'+esc(c.id)+'"><div><b>'+esc(c.name)+(on?'<span class="tag" style="background:#2f9e4f">ON</span>':'')+'</b><small>'+esc(c.text||'')+'</small></div></div>'}
+ h+='</div><p><button class="r" id="alloff">TURN EVERY SPECIAL GAME OFF</button></p>';
+ $('#app').innerHTML=h;
+ document.querySelectorAll('[data-m]').forEach(el=>el.onclick=()=>{const id=el.dataset.m;if(act.has(id))return;
+  if(!confirm('Activate '+(byId[id]||{}).name+' in the live game? It replaces the current Special Game.'))return;
+  live.specials=(live.specials||[]).filter(r=>!r.id.startsWith('mode_')).concat([{id:id}]);drawSpecial();queueSave()});
+ document.querySelectorAll('[data-g]').forEach(el=>el.onclick=()=>{const id=el.dataset.g;live.specials=act.has(id)?live.specials.filter(r=>r.id!==id):live.specials.concat([{id:id}]);drawSpecial();queueSave()});
+ $('#alloff').onclick=()=>{live.specials=(live.specials||[]).filter(r=>!r.id.startsWith('mode_'));drawSpecial();queueSave()}}
+function draw(){
+ $('#back').style.display=view==='home'?'none':'';$('#edit').style.display=view==='yard'?'':'none';$('#edit').textContent=edit?'DONE EDITING':'EDIT';$('#edit').className=edit?'on':'';
+ $('#title').textContent=view==='home'?'Bagga Lax Live-Ops':view==='yard'?'Yard Sale':'Special Games';
+ if(view==='home')$('#app').innerHTML='<div class="msg" id="msg"></div><div class="home"><button id="goY">YARD SALE</button><button id="goS">SPECIAL GAMES</button></div>';
+ if(view==='home'){$('#goY').onclick=()=>{view='yard';draw()};$('#goS').onclick=()=>{view='special';draw()}}
+ else if(view==='yard')drawYard();else drawSpecial()}
+$('#back').onclick=()=>{view='home';edit=false;draw()};
+$('#edit').onclick=()=>{edit=!edit;draw()};
+$('#save').onclick=save;
+$('#tokb').onclick=()=>{const v=prompt('Paste your GitHub token (stays in this browser only):',tok());if(v!==null){localStorage.setItem('baggalax_liveops_token',v.trim());sha=null;load()}};
+setInterval(()=>{if(layout)purge()},20000);
+setInterval(()=>{if(view==='yard'&&!document.querySelector('.modal'))draw()},60000);
+load();
+</script></body></html>
