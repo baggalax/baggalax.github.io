@@ -1,54 +1,203 @@
 {
   "shop": [
-    { "id": "pack_daily" },
-    { "id": "pack_basic" },
-    { "id": "pack_rare" },
-    { "id": "pack_legendary" },
-    { "id": "pack_stickfree" },
-    { "id": "pack_pass" },
-    { "id": "pack_tape" },
-    { "id": "pack_chirp" },
-    { "id": "pack_gear" },
-    { "id": "pack_crew" },
-    { "id": "pack_stick" },
-    { "id": "pack_unip" },
-    { "id": "pack_unic" },
-    { "id": "pack_uniw" },
-    { "id": "pack_pc38c" },
-    { "id": "pack_pc38r" },
-    { "id": "pack_pc38l" },
-    { "id": "pack_cu38" },
-    { "id": "pack_relax" },
-    { "id": "pack_fit45" },
-    { "id": "pack_halloween", "windowHours": 72, "anchor": "hw493start" },
-    { "id": "pack_vets489", "windowHours": 96, "anchor": "vets489start" }
+    {
+      "id": "pack_relax",
+      "end": "2026-11-24T04:32:00.000Z"
+    },
+    {
+      "id": "pack_fit45"
+    },
+    {
+      "id": "pack_halloween"
+    },
+    {
+      "id": "pack_vets489"
+    },
+    {
+      "id": "pack_daily"
+    },
+    {
+      "id": "pack_basic"
+    },
+    {
+      "id": "pack_rare"
+    },
+    {
+      "id": "pack_legendary"
+    },
+    {
+      "id": "pack_stickfree"
+    },
+    {
+      "id": "pack_pass"
+    },
+    {
+      "id": "pack_tape"
+    },
+    {
+      "id": "pack_chirp"
+    },
+    {
+      "id": "pack_gear"
+    },
+    {
+      "id": "pack_crew"
+    },
+    {
+      "id": "pack_stick"
+    },
+    {
+      "id": "pack_unip"
+    },
+    {
+      "id": "pack_unic"
+    },
+    {
+      "id": "pack_uniw"
+    },
+    {
+      "id": "pack_pc38c"
+    },
+    {
+      "id": "pack_pc38r"
+    },
+    {
+      "id": "pack_pc38l"
+    },
+    {
+      "id": "pack_cu38"
+    }
   ],
   "specials": [
-    { "id": "mode_vets489", "windowHours": 96, "anchor": "vets489start" }
+    {
+      "id": "mode_vets489",
+      "windowHours": 96,
+      "anchor": "vets489start"
+    }
   ],
   "goodstick": {
     "enabled": false,
     "roster": [
-      { "name": "PEPCA", "number": 7, "position": "A", "starter": true },
-      { "name": "JACK", "number": 9, "position": "A", "starter": true },
-      { "name": "TOPPER", "number": 11, "position": "A", "starter": true },
-      { "name": "BRIAN", "number": 22, "position": "M", "starter": true },
-      { "name": "GECKO", "number": 23, "position": "M", "starter": true },
-      { "name": "PIMPI", "number": 4, "position": "FO", "starter": true },
-      { "name": "STUCKIE", "number": 33, "position": "D", "starter": true },
-      { "name": "BARKY", "number": 44, "position": "D", "starter": true },
-      { "name": "MAXIM", "number": 55, "position": "D", "starter": true },
-      { "name": "KACKA", "number": 1, "position": "G", "starter": true },
-      { "name": "RICO", "number": 80, "position": "A", "filler": true },
-      { "name": "NICO", "number": 81, "position": "A", "filler": true },
-      { "name": "THEO", "number": 82, "position": "A", "filler": true },
-      { "name": "LENNY", "number": 83, "position": "M", "filler": true },
-      { "name": "CRUZ", "number": 84, "position": "M", "filler": true },
-      { "name": "REMY", "number": 85, "position": "M", "filler": true },
-      { "name": "HANK", "number": 86, "position": "D", "filler": true },
-      { "name": "DAX", "number": 87, "position": "D", "filler": true },
-      { "name": "SULLY", "number": 88, "position": "LSM", "filler": true },
-      { "name": "OTTO", "number": 89, "position": "G", "filler": true }
+      {
+        "name": "PEPCA",
+        "number": 7,
+        "position": "A",
+        "starter": true
+      },
+      {
+        "name": "JACK",
+        "number": 9,
+        "position": "A",
+        "starter": true
+      },
+      {
+        "name": "TOPPER",
+        "number": 11,
+        "position": "A",
+        "starter": true
+      },
+      {
+        "name": "BRIAN",
+        "number": 22,
+        "position": "M",
+        "starter": true
+      },
+      {
+        "name": "GECKO",
+        "number": 23,
+        "position": "M",
+        "starter": true
+      },
+      {
+        "name": "PIMPI",
+        "number": 4,
+        "position": "FO",
+        "starter": true
+      },
+      {
+        "name": "STUCKIE",
+        "number": 33,
+        "position": "D",
+        "starter": true
+      },
+      {
+        "name": "BARKY",
+        "number": 44,
+        "position": "D",
+        "starter": true
+      },
+      {
+        "name": "MAXIM",
+        "number": 55,
+        "position": "D",
+        "starter": true
+      },
+      {
+        "name": "KACKA",
+        "number": 1,
+        "position": "G",
+        "starter": true
+      },
+      {
+        "name": "RICO",
+        "number": 80,
+        "position": "A",
+        "filler": true
+      },
+      {
+        "name": "NICO",
+        "number": 81,
+        "position": "A",
+        "filler": true
+      },
+      {
+        "name": "THEO",
+        "number": 82,
+        "position": "A",
+        "filler": true
+      },
+      {
+        "name": "LENNY",
+        "number": 83,
+        "position": "M",
+        "filler": true
+      },
+      {
+        "name": "CRUZ",
+        "number": 84,
+        "position": "M",
+        "filler": true
+      },
+      {
+        "name": "REMY",
+        "number": 85,
+        "position": "M",
+        "filler": true
+      },
+      {
+        "name": "HANK",
+        "number": 86,
+        "position": "D",
+        "filler": true
+      },
+      {
+        "name": "DAX",
+        "number": 87,
+        "position": "D",
+        "filler": true
+      },
+      {
+        "name": "SULLY",
+        "number": 88,
+        "position": "LSM",
+        "filler": true
+      },
+      {
+        "name": "OTTO",
+        "number": 89,
+        "position": "G",
+        "filler": true
+      }
     ],
     "promo": {
       "enabled": true,
@@ -57,5 +206,113 @@
       "percent": "__",
       "url": "https://thegoodstick.co"
     }
+  },
+  "layout": {
+    "big": [
+      {
+        "id": "pack_relax",
+        "end": "2026-11-24T04:32:00.000Z"
+      },
+      {
+        "id": "pack_fit45",
+        "end": ""
+      },
+      {
+        "id": "pack_halloween",
+        "end": ""
+      },
+      {
+        "id": "pack_vets489",
+        "end": ""
+      },
+      null,
+      null,
+      null,
+      null
+    ],
+    "med": [
+      {
+        "id": "pack_daily",
+        "end": ""
+      },
+      {
+        "id": "pack_basic",
+        "end": ""
+      },
+      {
+        "id": "pack_rare",
+        "end": ""
+      },
+      {
+        "id": "pack_legendary",
+        "end": ""
+      },
+      {
+        "id": "pack_stickfree",
+        "end": ""
+      },
+      {
+        "id": "pack_pass",
+        "end": ""
+      },
+      {
+        "id": "pack_tape",
+        "end": ""
+      },
+      {
+        "id": "pack_chirp",
+        "end": ""
+      },
+      {
+        "id": "pack_gear",
+        "end": ""
+      },
+      {
+        "id": "pack_crew",
+        "end": ""
+      },
+      {
+        "id": "pack_stick",
+        "end": ""
+      },
+      null,
+      null,
+      null,
+      null
+    ],
+    "small": [
+      {
+        "id": "pack_unip",
+        "end": ""
+      },
+      {
+        "id": "pack_unic",
+        "end": ""
+      },
+      {
+        "id": "pack_uniw",
+        "end": ""
+      },
+      {
+        "id": "pack_pc38c",
+        "end": ""
+      },
+      {
+        "id": "pack_pc38r",
+        "end": ""
+      },
+      {
+        "id": "pack_pc38l",
+        "end": ""
+      },
+      {
+        "id": "pack_cu38",
+        "end": ""
+      },
+      null,
+      null,
+      null,
+      null
+    ]
   }
 }
