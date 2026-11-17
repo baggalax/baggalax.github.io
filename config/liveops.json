@@ -12,6 +12,9 @@
       "id": "pack_turkey565"
     },
     {
+      "id": "pack_goodstick"
+    },
+    {
       "id": "pack_daily"
     },
     {
@@ -217,7 +220,10 @@
         "id": "pack_turkey565",
         "end": ""
       },
-      null,
+      {
+        "id": "pack_goodstick",
+        "end": ""
+      },
       null,
       null,
       null,
