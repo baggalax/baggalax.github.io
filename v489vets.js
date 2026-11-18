@@ -519,7 +519,7 @@
   try {
    if (off() || typeof screen === 'undefined') return;
    if (screen === 'pickTeam' && !isVet(menuSel.team)) keep = { team: menuSel.team, t: LS.get('team', null), q: LS.get('qteam16', null), qp: LS.get('qplay26', null) };
-   if (screen === 'pickOpp' && isVet(menuSel.team) && menuSel.mode !== 'browse' && !owns() && keep) {
+   if (screen === 'pickOpp' && isVet(menuSel.team) && menuSel.mode !== 'browse' && !owns() && !(window.V493 && V493.vbOwn && V493.vbOwn(menuSel.team)) && keep) {
     menuSel.team = keep.team;
     LS.set('team', keep.t);
     LS.set('qteam16', keep.q);

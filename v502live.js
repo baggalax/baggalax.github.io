@@ -27,7 +27,12 @@
     text: 'COLLAB. Good Stick Shortie, Goalie Stick, Good Stick Tape, and the Good Stick Co. team. Hidden until this id is in the shop list.',
     gives: [ 'stick_gsc_shortie', 'stick_gsc_goalie', 'tape_gsc', 'gsc_team' ] }
  ];
+ PAST_PACKS.push({ id: 'pack_turkey565', kind: 'pack', name: 'TURKEY TROTTERS PACK', price: 45, past: false, section: 'shop',
+    text: 'THANKSGIVING. Turkey Leg Lacrosse Stick, Chicken Dance celly, Turkey Trotters N/A player cards. Hidden until this id is in the shop list.',
+    gives: [ 'stick_tk565leg', 'celly_tk565chk' ] });
  const PAST_ITEMS = [
+  [ 'stick_tk565leg', 'TURKEY LEG STICK', 12, 'Thanksgiving rare stick. White bone shaft, brown drumstick head.' ],
+  [ 'celly_tk565chk', 'CHICKEN DANCE', 10, 'Thanksgiving celly.' ],
   [ 'stick_orange', 'ORANGE STICK', 5, 'Halloween pack stick. Looks only.' ],
   [ 'stick_spooky', 'SPOOKY STICK', 12, 'Halloween pack. Rare stick, purple head, green flame, breaks on 1.2% of checks.' ],
   [ 'tape_purple', 'PURPLE TAPE', 3, 'Halloween pack tape.' ],
@@ -56,6 +61,8 @@
  ];
  const MODES = [
   { id: 'mode_vets489', kind: 'mode', name: 'VETERANS TOURNAMENT', past: false, text: 'Six service teams. Win 3 games for the Honor Medal. The 1.3 clock is 96 hours from the first open on this device (the old 48 hours plus 2 days).' },
+  { id: 'mode_turkey565', kind: 'mode', name: 'TURKEY TROTTERS (THANKSGIVING)', past: true, text: 'Turns on the Turkey Trotters N/A team, uniforms, cards and the Thanksgiving items. Hidden until this id is in the specials list.' },
+  { id: 'gift_wood565', kind: 'mode', name: 'GIFT: 1 WOODEN STICK FOR EVERYONE', past: true, text: 'Thanksgiving gift. Every player gets 1 Wooden Stick once while this id is in the specials list.' },
   { id: 'mode_ultimate', kind: 'mode', name: 'ULTIMATE TOURNAMENT', past: true, text: 'Always in PLAY. Listed so it can be featured under Special Games.' },
   { id: 'mode_world', kind: 'mode', name: 'WORLD GAMES', past: true, text: 'Always in PLAY. Listed so it can be featured under Special Games.' },
   { id: 'mode_college', kind: 'mode', name: 'COLLEGE TOURNAMENT', past: true, text: 'Always in PLAY. Listed so it can be featured under Special Games.' }
@@ -314,6 +321,18 @@
   if (!V.shopOn('pack_relax')) { const n = root.querySelector('#relax27tile'); if (n) n.remove(); }
   if (!V.shopOn('pack_fit45')) { const n = root.querySelector('#fit45tile'); if (n) n.remove(); }
   if (!V.shopOn('pack_pass')) { const n = root.querySelector('.pk17.pass'); if (n) n.remove(); }
+  try {
+   [ [ 'relax27tile', 'pack_relax' ], [ 'fit45tile', 'pack_fit45' ], [ 'b2504ctile', 'pack_b2504c' ], [ 'b2504ltile', 'pack_b2504l' ], [ 'vets489tile', 'pack_vets489' ], [ 'hw16tile', 'pack_halloween' ] ].forEach(m => {
+    const n = root.querySelector('#' + m[0]);
+    if (!n || n.querySelector('.lo502left') || !V.shopOn(m[1])) return;
+    const left = V.leftText(m[1]);
+    if (!left) return;
+    const b = doc.createElement('i');
+    b.className = 'lo502left tile';
+    b.textContent = left;
+    n.insertBefore(b, n.firstChild);
+   });
+  } catch (e) {}
   const singles = (cfg.shop || []).filter(r => r && V.shopOn(r.id) && V.catalog().some(c => c.id === r.id && c.kind === 'item'));
   let extra = '';
   if (singles.length) {
@@ -336,7 +355,8 @@
 
  function hook() {
   try {
-   if (typeof PANEL_RENDER === 'object' && typeof PANEL_RENDER.shop17 === 'function' && !PANEL_RENDER.shop17.__lo502) {
+   if (typeof PANEL_RENDER === 'object' && typeof PANEL_RENDER.shop17 === 'function' && !PANEL_RENDER.shop17.__lo502 && !V.wrapped502) {
+    V.wrapped502 = true;   // wrap once: wrapping again on top of v531's COLLAB-tab remover (every refresh) put the SHOP/COLLAB tabs back
     const r0 = PANEL_RENDER.shop17;
     const wrapped = function () {
      applyPrices();
@@ -375,7 +395,7 @@
       if (!Array.isArray(rows)) return rows;
       rows = rows.map(r => Array.isArray(r) ? r.filter(b => !(b && b.v489)) : r).filter(r => !Array.isArray(r) || r.length);
       if (!(W.M37 && M37.page === 'play' && W.V469 && V469.page === 'pick')) return rows;
-      const on = V.activeSpecials();
+      const on = V.activeSpecials().filter(s => !/^(gift_|mode_turkey565)/.test(s.id));
       const left = on.map(s => (catalog().find(c => c.id === s.id) || {}).name + (V.leftText(s.id) ? ' ' + V.leftText(s.id) : '')).join('  ');
       const btn = { label: 'SPECIAL GAMES', fn: () => openSpecials(on), bg: on.length ? '#5aa0ff' : '#5a6570', fg: on.length ? '#0b1a20' : '#9aa', m37: 1, h37: 28, t469: 'pick', big469: 1, lo502: 1, loOff: !on.length, loLeft: on.length ? left : 'NOTHING RIGHT NOW' };
       const i = rows.findIndex(r => r && r[0] && r[0].m37 === 'back');
@@ -416,6 +436,7 @@
    PANEL_ACT.lo502mode = id => {
     if (id === 'mode_vets489' && W.VETS489) VETS489.openTour();
     else if (id === 'mode_ultimate') screen = 'menu';
+    else if (id === 'mode_turkey565') V17.toast('PICK TURKEY TROTTERS IN QUICK PLAY (N/A TAB)', '#f2c230');
     else V17.toast(id, '#ffd23a');
    };
    screen = 'lo502';
@@ -452,6 +473,27 @@
   }
  }
  V.refresh = refresh;
+ try {
+  if (!document.getElementById('lo502css')) {
+   const st = document.createElement('style');
+   st.id = 'lo502css';
+   st.textContent = '.lo502left{display:inline-block;margin:2px 4px;padding:1px 5px;background:#c8102e;color:#fff;font-style:normal;font-size:9px;letter-spacing:.5px;border:1px solid #ffd84d}.lo502left.tile{position:absolute;top:2px;right:2px;z-index:3;margin:0}#relax27tile,#fit45tile,#b2504ctile,#b2504ltile,#vets489tile,#hw16tile,#tk565tile{position:relative}';
+   (document.head || document.documentElement).appendChild(st);
+  }
+ } catch (e) {}
+ try {
+  let bd = null, last = '';
+  setInterval(() => { try {
+   if (W.__rl_noLiveBadge) return;
+   const on = (typeof screen !== 'undefined') && (screen === 'shop17' || screen === 'shop');
+   if (!bd) { bd = document.createElement('div'); bd.style.cssText = 'position:fixed;left:4px;bottom:calc(4px + env(safe-area-inset-bottom,0px));z-index:99999;font:9px monospace;color:#fff;background:rgba(0,0,0,.6);padding:2px 4px;pointer-events:none;display:none'; document.body.appendChild(bd); }
+   bd.style.display = on ? 'block' : 'none';
+   if (!on) return;
+   const e = V.err && V.err.length ? String(V.err[V.err.length - 1]).slice(0, 40) : '';
+   const t = 'LIVE-OPS ' + (V.src || '?') + (V.ready ? '' : ' ...') + (V.src !== 'net' && e ? ' ' + e : '');
+   if (t !== last) { bd.textContent = t; last = t; }
+  } catch (x) {} }, 1000);
+ } catch (e) {}
  try {
   const o0 = V17.openShop;
   if (typeof o0 === 'function') V17.openShop = function () { refresh(); return o0.apply(this, arguments); };

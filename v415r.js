@@ -26,7 +26,7 @@
  };
  const TEN = '10-MAN RIDE', STD = 'STANDARD RIDE', NORM_LBL = 'NORMAL RIDE';
  const HOWTO = 'NORMAL = YOUR ATTACK + MIDDIES RIDE, GOALIE STAYS HOME. 10-MAN = YOUR GOALIE COMES OUT TOO SO A D CAN STEP UP.';
- const okG = G => !!G && !G.tutorial && !G.online && !(G.meta && G.meta.online);
+ const okG = G => !!G && !G.tutorial && (!G.online && !(G.meta && G.meta.online) || !!(window.V558NP && window.V558NP.on())); // V55.8: also online on the phone running the play (v558netplays.js)
 
  /* ---------------- (1) default + one-time reset ---------------- */
  try {

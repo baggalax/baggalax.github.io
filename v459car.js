@@ -412,10 +412,14 @@
    let w = 1;
    for (const pos in quota) for (let k = 0; k < quota[pos]; k++) teams[id].ro.push(genPlayer('C459G', id, pos, clamp(lvl + ri(-7, 6), 38, 66), (w = (w * 7 + 3) % 99 + 1)));
   });
-  C.team = 'C459H0'; C.lvl = 'hs'; C.stage = 'hs';
-  const ids = Object.keys(teams);
-  newLeague('hs', { yr: C.yr, nm: 'SENIOR SEASON', teams: ids, rounds: rr(ids), poN: 2, poNames: [ 'STATE TITLE' ] });
+  C.team = 'C459H0'; C.lvl = 'hs'; C.stage = 'hs'; C.hsYr = 1;
+  hsLeague();
   regMe();
+ }
+ // v1.3: three high school seasons minimum before college (old saves without hsYr count as done)
+ function hsLeague() {
+  const ids = Object.keys(C.hs.teams), y = C.hsYr || 3;
+  newLeague('hs', { yr: C.yr, nm: y >= 3 ? 'SENIOR SEASON' : 'HS YEAR ' + y, teams: ids, rounds: rr(ids), poN: 2, poNames: [ 'STATE TITLE' ] });
  }
  // recruiting stars from the senior season
  function starsFor(L) {
@@ -474,6 +478,11 @@
  // high school done -> stars + offers
  function hsDone() {
   if (C.stage !== 'hs' || C.L.phase !== 'done') return false;
+  if (!window.__rl_no562car && (C.hsYr || 3) < 3) {
+   endLevelSeason(); ageUp(2); C.hsYr = (C.hsYr || 1) + 1; C.yr++;
+   logE('HIGH SCHOOL YEAR ' + (C.hsYr - 1) + ' DONE');
+   hsLeague(); regMe(); save(); return true;
+  }
   C.stars = starsFor(C.L);
   endLevelSeason();
   C.offers = offersFor(C.stars);
@@ -502,7 +511,7 @@
   startCol();
   save(); return true;
  }
- const CLS = [ 'FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR' ];
+ const CLS = [ 'FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR', 'FIFTH' ];
  function startCol() {
   const ids = colRank();
   const mine = C.team, conf = (COL25.TEAMS.find(t => t.id === mine) || {}).conf;
@@ -518,7 +527,7 @@
   save(); return true;
  }
  function colReturn() {
-  if (C.stage !== 'colEnd' || C.col.yr >= 4) return false;
+  if (C.stage !== 'colEnd' || C.col.yr >= (window.__rl_no562car ? 4 : 5)) return false;
   C.col.yr++; ageUp(3); C.yr++;
   C.stage = 'col'; startCol(); save(); return true;
  }
@@ -535,6 +544,7 @@
   if (C.stage !== 'colEnd') return null;
   const yr = C.yr, col = C.col.team;
   C.pro = C.pro || {};
+  try { localStorage.setItem('rl_car459pre', JSON.stringify({ fr: localStorage.getItem('rl_' + LKEY), pro: C.pro, me: C.me, gen: null })); } catch (e) {}
   const res = withL((FR, F0) => {
    let F = F0;
    const ids = TEAMS.map(t => t.id);
@@ -595,6 +605,46 @@
   for (let k = 0; !fin.ok && k < 3; k++) { fixMyRoster(FR, F); fin = FR.finishOffseason(); }
   if (!fin.ok) { console.warn('car459: offseason closed by force', fin && fin.why); F.off = null; F.year++; FR.save(); }
  }
+ // v1.3: undrafted -> end the career, or (with eligibility left) go back to college. Undoes the free-agent signing.
+ function undrUndo() {
+  let pre = null; try { pre = JSON.parse(localStorage.getItem('rl_car459pre')); } catch (e) {}
+  if (!pre) return false;
+  try { if (pre.fr == null) localStorage.removeItem('rl_' + LKEY); else localStorage.setItem('rl_' + LKEY, pre.fr); } catch (e) {}
+  C.pro = pre.pro; C.me = pre.me;
+  C.team = C.col.team; C.lvl = 'col'; C.card = 'col'; C.stage = 'colEnd'; C.draft = null; C.cardUp = null;
+  try { localStorage.removeItem('rl_car459pre'); } catch (e) {}
+  regMe(); return true;
+ }
+ function undrReturn() {
+  if (C.stage !== 'draft' || !C.draft || C.draft.no || C.col.yr >= 5) return false;
+  if (!undrUndo()) return false;
+  logE('UNDRAFTED - RETURNED TO COLLEGE');
+  return colReturn();
+ }
+ function undrEnd() {
+  if (C.stage !== 'draft' || !C.draft || C.draft.no) return false;
+  const col = C.col.team;
+  undrUndo();
+  C.world = { team: null, pro: col, fin: 'UNDRAFTED' };
+  logE('UNDRAFTED - CAREER ENDS');
+  return finishCareer();
+ }
+ // transfer portal: after a college season, pick a new school and play the next year there
+ function portal() {
+  if (C.stage !== 'colEnd' || C.col.yr >= 5) return false;
+  const rk = colRank(), cur = C.col.team, n = rk.length;
+  const o = shuffle(rk.filter(id => id !== cur && rk.indexOf(id) < Math.max(30, n))).slice(0, 4).sort((a, b) => rk.indexOf(a) - rk.indexOf(b));
+  C.offers = o.map(id => ({ t: id, rank: rk.indexOf(id) + 1 }));
+  C.stage = 'portal'; save(); return true;
+ }
+ function portalSign(id) {
+  if (C.stage !== 'portal' || !(C.offers || []).some(o => o.t === id)) return false;
+  const from = C.col.team;
+  C.col.team = id; C.team = id; C.stage = 'colEnd'; C.offers = null;
+  logE('TRANSFERRED FROM ' + tname(from) + ' TO ' + tname(id));
+  return colReturn();
+ }
+ function portalBack() { if (C.stage !== 'portal') return false; C.stage = 'colEnd'; C.offers = null; save(); return true; }
  function draftSeen() { if (C.stage !== 'draft') return false; C.stage = 'pro'; C.yr++; startPro(); save(); return true; }
  function startPro() {
   const ids = Object.keys(C.pro.ro);
@@ -1030,7 +1080,7 @@
   create: create, startRatings: startRatings, ovrMe: ovrMe, DIFFN: DIFFN, xpNeed: xpNeed, totals: totals,
   myGame: () => myGame(), simMine: simMine, simSeason: simSeason, simRest: () => { simRest(C.L); save(); }, simRound: () => { simRound(C.L); save(); }, stand: (ids) => stand(C.L, ids), teamOvr: teamOvr, myRoster: myRoster, rosterOf: rosterOf,
   tobj: tobj, tname: tname, tabbr: tabbr, hsObj: hsObj, hsTeam: hsTeam,
-  hsDone: hsDone, sign: sign, colDone: colDone, colReturn: colReturn, projPick: projPick, runDraft: runDraft, draftSeen: draftSeen,
+  hsDone: hsDone, undrReturn: undrReturn, undrEnd: undrEnd, portal: portal, portalSign: portalSign, portalBack: portalBack, sign: sign, colDone: colDone, colReturn: colReturn, projPick: projPick, runDraft: runDraft, draftSeen: draftSeen,
   proDone: proDone, faOffers: faOffers, contract: contract, nextPro: nextPro, callup: callup, countryOffers: countryOffers, worldDone: worldDone, startUlt: startUlt, ultDone: ultDone,
   finalCard: finalCard, finishCareer: finishCareer, flipPending: flipPending, realIds: realIds, titleCards: titleCards, countries: countries, fromOf: fromOf, dadOf: dadOf, momOf: momOf, fromOk: fromOk, setFrom: setFrom, heritage: heritage, fromText: fromText, needOf: needOf, endCareer: endCareer, topCountry: topCountry, wgChance: wgChance, renameHS: renameHS,
   cards: cards, cardGrant: cardGrant, verOf: verOf, titleList: titleList, awardsOf: awardsOf, verInfo: verInfo, cidOf: cidOf, regCard: regCard, isCard: isCard, CPFX: CPFX, FLIPK: FLIPK, onFlipDone: null,

@@ -9,7 +9,7 @@
  const off = () => !!window.__rl_no404g || !!window.__rl_v124gb;
  const G_ = () => (typeof game !== 'undefined' ? game : null);
  const scr = () => (typeof screen !== 'undefined' ? screen : '');
- const online = G => !!(G && (G.online || G.meta && G.meta.online));
+ const online = G => !!(G && (G.online || G.meta && G.meta.online)) && !(window.V558NP && window.V558NP.on()); // V55.8: online + this phone runs the play (both on the new build) = offline rules (v558netplays.js)
  const hyp = Math.hypot;
 
  /* ---------------- (C) custom sets ---------------- */

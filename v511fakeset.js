@@ -21,7 +21,10 @@
 (function () {
  'use strict';
  const W0 = window;
- if (W0.__rl_no511fs || W0.__rl_v124gb) return;
+ // v518 (Nov 11, Charlie 10:59 PM): "no optional fakes. Fakes always on. No setting to turn off." -> this whole file (the FAKES ON/OFF
+ // setting, the season FAKES? box, the online lobby FAKES row and the fakes-OFF crease odds) is OFF unless window.__rl_511opt = true.
+ // A saved rl_fakes511 = off / a season saved with fakes NO is simply ignored (the key is not deleted). Fakes = v507's own rule again.
+ if (!W0.__rl_511opt || W0.__rl_no511fs || W0.__rl_v124gb) return;
  const KILL0 = !!W0.__rl_no507fake;   // v507 killed at boot: stays killed
  const KEY = 'fakes511';
  const ONLINE_READY = false;          // online fakes not built yet (see the report): YES stays greyed

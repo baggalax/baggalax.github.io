@@ -45,7 +45,8 @@
   if (on) v.t[b] = 1; else delete v.t[b];
   lsSet(v);
  }
- const fitKit = (kit, w) => Object.assign({}, kit, { fit45: w });
+ // v1.3: a Good Stick kit wearing the fit loses its gscH/gscA marker, so the Good Stick jersey art (sleeves, logo) can't clip through the fit
+ const fitKit = (kit, w) => { const k = Object.assign({}, kit, { fit45: w }); if (!window.__rl_no563fit && /^(gsc[HA]|tk565[HA])$/.test(k.g27 || '')) delete k.g27; return k; };
  const strip = kit => { if (!kit || !kit.fit45) return kit; const k = Object.assign({}, kit); delete k.fit45; return k; };
 
  /* ---------- games: the team you play with wears it when it's on for that team (offline only, net untouched) ---------- */
@@ -56,7 +57,7 @@
    if (off() || !r || !r[0]) return r;
    const online = !!(meta && meta.online) || mode === 'online';
    const w = own();
-   if (!online && w && wears(user) && !r[0].g27) r[0] = fitKit(r[0], w);
+   if (!online && w && wears(user) && !g27x(r[0])) r[0] = fitKit(r[0], w);
    else if (r[0].fit45) r[0] = strip(r[0]);
   } catch (e) {}
   return r;
@@ -78,11 +79,12 @@
    if (off() || i || !tid || !k) return k;
    const s = scr();
    if (s === 'pregame') return k; // game.uk already carries it (gameKits / the arrows below)
-   if (ELIG[s] && wears(tid) && !k.g27) return fitKit(k, own());
+   if (ELIG[s] && wears(tid) && !g27x(k)) return fitKit(k, own());
   } catch (e) {}
   return k;
  };
- const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !kit.g27 && !off());
+ const g27x = k => !!(k && k.g27 && (window.__rl_no563fit || !/^(gsc[HA]|tk565[HA])$/.test(k.g27)));
+ const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !g27x(kit) && !off());
  let heroOn = 0;
  const lb0 = window.lobbyBake, lh0 = window.lobbyHero;
  if (typeof lb0 === 'function' && typeof lh0 === 'function' && typeof RL12 !== 'undefined') {
@@ -135,7 +137,7 @@
  function putFit(tid) {
   const w = own(); if (!w) return;
   setOn(tid, true);
-  if (scr() === 'pregame' && game && game.uk && !game.uk.g27) game.uk = fitKit(game.uk, w);
+  if (scr() === 'pregame' && game && game.uk && !g27x(game.uk)) game.uk = fitKit(game.uk, w);
   toast(tname(tid) + ' WEARS ' + NAME[w], '#7dff7a');
  }
  function step(tid, d) {

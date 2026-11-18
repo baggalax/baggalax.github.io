@@ -3586,17 +3586,24 @@ const V17 = (() => {
    item: leg.length ? leg[ri(r, leg.length)] : null,
    txt: '3-STEP: ' + steps.map(s => s.txt).join(', THEN ')
   };
+  // V56.5c: the Baggatwaan Glow (won by a Baggatwaan winner only) and Turkey Trotters pack items are never a weekly reward.
+  // Swapped AFTER the pick so the random rolls (and every other week's rewards) stay exactly the same. Kill: __rl_no18tew.
+  const bad18 = id => !window.__rl_no18tew && !!(id && BY[id] && (BY[id].tew25 || BY[id].tk565));
+  const swap18 = (id, L) => { if (!bad18(id)) return id; const ok = L.filter(x => !bad18(x)); return ok.length ? ok[L.indexOf(id) % ok.length] : null; };
+  out[3].item = swap18(out[3].item, leg);
   if (!out[3].item) {
    out[3].pay = 50;
   }
   const rare = itemPool18(1), com = itemPool18(0);
   if (ri(r, 2) === 0 && rare.length) {
-   out[2].item = rare[ri(r, rare.length)];
-   out[2].pay = 0;
+   const p2 = out[2].pay;
+   out[2].item = swap18(rare[ri(r, rare.length)], rare);
+   out[2].pay = out[2].item ? 0 : p2;
   }
   if (ri(r, 3) === 0 && com.length) {
-   out[0].item = com[ri(r, com.length)];
-   out[0].pay = 0;
+   const p0 = out[0].pay;
+   out[0].item = swap18(com[ri(r, com.length)], com);
+   out[0].pay = out[0].item ? 0 : p0;
   }
   for (const c of out) c.pack = c.k === 'steps' ? PACK27.last : PACK27.early;
   return out;

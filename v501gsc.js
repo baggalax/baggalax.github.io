@@ -349,12 +349,14 @@
   const about = '<div class="gscAbout" style="margin-top:8px;padding:8px;background:#d5d8de;color:#111;border:2px solid #111"><b>ABOUT THE GOOD STICK CO.</b><div style="font-size:10px;letter-spacing:1px">COLLAB SERIES PARTNER</div><div style="font-size:11px;line-height:1.35">WE ONLY MANUFACTURE STICKS.<br>HEADS ARE MOLDED AT A SMALL SHOP IN LIBEREC, CZECH REPUBLIC.<br>EVERY STICK IS STRUNG BY HAND BY YOUNG CZECH PLAYERS.<br>LOCALLY SOURCED. AFFORDABLE TO EVERYONE.<br>"WE WANT A MILLION NEW PLAYERS, AND WE WANT EVERY SINGLE ONE OF THEM TO HAVE A GOOD STICK."<br>IN BAGGA LAX: THE GOOD STICK SHORTIE, THE GOALIE STICK, GOOD STICK TAPE AND THE GOOD STICK CO. TEAM.</div></div>';
   return '<div class="hw16 gsc501" id="gsc501tile" style="border-color:#111;background:linear-gradient(90deg,#1b1b1f,#2a2e33)"><div class="hwp16" style="width:64px;height:72px;background:#f4f4f4;border:2px solid #111;display:flex;align-items:center;justify-content:center"><img alt="" src="' + V17.iconUrl('gsc_team') + '" style="width:40px;height:40px;image-rendering:pixelated"></div><div class="hwb16"><b style="color:#fff">GOOD STICK PACK</b><small style="color:#d7dbe0">COLLAB - THE GOOD STICK CO. YOU GET: GOOD STICK SHORTIE + GOALIE STICK + GOOD STICK TAPE + THE GOOD STICK CO. TEAM. NO PLAYER CARDS IN THE PACK.</small><div class="hwr16">' + icons + '</div><small style="color:#ffe14d">GOOD STICK CO. PLAYER CARDS: EARN 2 EACH GAME YOU PLAY AS THE TEAM</small></div><div class="hwc16"><button type="button" class="g" data-a="gsc501inside">SEE WHAT\'S INSIDE</button>' + (own ? '<button type="button" class="d">OWNED</button>' : '<button type="button" class="y" data-a="gsc501buy"><span class="coin17"></span>' + price + '</button>') + '</div></div>' + promoHtml() + follow + about;
  }
- const PROMO0 = { enabled: true, text: 'Use code "{code}" at thegoodstick.co for {percent}% off', code: '____', percent: '__', url: 'https://thegoodstick.co' };
+ const GS_INSTA = 'https://www.instagram.com/thegoodstick.co/'; // the Good Stick Co. Instagram page URL (opens when FOLLOW is tapped)
+ const PROMO0 = { enabled: true, text: 'USE CODE "{code}" ON PURCHASES FROM THE GOOD STICK CO.', code: 'BAGGALAX', percent: '', url: '' };
  function promo() {
   const d = PROMO0;
   try {
    const g = win.LIVEOPS && LIVEOPS.goodstick && LIVEOPS.goodstick();
    const p = g && g.promo;
+   if (!win.__rl_no563gs) return d; // v1.3: fixed wording, no link out
    if (!p || typeof p !== 'object') return d;
    const url = typeof p.url === 'string' && /^https?:\/\//i.test(p.url.trim()) ? p.url.trim() : d.url;
    return {
@@ -408,12 +410,12 @@
   if (typeof PANEL_ACT === 'object') {
    PANEL_ACT.gsc501buy = () => { buy(); return win.PANEL_KEEP; };
    PANEL_ACT.gsc501inside = () => { view = 'inside'; try { panelDirty(); } catch (e) {} return win.PANEL_KEEP; };
-   PANEL_ACT.gsc501follow = () => { try { LS.set('gsc501follow', 1); } catch (e) {} try { V17.toast('FOLLOW = 15 DIMES', '#ffe14d'); } catch (e) {} try { panelDirty(); } catch (e) {} return win.PANEL_KEEP; };
+   PANEL_ACT.gsc501follow = () => { try { LS.set('gsc501follow', 1); } catch (e) {} try { const u = win.__rl_gsInsta || GS_INSTA; if (u) { if (win.RL41 && RL41.link) RL41.link(u); else win.open(u, '_blank', 'noopener'); } } catch (e) {} try { V17.toast('FOLLOW = 15 DIMES', '#ffe14d'); } catch (e) {} try { panelDirty(); } catch (e) {} return win.PANEL_KEEP; };
    PANEL_ACT.gsc501item = v => { view = 'item:' + v; try { panelDirty(); } catch (e) {} return win.PANEL_KEEP; };
    PANEL_ACT.gsc501close = () => { view = null; try { panelDirty(); } catch (e) {} };
    PANEL_ACT.gsc501promo = () => {
     const url = promo().url;
-    try { win.open(url, '_blank', 'noopener'); } catch (e) {}
+    if (url) { try { win.open(url, '_blank', 'noopener'); } catch (e) {} }
     return win.PANEL_KEEP;
    };
    PANEL_ACT.gsc501kit = v => {

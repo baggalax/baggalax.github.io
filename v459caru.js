@@ -290,12 +290,17 @@
  // ---------- 3. signing day ----------
  function rSign() {
   const C = CA.get(), s = C.stars | 0, hsS = C.seasons[C.seasons.length - 1];
+  if (C.stage === 'portal') {
+   const of = (C.offers || []).map(o => { const t = T(o.t), ct = (COL25.TEAMS.find(x => x.id === o.t) || {});
+    return '<div class="c9off"><div class="hdr"><img alt="" src="' + badge(o.t) + '"><div><div class="t">' + E(t.name) + '</div><div class="d">' + E((ct.nick || '') + (ct.conf ? ' - ' + ct.conf : '')) + '</div></div></div><div class="d">NATIONAL RANK #' + o.rank + ' - TEAM OVR ' + CA.teamOvr(o.t) + '</div>' + btn9('TRANSFER TO ' + (t.abbr || t.name), 'sign:' + o.t, 'y') + '</div>'; }).join('');
+   return head('TRANSFER PORTAL', '') + '<div class="c9wrap">' + side() + '<div class="c9main"><div class="note">PICK A NEW SCHOOL TO PLAY YOUR NEXT COLLEGE YEAR. YOU KEEP YOUR RATINGS.</div><div class="c9offers">' + of + '</div><div class="row">' + btn9('BACK', 'pback', 'g') + '</div></div></div>';
+  }
   const stars = '<span class="c9stars">' + '&#9733;'.repeat(s) + '<i>' + '&#9733;'.repeat(5 - s) + '</i></span>';
   const offers = (C.offers || []).map(o => { const t = T(o.t), ct = (COL25.TEAMS.find(x => x.id === o.t) || {}); const ovrT = CA.teamOvr(o.t);
    return '<div class="c9off"><div class="hdr"><img alt="" src="' + badge(o.t) + '"><div><div class="t">' + E(t.name) + '</div><div class="d">' + E((ct.nick || '') + (ct.conf ? ' - ' + ct.conf : '')) + '</div></div></div><div class="d">NATIONAL RANK #' + o.rank + ' - TEAM OVR ' + ovrT + '</div><div class="d">' + E(ct.coach ? 'COACH ' + String(ct.coach).toUpperCase() : '') + '</div>' + depth(o.t) + btn9('SIGN WITH ' + (t.abbr || t.name), 'sign:' + o.t, 'y') + '</div>'; }).join('');
-  return head('SIGNING DAY - ' + C.yr, '') + '<div class="c9wrap">' + side() + '<div class="c9main"><div class="box"><div class="c9line">SENIOR SEASON: <b>' + hsS.w + '-' + hsS.l + '</b> ' + E(statLine(hsS, C.me.pos)) + (hsS.champ ? ' - <b>STATE CHAMPS</b>' : '') + '</div><div class="row" style="margin-top:3px">' + stars + '<span class="c9line"><b>' + s + '-STAR RECRUIT</b> - ' + (C.offers || []).length + ' SCHOOLS OFFERED YOU</span></div></div>' +
+  return head('SIGNING DAY - ' + C.yr, '') + '<div class="c9wrap">' + side() + '<div class="c9main"><div class="box"><div class="c9line">LAST HIGH SCHOOL SEASON: <b>' + hsS.w + '-' + hsS.l + '</b> ' + E(statLine(hsS, C.me.pos)) + (hsS.champ ? ' - <b>STATE CHAMPS</b>' : '') + '</div><div class="row" style="margin-top:3px">' + stars + '<span class="c9line"><b>' + s + '-STAR RECRUIT</b> - ' + (C.offers || []).length + ' SCHOOLS OFFERED YOU</span></div></div>' +
    '<div class="note">PICK YOUR SCHOOL. THESE ARE THE REAL COLLEGE TEAMS + ROSTERS IN THE GAME. YOU TAKE A STARTING SPOT AT ' + E(POSN[C.me.pos]) + '.</div><div class="c9offers">' + offers + '</div>' +
-   '<div class="note" style="margin-top:auto">STARS COME FROM YOUR RATING + YOUR SENIOR STATS (+1 FOR A STATE TITLE). 5 STARS = OFFERS FROM THE TOP 15 PROGRAMS. COLLEGE: UP TO 4 SEASONS + THE NATIONAL TOURNAMENT, THEN DRAFT NIGHT.</div></div></div>';
+   '<div class="note" style="margin-top:auto">STARS COME FROM YOUR RATING + YOUR SENIOR STATS (+1 FOR A STATE TITLE). 5 STARS = OFFERS FROM THE TOP 15 PROGRAMS. COLLEGE: UP TO 5 SEASONS + THE NATIONAL TOURNAMENT, THEN DRAFT NIGHT.</div></div></div>';
  }
  function depthW(t) { try { const ro = (T(t).roster || []).map(P).filter(Boolean).sort((a, b) => b.ovr - a.ovr); return ro[0] ? '<div class="d" style="color:#cfe">BEST PLAYER: ' + E(ro[0].n) + ' (' + ro[0].pos + ' ' + ro[0].ovr + ')</div>' : ''; } catch (e) { return ''; } }
  function depth(t) {
@@ -305,11 +310,11 @@
  }
  // ---------- 4b. end of a college year ----------
  function rColEnd() {
-  const C = CA.get(), s = C.seasons[C.seasons.length - 1], pj = C.proj, yr = C.col.yr, CLS = [ 'FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR' ];
+  const C = CA.get(), s = C.seasons[C.seasons.length - 1], pj = C.proj, yr = C.col.yr, CLS = [ 'FRESHMAN', 'SOPHOMORE', 'JUNIOR', 'SENIOR', 'FIFTH' ];
   const pjt = !pj ? '' : pj.rd ? 'PROJECTED: ROUND ' + pj.rd + ', AROUND PICK ' + pj.pick : 'PROJECTED: UNDRAFTED (KEEP GROWING)';
   return head('COLLEGE - END OF ' + CLS[yr - 1] + ' YEAR - ' + s.yr) + '<div class="c9wrap">' + side() + '<div class="c9main"><div class="box"><div class="c9vs">' + E(s.fin) + '<small>' + s.w + '-' + s.l + ' - ' + E(statLine(s, C.me.pos)) + '</small></div></div>' + flipBox() +
    '<div class="box"><div class="c9line"><b>PRO DRAFT</b> - ' + E(pjt) + '</div><div class="note">THE TOP COLLEGE PLAYERS DECLARE AND THE WORST PRO TEAMS PICK FIRST. A COLLEGE STAR IS NOT AN INSTANT PRO STAR: ROOKIES LOSE A FEW POINTS ON DRAFT NIGHT.</div></div>' +
-   '<div class="row">' + btn9('DECLARE FOR THE DRAFT', 'declare', 'y') + (yr < 4 ? btn9('RETURN FOR ' + CLS[yr] + ' YEAR', 'return', '') : '<span class="note">SENIOR YEAR DONE: TIME TO GO PRO.</span>') + '</div>' +
+   '<div class="row">' + btn9('DECLARE FOR THE DRAFT', 'declare', 'y') + (yr < 5 ? btn9('RETURN FOR ' + CLS[yr] + ' YEAR', 'return', '') + btn9('TRANSFER PORTAL', 'portal', 'g') : '<span class="note">FIFTH YEAR DONE: TIME TO GO PRO.</span>') + '</div>' +
    '<div class="scroll" id="c9tb">' + careerTable() + '</div></div></div>' + pop();
  }
  // ---------- 5. draft night ----------
@@ -325,7 +330,7 @@
   } else if (mineI >= 0) {
    stage = '<div class="c9pod">' + D.yr + ' PRO DRAFT - ROUND ' + D.rd + ', PICK ' + D.inRd + '</div><div class="c9call">WITH THE <b>' + ord(D.no) + ' PICK</b> IN THE ' + D.yr + ' PRO DRAFT,<br><b>' + E(CA.tname(D.team)) + '</b> SELECTS...</div><div class="c9name">' + E(String(C.me.n).toUpperCase()) + '</div><div class="c9line">' + E(POSN[C.me.pos]) + ' - ' + E(CA.tname(C.col.team)) + ' - ROOKIE DEAL <b>' + money(D.ct[1]) + ' X ' + D.ct[0] + ' YRS</b></div>' + btn9('PUT ON THE HAT', 'drok', 'y');
   } else {
-   stage = '<div class="c9pod">' + D.yr + ' PRO DRAFT - OVER</div><div class="c9call">' + D.picks.length + ' PICKS. YOUR NAME WAS NOT CALLED.</div><div class="c9name">UNDRAFTED</div><div class="c9line"><b>' + E(CA.tname(D.team)) + '</b> SIGNS YOU AS A FREE AGENT - <b>' + money(D.ct[1]) + ' X ' + D.ct[0] + ' YRS</b>. PROVE THEM WRONG.</div>' + btn9('LET\'S GO', 'drok', 'y');
+   stage = '<div class="c9pod">' + D.yr + ' PRO DRAFT - OVER</div><div class="c9call">' + D.picks.length + ' PICKS. YOUR NAME WAS NOT CALLED.</div><div class="c9name">UNDRAFTED</div>' + (C.col.yr < 5 ? '<div class="note">NO TEAM CALLED YOUR NAME. YOU HAVE ' + (5 - C.col.yr) + ' YEAR(S) OF COLLEGE ELIGIBILITY LEFT.</div><div class="row">' + btn9('RETURN TO COLLEGE', 'undrret', 'y') + btn9('END CAREER', 'undrend', 'g') + '</div>' : '<div class="note">YOUR COLLEGE ELIGIBILITY IS USED UP.</div>' + btn9('END CAREER', 'undrend', 'y'));
   }
   const col = C.col.team, cardH = reached ? myCard('pro') : cardHtml({ n: C.me.n, num: C.me.num, pos: C.me.pos, ovr: D.covr || CA.ovrMe(), lvl: 'col', diff: C.diff, ctl: C.ctl, team: col, pid: artPid() });
   const hd = reached ? head('DRAFT NIGHT - ' + D.yr) : '<div class="hd"><img alt="" src="' + badge(col) + '"><div><div class="tt">DRAFT NIGHT</div><div class="st">' + E(D.yr + ' PRO DRAFT - ' + CA.tname(col) + ' - ' + POSN[C.me.pos]) + '</div></div><div class="sp"></div>' + btn9('MENU', 'menu', 'g') + '</div>';
@@ -389,7 +394,7 @@
   const C = CA.get();
   if (!C || U.v === 'create') return 'create';
   if (U.v === 'hsren' && C.stage === 'hs') return 'hsren';
-  return { hs: 'hub', col: 'hub', pro: 'hub', world: 'hub', ult: 'done', sign: 'sign', colEnd: 'colEnd', draft: 'draft', proEnd: 'proEnd', worldEnd: 'done', done: 'done' }[C.stage] || 'hub';
+  return { hs: 'hub', col: 'hub', pro: 'hub', world: 'hub', ult: 'done', sign: 'sign', portal: 'sign', colEnd: 'colEnd', draft: 'draft', proEnd: 'proEnd', worldEnd: 'done', done: 'done' }[C.stage] || 'hub';
  }
  function render() {
   const v = view();
@@ -438,9 +443,13 @@
   if (k === 'setfrom') { if (CA.setFrom(a)) say('HERITAGE: ' + CA.tname(a) + '. ONLY ' + CA.tname(a) + ' CAN CALL YOU UP.', true); return; }
   if (k === 'locker') { openLocker(); return; }
   if (k === 'endcar') { U.cty = false; CA.endCareer(); return; }
-  if (k === 'sign') { CA.sign(a); return; }
+  if (k === 'sign') { if (C.stage === 'portal') CA.portalSign(a); else CA.sign(a); return; }
   if (k === 'declare') { U.dr = 0; CA.runDraft(); return; }
   if (k === 'return') { CA.colReturn(); return; }
+  if (k === 'portal') { CA.portal(); return; }
+  if (k === 'pback') { CA.portalBack(); return; }
+  if (k === 'undrret') { CA.undrReturn(); return; }
+  if (k === 'undrend') { U.cty = false; CA.undrEnd(); return; }
   if (k === 'drskip') { const D = C.draft, i = D.picks.findIndex(p => p.id === ME); U.dr = i >= 0 ? i + 1 : D.picks.length; return; }
   if (k === 'drok') { CA.draftSeen(); return; }
   if (k === 'stay') { const r = CA.contract('stay'); if (r && !r.ok) say(r.why || 'TRY AGAIN', false); return; }

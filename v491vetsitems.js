@@ -374,6 +374,20 @@
  }
  const iconFor = (id, sil) => { const k = CK[(V17.BY[id] || {}).ck], key = id + (sil ? 's' : ''); return k ? ICON[key] || (ICON[key] = mkIcon(k, sil)) : null; };
  V.iconFor = iconFor;
+ // v1.3: whatever view draws these two cards (locker, shop, pack, reveal), put OUR pixel art on the tile and the green VETERANS card look on it
+ try {
+  const fixDom = root => {
+   if (window.__rl_no562art || !root || !root.querySelectorAll) return;
+   for (const el of root.querySelectorAll('.c17[data-v="celly_v491chop"],.c17[data-v="celly_v491fw"]')) {
+    const id = el.getAttribute('data-v'), sil = el.classList.contains('lk'), u = iconFor(id, sil), im = el.querySelector('.art img');
+    if (u && im && im.getAttribute('src') !== u) im.setAttribute('src', u);
+    if (!el.classList.contains('vc494')) el.classList.add('vc494');
+   }
+  };
+  const mo = new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) if (n.nodeType === 1) fixDom(n.matches && n.matches('.c17') ? n.parentNode || n : n); });
+  const go = () => { try { fixDom(document.body); mo.observe(document.body, { childList: true, subtree: true }); } catch (e) { fail('mo', e); } };
+  if (document.body) go(); else document.addEventListener('DOMContentLoaded', go);
+ } catch (e) { fail('dom', e); }
  // the game draws celly tiles with its own stick-figure art: swap in ours wherever an item card's <img> is rendered
  // both pack cellies share the game's fallback tile, so each <img> takes the icon of the nearest item id before it
  let SWAP = null;
@@ -440,6 +454,7 @@
      if (off() || typeof h !== 'string') return h;
      try { if (key === 'locker17') h = lockerHtml(h); } catch (e) { fail('locker', e); }
      try { h = fixHtml(h); } catch (e) { fail('icon', e); }
+     try { if (!window.__rl_no562art && h.indexOf('celly_v491') >= 0) h = h.replace(/<div class="(c17 [^"]*)"([^>]*data-v="celly_v491(?:chop|fw)")/g, (m0, c1, r1) => c1.indexOf('vc494') >= 0 ? m0 : '<div class="' + c1 + ' vc494"' + r1); } catch (e) { fail('green', e); }
      return h;
     };
    }

@@ -133,7 +133,8 @@
   if (alpha != null) { const a = gx.globalAlpha; gx.globalAlpha = alpha; gx.drawImage(c, x - ax - pad, y - f[1] - pad); gx.globalAlpha = a; }
   else gx.drawImage(c, x - ax - pad, y - f[1] - pad);
  }
- const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !kit.g27 && !off());
+ const g27x = k => !!(k && k.g27 && (window.__rl_no563fit || !/^(gsc[HA]|tk565[HA])$/.test(k.g27)));
+ const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !g27x(kit) && !off());
  const skinOfP = p => { try { return typeof skinOf === 'function' ? skinOf(p && p.pl) : 0; } catch (e) { return 0; } };
 
  const draw0 = R.draw;
@@ -181,12 +182,13 @@
  };
 
  /* ---------- which team wears it: the user's team in offline games, when switched on in the locker ---------- */
- const fitKit = (kit, w) => Object.assign({}, kit, { fit45: w });
+ // v1.3: a Good Stick kit wearing the fit loses its gscH/gscA marker, so the Good Stick jersey art (sleeves, logo) can't clip through the fit
+ const fitKit = (kit, w) => { const k = Object.assign({}, kit, { fit45: w }); if (!window.__rl_no563fit && /^(gsc[HA]|tk565[HA])$/.test(k.g27 || '')) delete k.g27; return k; };
  if (window.UNI21 && typeof UNI21.gameKits === 'function') {
   const gk0 = UNI21.gameKits;
   UNI21.gameKits = function(user, opp, userHome, mode, meta) {
    const r = gk0.apply(this, arguments);
-   try { const w = wearing(); if (w && !off() && !(meta && meta.online) && mode !== 'online' && r && r[0] && !r[0].g27) r[0] = fitKit(r[0], w); } catch (e) {}
+   try { const w = wearing(); if (w && !off() && !(meta && meta.online) && mode !== 'online' && r && r[0] && !g27x(r[0])) r[0] = fitKit(r[0], w); } catch (e) {}
    return r;
   };
  }
@@ -201,7 +203,7 @@
   return null;
  }
  function teamKit(tid) {
-  try { if (tid && window.UNI21 && UNI21.on && UNI21.on()) { const k = UNI21.kitOf(tid, UNI21.savedK(tid)); if (k && !k.g27) return k; } } catch (e) {}
+  try { if (tid && window.UNI21 && UNI21.on && UNI21.on()) { const k = UNI21.kitOf(tid, UNI21.savedK(tid)); if (k && !g27x(k)) return k; } } catch (e) {}
   try { if (tid && typeof lobbyKit === 'function') return lobbyKit(tid); } catch (e) {}
   return { jersey: '#1d2a5e', trim: '#ffffff', helm: '#1d2a5e' };
  }

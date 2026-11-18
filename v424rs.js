@@ -35,7 +35,8 @@
  const scr = () => (typeof screen !== 'undefined' ? screen : '');
  const hyp = Math.hypot, CL = (v, a, b) => Math.max(a, Math.min(b, v));
  const err = (e, w) => { try { LOG.errs.push((w || '') + ': ' + String(e && e.message || e).slice(0, 160)); if (LOG.errs.length < 5) console.error(e); } catch (x) {} };
- const okG = G => !!G && !G.tutorial && !G.online && !(G.meta && G.meta.online) && !G.brave && !G.over;
+ const okG = G => !!G && !G.tutorial && (!G.online && !(G.meta && G.meta.online) || !!(window.V558NP && window.V558NP.on())) && !G.brave && !G.over; // V55.8: also online on the phone running the play (v558netplays.js)
+ const okP = G => okG(G) || !!(G && !G.tutorial && !G.brave && !G.over && window.V558NP && window.V558NP.cap()); // V55.8: remember picks online on either phone
  const wrap = (n, f) => { const o = window[n]; if (typeof o !== 'function') return false; const w = function () { return f.call(this, o, arguments); }; w.v424 = 1; window[n] = w; return true; };
  const OCATS = [ 'OFFENSE', 'MAN-UP', 'END LINE' ];
  const NOT_RESTART = { goal: 1, cgoal: 1, fowin: 1, folose: 1, buzzer: 1, tutdone: 1, flag: 0 };
@@ -59,18 +60,18 @@
    if (typeof o !== 'function') continue;
    PANEL_ACT[k] = function (v) {
     const G = G_();
-    try { if (G && !off() && okG(G) && !v) G.sel424 = {}; } catch (e) { err(e, 'pick0'); }
+    try { if (G && !off() && okP(G) && !v) G.sel424 = {}; } catch (e) { err(e, 'pick0'); }
     const r = o.apply(this, arguments);
-    try { if (G && !off() && okG(G) && v) remember(G, v); } catch (e) { err(e, 'pick'); }
+    try { if (G && !off() && okP(G) && v) remember(G, v); } catch (e) { err(e, 'pick'); }
     return r;
    };
   }
  } catch (e) { err(e, 'panel'); }
- wrap('penPlay18', function (o, a) { const G = G_(); try { if (G && !off() && okG(G)) remember(G, a[0]); } catch (e) {} return o.apply(this, a); });
+ wrap('penPlay18', function (o, a) { const G = G_(); try { if (G && !off() && okP(G)) remember(G, a[0]); } catch (e) {} return o.apply(this, a); });
  wrap('pbOn', function (o, a) {
   const r = o.apply(this, a);
   if (r || off()) return r;
-  try { const G = a[0], p = a[1]; if (G && okG(G) && p && G.sel424 && OCATS.includes(catOf(p)) && G.sel424[catOf(p)] === p.id) return true; } catch (e) {}
+  try { const G = a[0], p = a[1]; if (G && okP(G) && p && G.sel424 && OCATS.includes(catOf(p)) && G.sel424[catOf(p)] === p.id) return true; } catch (e) {}
   return r;
  });
 
