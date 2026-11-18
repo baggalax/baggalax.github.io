@@ -33,7 +33,11 @@
  const scr = () => (typeof screen !== 'undefined' ? screen : '');
  const hyp = Math.hypot;
  const err = (e, w) => { try { LOG.errs.push((w || '') + ': ' + String(e && e.message || e).slice(0, 160)); if (LOG.errs.length < 6) console.error(e); } catch (x) {} };
- const okG = G => !!G && !G.tutorial && !G.online && !(G.meta && G.meta.online) && !G.brave && !window.__rl_v124gb;
+ const offl = G => !G.online && !(G.meta && G.meta.online);
+ const okG = G => !!G && !G.tutorial && (offl(G) || !!(window.V558NP && window.V558NP.on())) && !G.brave && !window.__rl_v124gb; // V55.8: also online on the phone running the play (v558netplays.js)
+ // V55.8: online, the CPU-team half runs ONLY the other player's own picked custom ride (never a made-up CPU clear / ride)
+ const netRide = G => !offl(G) && window.V558NP && typeof window.V558NP.ride === 'function' ? window.V558NP.ride(G) : null;
+ const cpuOk = G => offl(G) || !!netRide(G);
  const wrapG = (n, f) => { const o = window[n]; if (typeof o !== 'function') return false; window[n] = function () { return f.call(this, o, arguments); }; return true; };
  const CL = (v, a, b) => Math.max(a, Math.min(b, v));
  const alive = p => p && !(p.down > 0);
@@ -454,7 +458,7 @@
   const b = G.ball, s = scr(), key = 'r' + (G.n420 || 0);
   let R = G.cr420;
   if (!R || R.key !== key) {
-   const name = pickRide(G, G.n420 || 0);
+   const name = (!offl(G) && netRide(G)) || pickRide(G, G.n420 || 0);
    R = G.cr420 = { key: key, name: name, kind: RIDES[name].k, own: new Map(), map: null, t: 0, arr: new Set() };
    LOG.cpuRides.push({ team: teamBook(G).key, name: name });
    const h = s === 'defense' ? G.dclear && G.dclear.holder : G.carrier;
@@ -463,7 +467,7 @@
   if (R.kind === 'ten') return;
   R.t += 1 / 60;
   const car = s === 'defense' ? (G.dclear ? G.dclear.holder : b.state === 'pass' ? b.to : null) : (b.state === 'held' ? G.carrier : b.state === 'pass' ? b.to : null);
-  const riders = cpuTeam(G, s).filter(p => alive(p) && roleOf(p) !== 'G' && !(G.dclear && G.dclear.rider === p));
+  const riders = cpuTeam(G, s).filter(p => alive(p) && roleOf(p) !== 'G' && !(G.dclear && G.dclear.rider === p) && !p.netCtl);
   const clr = userTeam(G).filter(alive);
   const spots = RIDES[R.name].s;
   const list = riders.map(p => ({ o: p, role: roleOf(p) }));
@@ -522,7 +526,7 @@
  wrapG('rideOn', function (o, a) {
   const r = o.apply(this, a);
   try {
-   if (r && a[0] === 'C' && !offC()) { const G = G_(); if (okG(G) && G.cr420 && !G.cr420.done && G.cr420.kind !== 'ten') return false; }
+   if (r && a[0] === 'C' && !offC()) { const G = G_(); if (okG(G) && cpuOk(G) && G.cr420 && !G.cr420.done && G.cr420.kind !== 'ten') return false; }
   } catch (e) {}
   return r;
  });
@@ -536,8 +540,8 @@
     if (G.cset) userClearSpeed(G);
     // safety: a pass with no receiver (seen once in 20 seeded games) would throw in updateLive every frame - make it a loose ball
     { const b = G.ball; if (b && b.state === 'pass' && !b.to && !b.intercept) { b.state = 'loose'; LOG.passFix = (LOG.passFix || 0) + 1; } }
-    if (!offC() && G.farU && G.farC) {
-     const k = cpuCtx(G), b = G.ball;
+    if (!offC() && G.farU && G.farC && cpuOk(G)) {
+     const k0 = cpuCtx(G), k = offl(G) || k0 === 'ride' ? k0 : null, b = G.ball;
      // a new clear / ride starts on the rising edge of a clear (not on every flicker of the context)
      const cc = !!G.cpuClear, uc = !!(G.dclear || G.clearing || b && b.clear);
      if (k === 'clear' && (cc && !G.cc0420 || !G.cc420)) G.n420 = (G.n420 || 0) + 1;

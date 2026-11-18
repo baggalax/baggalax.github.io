@@ -49,7 +49,8 @@
   lowConv: .35,              // below GROSS: this share of would-be saves on crease finishes go in
   win: 2.0,                  // s (real time) the goalie stays fooled after a fake
   biteSpd: 400,              // px/s the goalie lunges at the fake
-  preR: 10                   // FAKE shows this many px before the circles do
+  preR: 10,                  // FAKE shows this many px before the circles do
+  noFakeNormalBelow: 1       // v518: tiers below this (0 = GROSS) roll no-fake crease shots as the game's own finish (no extra saves); NASTY / BAGGATWAAN keep K.base
  };
  const F = { armed: false, used: false, fake: null, offT: 0, car: null, pressT: 0 };
  function tier() { try { const l = DF && DF.level; return l === 3 ? 0 : l === 4 ? 1 : l === 5 ? 2 : -1; } catch (e) { return -1; } }
@@ -70,7 +71,7 @@
  function opp(name) { return name.indexOf('TOP') === 0 ? name.replace('TOP', 'BOTTOM') : name.replace('BOTTOM', 'TOP'); }
  // ---------------- the button (drawn on the canvas, tapped through the game's own #ui hit buttons) ----------------
  const BR = 12;
- function btnPos() { return { x: W - BR - 6, y: 30 }; }  // top right, just under the score bar / timeout pips, in front of the boards
+ function btnPos() { return { x: W - BR - 6, y: 42 }; }   // v518 (Nov 11, Charlie 10:54 PM): a bit lower (was y 30)  // top right, just under the score bar / timeout pips, in front of the boards
  function arm(src) {
   if (!btnShown() || F.armed) return false;   // v507b (Nov 11): a tap counts as soon as the button shows (it shows a moment before the circles), not only once they are up
   F.armed = true; ST.arms++;
@@ -88,14 +89,14 @@
   const p = btnPos(), live = circOn(), t = rt();
   const pulse = F.armed ? 1 : .5 + .5 * Math.sin(t * 8);
   g.save();
-  g.globalAlpha = live ? 1 : .6;
+  g.globalAlpha = F.armed ? .85 : live ? .7 : .45;   // v518: a little see-through (was live ? 1 : .6)
   disc(p.x + .5, p.y + 2.5, BR, '#000');
   disc(p.x + .5, p.y + .5, BR, F.armed ? '#ffffff' : '#d8261c');
   disc(p.x + .5, p.y + .5, BR - 2, F.armed ? '#ff3b2e' : '#ff4a3a');
   g.strokeStyle = F.armed ? '#ffe14d' : 'rgba(255,255,255,' + (.45 + .4 * pulse).toFixed(2) + ')';
   g.lineWidth = 1; g.beginPath(); g.arc(p.x + .5, p.y + .5, BR - .5, 0, Math.PI * 2); g.stroke();
   g.restore();
-  g.save(); g.globalAlpha = live ? 1 : .6;
+  g.save(); g.globalAlpha = F.armed ? .85 : live ? .7 : .45;   // v518: a little see-through (was live ? 1 : .6)
   text('FAKE', p.x + 1, p.y - 2, 1, '#ffffff', 'center', '#5a0000');
   g.restore();
   if (T.active && T.step === 'arm') {   // tutorial: arrow at the button
@@ -195,6 +196,9 @@
    if (fk && fk.top !== top) { kind = 'opp'; p = K.opp[k]; }
    else if (fk && fk.high === hi) { kind = 'same'; p = K.same[k]; }
    else if (fk) { kind = 'near'; p = K.near[k]; }
+   else if (k < K.noFakeNormalBelow) {   // v518 (Nov 11, Charlie 11:00 PM): below NASTY not faking never makes the goalie save more - the game's own finish
+    kind = 'none'; p = null;
+   }
    else {
     kind = 'none';
     let adj = 0;
