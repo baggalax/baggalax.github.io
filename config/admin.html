@@ -124,7 +124,7 @@ function card(c, on, listName) {
  box.className = 'card';
  box.innerHTML = '<b>' + c.name + '</b>' + (c.past ? '<span class="tag">PAST</span>' : '') +
   '<small>' + (c.text || '') + '</small>' +
-  '<div class="row"><label>Price<input data-k="price" type="number" min="0" value="' + (row.price != null ? row.price : (c.price || 0)) + '"></label>' +
+  '<div class="row"><label>' + (c.kind === 'mode' ? 'Price (not used)' : 'Price in dimes' + (c.price > 0 ? ' (' + Math.max(1, Math.ceil(c.price / 4)) + '-' + Math.min(5000, c.price * 10) + ')' : '')) + '<input data-k="price" type="number" min="0" max="5000" value="' + (row.price != null ? row.price : (c.price || 0)) + '"></label>' +
   '<label>Section<input data-k="section" value="' + (row.section || c.section || 'shop') + '"></label></div>' +
   '<div class="row"><label>Starts (New York)<input data-k="start" type="datetime-local" value="' + toLocalInput(row.start) + '"></label>' +
   '<label>Ends (New York)<input data-k="end" type="datetime-local" value="' + toLocalInput(row.end) + '"></label></div>' +
@@ -148,7 +148,7 @@ function readCard(box, id, listName) {
  const section = box.querySelector('[data-k="section"]').value.trim();
  const start = fromLocalInput(box.querySelector('[data-k="start"]').value);
  const end = fromLocalInput(box.querySelector('[data-k="end"]').value);
- if (price !== '') row.price = Math.max(0, +price || 0); else delete row.price;
+ if (price !== '') { const c0 = catalog.find(x => x.id === id), d0 = c0 && +c0.price; let p = Math.round(+price || 0); if (d0 > 0) p = Math.max(Math.max(1, Math.ceil(d0 / 4)), Math.min(Math.min(5000, d0 * 10), p)); else if (d0 === 0) p = 0; else p = Math.max(1, Math.min(5000, p)); row.price = p; box.querySelector('[data-k="price"]').value = p; } else delete row.price;
  if (section) row.section = section; else delete row.section;
  if (start) row.start = start; else delete row.start;
  if (end) row.end = end; else delete row.end;

@@ -9447,6 +9447,29 @@
       "past": false,
       "section": "collab",
       "rar": "COLLAB"
+    },
+    {
+      "id": "pack_turkey565",
+      "kind": "pack",
+      "name": "TURKEY TROTTERS PACK",
+      "price": 45,
+      "past": false,
+      "section": "shop",
+      "text": "THANKSGIVING. Turkey Trotters N/A team, Turkey Leg Stick, Chicken Dance celly, 6 player cards. Needed to play the Turkey Bowl."
+    },
+    {
+      "id": "mode_turkey565",
+      "kind": "mode",
+      "name": "TURKEY TROTTERS (THANKSGIVING)",
+      "past": false,
+      "text": "Turns on the Turkey Trotters N/A team, uniforms, cards and the Thanksgiving items. The Turkey Bowl turns this on by itself."
+    },
+    {
+      "id": "mode_tbowl570",
+      "kind": "mode",
+      "name": "TURKEY BOWL",
+      "past": false,
+      "text": "Play as the Turkey Trotters vs 4 teams you pick: round robin, then the top 2 play the final for the Turkey Bowl trophy. Only for Turkey Trotters pack owners. Needs app 1.4."
     }
   ]
 }
