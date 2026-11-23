@@ -9495,7 +9495,7 @@
       "name": "WALK THE PLANK",
       "price": 150,
       "text": "LEGENDARY CELLY. THE FLYING DUTCHMAN RISES, HE WALKS THE PLANK, SALUTES AND SPLASHES IN. COSMETIC ONLY. SHOP ONLY.",
-      "past": false,
+      "past": true,
       "section": "shop",
       "rar": "LEGENDARY"
     },
