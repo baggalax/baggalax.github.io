@@ -1,5 +1,5 @@
 {
-  "generated": "2026-11-11T21:35:00.308Z",
+  "generated": "2026-11-23T00:00:00Z",
   "items": [
     {
       "id": "pack_daily",
@@ -9201,9 +9201,9 @@
     {
       "id": "uni21|VTAF|2",
       "kind": "item",
-      "name": "AIR FORCE FIGHTER PILOT",
+      "name": "AIR\u00a0FORCE FIGHTER PILOT",
       "price": 15,
-      "text": "HONOR PACK. A AIR FORCE UNIFORM: FLIGHT SUIT + PILOT HELMET WITH DARK VISOR. PICK IT BEFORE A GAME. LOOKS ONLY.",
+      "text": "HONOR PACK. A AIR\u00a0FORCE UNIFORM: FLIGHT SUIT + PILOT HELMET WITH DARK VISOR. PICK IT BEFORE A GAME. LOOKS ONLY.",
       "past": false,
       "section": "shop",
       "rar": "LEGENDARY"
@@ -9213,7 +9213,7 @@
       "kind": "item",
       "name": "SIX SERVICE TEAMS",
       "price": 15,
-      "text": "PLAY AS ARMY, NAVY, AIR FORCE, MARINES, COAST GUARD + SPACE FORCE IN QUICK MATCH. YOURS FOREVER.",
+      "text": "PLAY AS ARMY, NAVY, AIR\u00a0FORCE, MARINES, COAST GUARD + SPACE FORCE IN QUICK MATCH. YOURS FOREVER.",
       "past": false,
       "section": "shop",
       "rar": "LEGENDARY"
@@ -9470,6 +9470,343 @@
       "name": "TURKEY BOWL",
       "past": false,
       "text": "Play as the Turkey Trotters vs 4 teams you pick: round robin, then the top 2 play the final for the Turkey Bowl trophy. Only for Turkey Trotters pack owners. Needs app 1.4."
+    },
+    {
+      "id": "stick_tk565leg",
+      "kind": "item",
+      "name": "TURKEY LEG STICK",
+      "price": 12,
+      "text": "Thanksgiving rare stick. White bone shaft, brown drumstick head.",
+      "past": true,
+      "section": "shop"
+    },
+    {
+      "id": "celly_tk565chk",
+      "kind": "item",
+      "name": "CHICKEN DANCE",
+      "price": 10,
+      "text": "Thanksgiving celly.",
+      "past": true,
+      "section": "shop"
+    },
+    {
+      "id": "celly_wplank",
+      "kind": "item",
+      "name": "WALK THE PLANK",
+      "price": 150,
+      "text": "LEGENDARY CELLY. THE FLYING DUTCHMAN RISES, HE WALKS THE PLANK, SALUTES AND SPLASHES IN. COSMETIC ONLY. SHOP ONLY.",
+      "past": false,
+      "section": "shop",
+      "rar": "LEGENDARY"
+    },
+    {
+      "id": "gift_wood565",
+      "kind": "mode",
+      "name": "GIFT: 1 WOODEN STICK FOR EVERYONE",
+      "past": true,
+      "text": "Thanksgiving gift. Every player gets 1 Wooden Stick once while this id is in the specials list."
+    },
+    {
+      "id": "gift_starter598",
+      "kind": "mode",
+      "name": "STARTER GIFT (1.5)",
+      "past": true,
+      "text": "10 random BASIC custom player cards + 1 random BASIC coach card, once per account AND once per device, shown with the pack reveal. Always on in 1.5 (v598new.js, kill switch __rl_no598gift)."
+    },
+    {
+      "id": "tut_welcome598",
+      "kind": "mode",
+      "name": "WELCOME TUTORIAL (1.5)",
+      "past": true,
+      "text": "Show-only tour: WHAT'S NEW, ONLINE, MAKING A CARD TEAM. BACK / NEXT / SKIP on every step, once per account (v598new.js, kill switch __rl_no598tut)."
+    },
+    {
+      "id": "team_tk565",
+      "kind": "item",
+      "name": "TURKEY TROTTERS TEAM",
+      "price": 15,
+      "text": "THE TEAM ITSELF, NOT A CARD YOU KEEP. IT UNLOCKS THE TURKEY TROTTERS TO PLAY AS (N/A TAB IN QUICK PLAY) WITH BOTH TURKEY UNIFORMS.",
+      "past": false,
+      "section": "shop",
+      "rar": "LEGENDARY"
+    },
+    {
+      "id": "pc27|TKT-0",
+      "kind": "item",
+      "name": "MASHED POTATOES",
+      "price": 15,
+      "text": "PLAYER CARD: MASHED POTATOES (TURKEY TROTTERS) - OVR 89. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "LEGENDARY"
+    },
+    {
+      "id": "pc27|TKT-6",
+      "kind": "item",
+      "name": "MACARONI CHEESE",
+      "price": 8,
+      "text": "PLAYER CARD: MACARONI CHEESE (TURKEY TROTTERS) - OVR 73. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "RARE"
+    },
+    {
+      "id": "pc27|TKT-12",
+      "kind": "item",
+      "name": "GRAVY BOAT",
+      "price": 15,
+      "text": "PLAYER CARD: GRAVY BOAT (TURKEY TROTTERS) - OVR 89. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "LEGENDARY"
+    },
+    {
+      "id": "pc27|TKT-14",
+      "kind": "item",
+      "name": "COLLARD GREENS",
+      "price": 3,
+      "text": "PLAYER CARD: COLLARD GREENS (TURKEY TROTTERS) - OVR 68. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-18",
+      "kind": "item",
+      "name": "WHOLE TURKEY",
+      "price": 8,
+      "text": "PLAYER CARD: WHOLE TURKEY (TURKEY TROTTERS) - OVR 74. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "RARE"
+    },
+    {
+      "id": "pc27|TKT-19",
+      "kind": "item",
+      "name": "APPLE CIDER",
+      "price": 3,
+      "text": "PLAYER CARD: APPLE CIDER (TURKEY TROTTERS) - OVR 69. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "trophy_tbowl570",
+      "kind": "item",
+      "name": "TURKEY BOWL TROPHY",
+      "price": 15,
+      "text": "THANKSGIVING. WON THE TURKEY BOWL WITH THE TURKEY TROTTERS - 4 ROUND ROBIN GAMES, THEN THE FINAL.",
+      "past": false,
+      "section": "shop",
+      "rar": "LEGENDARY"
+    },
+    {
+      "id": "pc27|TKT-1",
+      "kind": "item",
+      "name": "CANDIED YAMS",
+      "price": 8,
+      "text": "PLAYER CARD: CANDIED YAMS (TURKEY TROTTERS) - OVR 81. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "RARE"
+    },
+    {
+      "id": "pc27|TKT-2",
+      "kind": "item",
+      "name": "GREEN BEAN CASSEROLE",
+      "price": 3,
+      "text": "PLAYER CARD: GREEN BEAN CASSEROLE (TURKEY TROTTERS) - OVR 62. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-3",
+      "kind": "item",
+      "name": "SWEET POTATO PIE",
+      "price": 15,
+      "text": "PLAYER CARD: SWEET POTATO PIE (TURKEY TROTTERS) - OVR 89. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "LEGENDARY"
+    },
+    {
+      "id": "pc27|TKT-4",
+      "kind": "item",
+      "name": "PECAN PIE",
+      "price": 3,
+      "text": "PLAYER CARD: PECAN PIE (TURKEY TROTTERS) - OVR 72. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-5",
+      "kind": "item",
+      "name": "DEVILED EGGS",
+      "price": 3,
+      "text": "PLAYER CARD: DEVILED EGGS (TURKEY TROTTERS) - OVR 71. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-7",
+      "kind": "item",
+      "name": "STUFFING",
+      "price": 3,
+      "text": "PLAYER CARD: STUFFING (TURKEY TROTTERS) - OVR 68. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-8",
+      "kind": "item",
+      "name": "CRANBERRY SAUCE",
+      "price": 3,
+      "text": "PLAYER CARD: CRANBERRY SAUCE (TURKEY TROTTERS) - OVR 61. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-9",
+      "kind": "item",
+      "name": "PUMPKIN PIE",
+      "price": 3,
+      "text": "PLAYER CARD: PUMPKIN PIE (TURKEY TROTTERS) - OVR 71. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-10",
+      "kind": "item",
+      "name": "DINNER ROLL",
+      "price": 3,
+      "text": "PLAYER CARD: DINNER ROLL (TURKEY TROTTERS) - OVR 75. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-11",
+      "kind": "item",
+      "name": "CORN BREAD",
+      "price": 3,
+      "text": "PLAYER CARD: CORN BREAD (TURKEY TROTTERS) - OVR 64. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-13",
+      "kind": "item",
+      "name": "BRUSSELS SPROUT",
+      "price": 3,
+      "text": "PLAYER CARD: BRUSSELS SPROUT (TURKEY TROTTERS) - OVR 76. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-15",
+      "kind": "item",
+      "name": "HONEY HAM",
+      "price": 3,
+      "text": "PLAYER CARD: HONEY HAM (TURKEY TROTTERS) - OVR 73. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-16",
+      "kind": "item",
+      "name": "BAKED BEANS",
+      "price": 3,
+      "text": "PLAYER CARD: BAKED BEANS (TURKEY TROTTERS) - OVR 61. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "pc27|TKT-17",
+      "kind": "item",
+      "name": "CORN ON THE COB",
+      "price": 3,
+      "text": "PLAYER CARD: CORN ON THE COB (TURKEY TROTTERS) - OVR 71. SUB HIM ONTO YOUR TEAM IN QUICK PLAY + ONLINE.",
+      "past": false,
+      "section": "shop",
+      "rar": "COMMON"
+    },
+    {
+      "id": "mode_ll15",
+      "kind": "mode",
+      "name": "LOCKER LEAGUE (RANKED ONLINE)",
+      "past": false,
+      "text": "Ranked online: FIND MATCH, CPU bot after no player, server-decided rank points, leaderboards."
+    },
+    {
+      "id": "bot_ll15",
+      "kind": "mode",
+      "name": "LOCKER LEAGUE CPU BOTS",
+      "past": false,
+      "text": "GOBBLERS, INVADERS, WARFARE, GRAVEYARD, DEEP SEA DOGS, DOGFIGHT, BEACHHEAD, RIPTIDE. Half rank points."
+    },
+    {
+      "id": "rku15",
+      "kind": "item",
+      "name": "RANKED UNI (SQUID - BAGGATWAAN, HOME + AWAY)",
+      "price": 0,
+      "past": false,
+      "section": "reward",
+      "text": "Reward only. Reach the tier = kept forever."
+    },
+    {
+      "id": "rku15_jadecrown",
+      "kind": "item",
+      "name": "JADE CROWN",
+      "price": 0,
+      "past": false,
+      "section": "reward",
+      "text": "Reward only. Only while you are the #1 player."
+    },
+    {
+      "id": "rku15_jade",
+      "kind": "item",
+      "name": "JADE",
+      "price": 0,
+      "past": false,
+      "section": "reward",
+      "text": "Reward only. Hit #1 once = kept forever."
+    },
+    {
+      "id": "rku15_davy",
+      "kind": "item",
+      "name": "DAVY JONES",
+      "price": 0,
+      "past": false,
+      "section": "reward",
+      "text": "Reward only. #1 locker once = kept forever."
+    },
+    {
+      "id": "run15_dutch",
+      "kind": "item",
+      "name": "THE FLYING DUTCHMAN (RUN OUT)",
+      "price": 0,
+      "past": false,
+      "section": "reward",
+      "text": "Free run out for everyone."
+    },
+    {
+      "id": "bdg15_top10",
+      "kind": "item",
+      "name": "TOP 10 LOCKER BADGE",
+      "price": 0,
+      "past": false,
+      "section": "reward",
+      "text": "Reward only. Green locker on the arm while your locker is top 10."
     }
   ]
 }
