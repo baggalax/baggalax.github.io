@@ -5,7 +5,8 @@
       "end": "2026-11-27T02:23:00.000Z"
     },
     {
-      "id": "celly_wplank"
+      "id": "celly_wplank",
+      "price": 170
     },
     {
       "id": "pack_turkey565",
@@ -214,7 +215,8 @@
       },
       {
         "id": "celly_wplank",
-        "end": ""
+        "end": "",
+        "price": 170
       },
       {
         "id": "pack_turkey565",
