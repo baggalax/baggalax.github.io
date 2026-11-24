@@ -23,7 +23,8 @@
  if (W.__rl_no470ads || W.__rl_v124gb) return;
  // ---------- the numbers Charlie may want to change (all in one place) ----------
  const CFG = W.RL470 = {
-  DAILY_DIMES: 25,          // DAILY DIMES reward
+  DAILY_DIMES: 10,          // 1.4 (Charlie): 10 dimes (was 25)
+           // DAILY DIMES reward
   PACKS_PER_DAY: 3,         // FREE PACK ads per local day
   PACKS_PER_AD: 1,          // basic packs per FREE PACK ad (Charlie Nov 11 9:58 PM)
   PACK_KIND: 'basic',       // the standard pack (items17 PACKS.basic, "BASIC PACK")
@@ -222,10 +223,13 @@
  }
  A.show = show;
  A.screens = SCREENS; A.close = close; A.native = () => !!plugin();   // V51.4 hooks for v514adfree.js
+ const W470fp = () => !!window.__rl_470freepack;
  function tileHtml() {
   const pl = packsLeft(), dr = dimesReady();
-  return '<div class="ad470c"><b>FREE PACK</b><small>' + (pl ? 'WATCH A SHORT AD FOR ' + (CFG.PACKS_PER_AD > 1 ? CFG.PACKS_PER_AD + ' BASIC PACKS' : 'A BASIC PACK') + ' - ' + pl + ' LEFT TODAY' : 'ALL ' + CFG.PACKS_PER_DAY + ' USED - BACK TOMORROW') + '</small>' +
-   '<button type="button" class="y' + (pl ? '' : ' d') + '" id="ad470pack" aria-label="FREE PACK: WATCH AD">FREE PACK: WATCH AD</button></div>' +
+  // 1.4 (Charlie): one free pack only - the FREE DAILY PACK (watch ad, v514). The extra FREE PACK: WATCH AD card is gone
+  // (kill switch to bring it back: __rl_470freepack).
+  return (W470fp() ? '<div class="ad470c"><b>FREE PACK</b><small>' + (pl ? 'WATCH A SHORT AD FOR ' + (CFG.PACKS_PER_AD > 1 ? CFG.PACKS_PER_AD + ' BASIC PACKS' : 'A BASIC PACK') + ' - ' + pl + ' LEFT TODAY' : 'ALL ' + CFG.PACKS_PER_DAY + ' USED - BACK TOMORROW') + '</small>' +
+   '<button type="button" class="y' + (pl ? '' : ' d') + '" id="ad470pack" aria-label="FREE PACK: WATCH AD">FREE PACK: WATCH AD</button></div>' : '') +
    '<div class="ad470c"><b>DAILY DIMES</b><small>' + (dr ? 'WATCH A SHORT AD FOR +' + CFG.DAILY_DIMES + ' DIMES, ONCE A DAY' : 'CLAIMED TODAY - BACK TOMORROW') + '</small>' +
    '<button type="button" class="y' + (dr ? '' : ' d') + '" id="ad470dimes" aria-label="DAILY DIMES: WATCH AD">DAILY DIMES: WATCH AD</button></div>';
  }

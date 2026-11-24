@@ -374,7 +374,6 @@ const RL12A = (() => {
   c172_stick_01: [ 'knox_detwigged_1', 'knox_detwigged_2' ],
   c172_stick_02: [ 'knox_lostsomething_1', 'knox_lostsomething_2' ],
   c173_relax_01: [ 'knox_relaxpal_1', 'knox_relaxpal_2' ],
-  oldman_back: [ 'oldman_ohmyback_1', 'oldman_ohmyback_2' ],
   oldman_groan: [ 'oldman_groan_1' ],
   crowd_ewww: [ 'crowd_ewww_1', 'crowd_ewww_2' ],
   top_cheddar: [ 'knox_topcheddar_1', 'knox_topcheddar_2' ]
@@ -383,8 +382,6 @@ const RL12A = (() => {
   "crowd_ewww_1": 1.65,
   "crowd_ewww_2": 1.65,
   "oldman_groan_1": 2.9,
-  "oldman_ohmyback_1": 4.34,
-  "oldman_ohmyback_2": 4.31,
   "knox_detwigged_1": 1.96,
   "knox_detwigged_2": 2.66,
   "knox_lostsomething_1": 1.62,

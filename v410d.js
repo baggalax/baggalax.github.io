@@ -241,8 +241,9 @@
     if (sc !== 'final' && sc !== 'defense' && sc !== 'cpu' && G.cpuDef) {
      const lab = 'THEIR D: ' + dLabel(G) + (s.lock ? ' + LOCK ' + s.lock.num : '');
      const lw = textW(lab);
-     rect(W - 98 - lw, 17, lw + 4, 9, 'rgba(0,0,0,.72)');
-     text(lab, W - 96, 18, 1, s.cur !== s.base ? '#ffb14d' : '#8fe3f0', 'right', '#000');
+     const ly = window.__rl_no596hud ? 17 : 35; // 1.5c (Jonny): under the ad boards, not on them
+     rect(W - 98 - lw, ly, lw + 4, 9, 'rgba(0,0,0,.72)');
+     text(lab, W - 96, ly + 1, 1, s.cur !== s.base ? '#ffb14d' : '#8fe3f0', 'right', '#000');
     }
     drawCall(G, s);
    }

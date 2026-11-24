@@ -785,7 +785,7 @@
   if (r.side === 'g') {
    let team = r.state.gteam || LS.get('team', null) || TEAMS[1].id;
    if (team === r.state.hteam) team = TEAMS.find(t => t.id !== r.state.hteam).id;
-   if (!r.state.gteam) patchLobby({
+   if (!r.state.gteam && (window.__rl_no77fix || !(window.RK15LL && RK15LL.pvp && RK15LL.pvp.code === code))) patchLobby({ // B77: a ranked room gets the card team at once (v590ll flow74) - no default team write to race it
     gteam: team,
     glu: myLineup(team)
    });
@@ -1272,10 +1272,22 @@
    }
   });
  }
+ // 1.5 B72 (HIGH): card team ids are per-phone slot ids ('SZ0P1' + a counter), so two players' first card teams are BOTH
+ // 'SZ0P11'. The opponent's team was registered over YOUR SZ_REG entry (your card team showed the friend's name, the match
+ // had the same id on both sides). Now an opponent team whose id is one of yours is registered as a copy under a remote-only
+ // id ('SZ1' + the rest; 'SZ1' is never made locally) and that entry is removed after the match. Kill: window.__rl_no72ali
+ function localTeam72(id) { try { const t = SZ_REG[id]; if (t && (t.mine || t.ct33 && !t.rem72)) return true; if (window.V33 && V33.all && V33.all().some(x => x && x.id === id)) return true; if (typeof szIsArch2314 === 'function' && szIsArch2314(id)) return true; } catch (e) {} return false; }
+ function alias72(id, side) { if (window.__rl_no72ali || !id || !N.side || side === N.side || !/^SZ[A-Z0-9]{4}$/.test(String(id))) return id; return localTeam72(id) ? 'SZ1' + String(id).slice(3) : id; }
+ // 1.5 B74 (Charlie: 'when I left, my friend kept playing a CPU... as UTAH'): v592ff keeps the match going vs the CPU after the
+ // other player leaves and closes the room (N.leave) - which deleted the opponent's remote-only team copy mid-match, so T()
+ // fell back to TEAMS[0] (Utah). Now the copy is only removed once no match is up any more. Kill switch: window.__rl_no74keep
+ function clear72() { if (!window.__rl_no74keep && typeof game !== 'undefined' && game) { if (!clear72.w) clear72.w = setInterval(() => { if (typeof game === 'undefined' || !game) { clearInterval(clear72.w); clear72.w = 0; clear72(); } }, 2000); return; } try { for (const k of Object.keys(SZ_REG)) if (SZ_REG[k] && SZ_REG[k].rem72) delete SZ_REG[k]; if (window.V33 && V33.regAll) V33.regAll(); } catch (e) {} }
+ N.alias72 = alias72; N.clear72 = clear72;
  function szSync15(st) {
   if (!st || typeof szRegister15 !== 'function') return;
   for (const k of [ 'h', 'g' ]) {
-   const d = st[k + 'szn'], id = st[k + 'team'];
+   const d0 = st[k + 'szn'], id0 = st[k + 'team'], id = alias72(id0, k), d = d0 && id !== id0 && d0.id === id0 ? Object.assign(JSON.parse(JSON.stringify(d0)), { id: id }) : d0;
+   if (id !== id0 && d && (!SZ_REG[id] || SZ_REG[id]._raw !== d0)) { const t = szRegister15(d, false); if (t) { t._raw = d0; t.rem72 = 1; } continue; }
    if (d && id && d.id === id && !(SZ_REG[id] && SZ_REG[id].mine) && (!SZ_REG[id] || SZ_REG[id]._raw !== d)) {
     const t = szRegister15(d, false);
     if (t) t._raw = d;
@@ -1293,7 +1305,7 @@
   szSync15(st);
   const S0 = st.settings || defaultSettings();
   if (typeof vsBegin === 'function') vsBegin();
-  const myT = host ? st.hteam : st.gteam, opT = host ? st.gteam : st.hteam, src = sg ? 'season' : 'real';
+  const myT = host ? st.hteam : st.gteam, opT = alias72(host ? st.gteam : st.hteam, host ? 'g' : 'h'), src = sg ? 'season' : 'real';
   const myR = host ? st.hready : st.gready, opR = host ? st.gready : st.hready;
   const colW = 100, lx = 52, rx = W - 52, feetY = 92, k = 3;
   const tcard = (tid, cx, label, ready, mine) => {
@@ -1631,6 +1643,7 @@
   N.code = null;
   N.lobby = null;
   N.inGame = false;
+  clear72();
   N.auth = false;
   saveNetGame(null);
   if (N.seasonBack) {
@@ -1669,7 +1682,7 @@
   N.manualSw = -9;
   N.st = st;
   N.myTeam = host ? st.hteam : st.gteam;
-  N.oppTeam = host ? st.gteam : st.hteam;
+  N.oppTeam = alias72(host ? st.gteam : st.hteam, host ? 'g' : 'h');
   N.savedSettings = Object.assign({}, SETTINGS);
   Object.assign(SETTINGS, st.settings || {});
   settingsFix();
@@ -2157,8 +2170,32 @@
    p: p
   });
  }
+ // 1.5 B77 (Charlie, online faceoff: 'the ball does not come out until BOTH of us swipe'): the host decided only once both
+ // presses were in. Now: when one player has swiped and the other has not within 0.35 s, the host decides with what it has
+ // (the one who has not swiped = his taps so far + his reaction = the time since the whistle, so he is the slower one). If the
+ // swiper wins, his ball comes out right away in his swipe direction (as offline); if the other one wins, he gets the ball
+ // like offline's too-slow rule (ball out to him). Same host decision for both phones ('for'). Kill switch: window.__rl_no77fo
+ function foEarly77() {
+  const f = N.fo, G = game, F = G && G.fo; if (!f || f.res || !F || N.side !== 'h') return;
+  const one = f.mine || f.theirs; if (!one) return;
+  const t0 = f.mine ? f.pressAt : f.theirAt;
+  if (performance.now() - (t0 || 0) < 350) { if (!f.w77) f.w77 = setTimeout(() => { f.w77 = null; foDecide(); }, 380); return; }
+  const el = Math.max(+(F.t - (F.whistleT != null ? F.whistleT : F.t)).toFixed(3), (one.react || 0) + .05);
+  const a = f.mine || { react: el, rate: +((F.taps || 0) / (F.setDur || 1)).toFixed(3), fo: +rf(G.foMe.pl, 'fo').toFixed(3), late77: 1 };
+  const b = f.theirs || { react: el, rate: +((f.theirTaps || 0) / (F.setDur || 1)).toFixed(3), fo: +rf(G.foThem.pl, 'fo').toFixed(3), late77: 1 };
+  let hostWins;
+  if (a.viol && b.viol) hostWins = Math.random() < .5; else if (a.viol || b.viol) hostWins = !a.viol; else {
+   const p = clamp(.5 + ((a.rate || 0) - (b.rate || 0)) * .07 + ((b.react == null ? 1.6 : b.react) - (a.react == null ? 1.6 : a.react)) * 1.2 + .11 * ((a.fo || 0) - (b.fo || 0)), .08, .92);
+   hostWins = Math.random() < p; f.p = p;
+  }
+  f.res = hostWins ? 'h' : 'g'; f.early77 = 1; N.stats.foEarly = (N.stats.foEarly || 0) + 1;
+  N.link.send({ t: 'for', n: f.n, w: f.res, p: f.p });
+  if (!f.mine) f.mine = { slow: true, late: true };
+  foApply(f.res);
+ }
  function foDecide() {
   const f = N.fo;
+  if (f && !f.res && !window.__rl_no77fo && N.side === 'h' && (!f.mine || !f.theirs)) { foEarly77(); return; }
   if (!f || f.res || !f.mine) return;
   const a = f.mine, b = f.theirs;
   if (!b) return;
@@ -2850,6 +2887,7 @@
     return;
    }
    N.fo.theirs = e.p;
+   N.fo.theirAt = performance.now();
    if (!N.fo.theirDown) {
     N.fo.theirDown = true;
     if (N.side === 'h') foMaybeGo();
@@ -5472,7 +5510,7 @@
   const cx = W / 2, win = G.score[0] > G.score[1];
   rect(0, 0, W, H, 'rgba(0,0,0,.55)');
   card(cx - 120, 14, 240, 156);
-  text('FINAL' + (typeof otTag173 === 'function' ? otTag173(G) : G.ot ? ' / OT' : '') + '  -  ' + DIFF_NAMES[G.diff != null ? G.diff : 1] + '  -  ONLINE', cx, 20, 1, '#9aa', 'center');
+  text('FINAL' + (typeof otTag173 === 'function' ? otTag173(G) : G.ot ? ' / OT' : '') + '  -  ONLINE' /* 1.5f: the difficulty label read ONLINE too (online games are always the online level) - say it once */, cx, 20, 1, '#9aa', 'center');
   text(win ? 'YOU WIN!' : 'TOUGH LOSS', cx, 30, 4, win ? '#ffe14d' : '#ff5a4a', 'center', '#000');
   scoreLine(cx, 64);
   text('VS ' + T(G.opp).name + (G.mode === 'season' ? ' - ' + (pendingGame && pendingGame.h2h || N.code ? 'ONLINE' : 'CPU') : ' - YOUR FRIEND'), cx, 98, 1, '#cfe', 'center');

@@ -96,8 +96,8 @@
   const blink = Math.floor(T() * 2) % 2 === 0;
   textMini('NEW IN', cx, y + 3, blink ? '#ffe14d' : '#ffffff');
   textMini('YARD SALE', cx, y + 7.5, '#7dff7a');
-  const L = wrap(P.n, tw).slice(0, 2);
-  L.forEach((s, i) => textMini(s, cx, y + 12.5 + i * 4.3, '#e8f0f4'));
+  if (window.RK15 && RK15.miniFit && !window.__rl_no596promo) RK15.miniFit(P.n, cx, y + 13, tw, '#e8f0f4', .65); // 1.5c (Jonny): one measured line that always fits (the width estimate overflowed / wrapped to 4 lines at 667)
+  else { const L = wrap(P.n, tw).slice(0, 2); L.forEach((s, i) => textMini(s, cx, y + 12.5 + i * 4.3, '#e8f0f4')); }
   const ps = String(P.cost), pw = 9 + ps.length * 2.6, px = Math.round(cx - pw / 2), py = y + h - 9;
   coin(px, py);
   textMini(ps, px + 9 + ps.length * 1.3, py + 2.5, '#ffe14d');

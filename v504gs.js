@@ -358,7 +358,7 @@
       const hp = window.__v17hp, sid = hp && stickOf(hp);
       if (sid === IDS.pro || sid === IDS.gk) {
        const rows = f[3], w = rows[0].length, cells = [];
-       rows.forEach((row, r) => [ ...row ].forEach((ch, q) => { if (ch === 'X' || ch === 'M' || ch === 'm' || ch === 'n') cells.push([ q, r ]); }));
+       const nh73 = !!(window.STICK590 && !window.__rl_no590stick && !window.__rl_no73gs); rows.forEach((row, r) => [ ...row ].forEach((ch, q) => { if (ch === 'X' || (!nh73 && (ch === 'M' || ch === 'm' || ch === 'n'))) cells.push([ q, r ]); })); // 1.5 B73: no shimmer on the old head's (empty) cells
        if (cells.length) {
         const r0 = Math.min(...cells.map(c => c[1])), r1 = Math.max(...cells.map(c => c[1])), qs = cells.map(c => flip ? -c[0] : c[0]), q0 = Math.min(...qs), span = r1 - r0 + 1 + (Math.max(...qs) - q0) * .5;
         // one bright pure-white diagonal band, 2-3 sprite pixels wide, sweeping down the head and the shaft every 1.6 s

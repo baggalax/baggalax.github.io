@@ -22,7 +22,7 @@ const CREASE = 15, MOUTH = 8;
 
 const QLEN = 90, SHOT_CLOCK = 20;
 
-const CLEAR_T = 10, BOX_T = 6, CREASE_CT = 4;
+var CLEAR_T = 10, BOX_T = 6, CREASE_CT = 4; // 1.5f: var (not const) so v599rules can set them per league for each game
 
 const cv = document.getElementById('game');
 
@@ -11349,6 +11349,7 @@ function drawHandStick(x, y, hx, hy, long) {
    g.globalAlpha = 1;
   }
   line(x, y - 11, hx, hy + 3, sc ? sc.X : long ? '#3a3a44' : '#282830');
+  if (window.STICK590 && STICK590.headAt && STICK590.headAt(g, hx, hy + 3, x, y - 11, sc || null, sc && sc.glow)) return; // 1.5e: the new head (was the old 5x6 head)
   rect(hx - 2, hy - 2, 5, 6, '#0d0d0d');
   rect(hx - 1, hy - 1, 3, 4, sc ? sc.M : '#ffffff');
   px(hx, hy + 1, sc ? sc.m : '#cdd6da');
@@ -13977,7 +13978,7 @@ function vsHeroCol(i, tid, src, cx, feetY, k, live, o) {
   if (now() < VS.swallow) return;
   if (o.onHero) o.onHero(i);
  }, 'VS PLAYER ' + (i ? 'RIGHT' : 'LEFT'));
- const ay = Math.round(feetY - 21 * k / 2 - 15), axl = cx - hw - 22, axr = cx + hw + 4;
+ const ay = Math.round(feetY - 21 * k / 2 - 15), axl = window.__rl_no597mu ? cx - hw - 22 : Math.max(2, cx - hw - 22), axr = window.__rl_no597mu ? cx + hw + 4 : Math.min(W - 20, cx + hw + 4); // 1.5e (QA6): arrows stay on screen at 667
  if (st.n > 1) {
   if (live) {
    lobbyArrow('VS ' + (i ? 'R' : 'L') + ' PREV', axl, ay, -1, () => vsStep(i, -1));
@@ -14160,17 +14161,32 @@ function drawVsScreen(o) {
   });
   const ul = VS.uni && VS.uni[i] ? VS.uni[i] : null;
   const lw = Math.max(textW(tm.name, 1), textW(c.label, 1), ul ? textW(ul.txt, 1) : 0) + 6;
-  rect(Math.round(x - lw / 2), hy - 2, lw, ul ? 23 : 16, o.hdA || 'rgba(5,10,14,.55)');
+  const sh597 = window.__rl_no597mu ? null : '#000'; // 1.5e (QA6): a see-through plate (the helmets show) - every line gets a pixel shadow instead
+  rect(Math.round(x - lw / 2), hy - 2, lw, ul ? 23 : 16, window.__rl_no597mu ? (o.hdA || 'rgba(5,10,14,.55)') : 'rgba(5,10,14,.74)'); // QA7: dark enough that a stick head behind never fights the labels (the helmet still shows dimmed)
   text(tm.name, x, hy, 1, '#ffffff', 'center', '#000');
-  text(c.label, x, hy + 7, 1, c.you ? '#8fe3f0' : '#cfe', 'center');
-  if (ul) text(ul.txt, x, hy + 14, 1, ul.locked ? '#ff9a8a' : '#ffd23a', 'center');
+  text(c.label, x, hy + 7, 1, c.you ? '#8fe3f0' : '#cfe', 'center', sh597);
+  if (ul) text(ul.txt, x, hy + 14, 1, ul.locked ? '#ff9a8a' : '#ffd23a', 'center', sh597);
  }
  const mt = o.midY || 44;
  badge(T(o.L.tid), cx - 30, mt, 2);
  badge(T(o.R.tid), cx + 4, mt, 2);
  text(o.mid || 'VS', cx, mt + 38, 3, '#fff', 'center', '#000');
  if (o.midText) o.midText(cx, mt + 62);
- if (window.UNI21 && UNI21.on() && UNI21.clash()) text('KITS LOOK ALIKE', cx, mt + 56, 1, '#ff9a8a', 'center', '#000');
+ if (!o.clashBelow && window.UNI21 && UNI21.on() && UNI21.clash()) text('KITS LOOK ALIKE', cx, mt + 56, 1, '#ff9a8a', 'center', '#000');
+}
+
+// 1.5e (QA6): the menu message ('NO ACCOUNT YET...') ran out of its box, over the mute button and into the island strip:
+// the box stops short of the mute button and the text shrinks to fit inside it.
+function menuMsg597(bx, y, bw, tcx) {
+ if (window.__rl_no597msg) { rect(bx, y, bw, 12, 'rgba(0,0,0,.8)'); text(menuMsg.s, tcx, y + 3, 1, '#ff9a8a', 'center'); return; }
+ const w = bw - 22, cx = bx + w / 2;
+ let bb = 0; try { (lobby.bars || []).forEach(b => { if (b.x < bx + bw && b.x + b.w > bx) bb = Math.max(bb, b.y + b.h); }); } catch (e) {}
+ if (bb && y < bb + 2) y = bb + 2; // QA7: never over the FRIENDS bar (667)
+ if (y + 12 > H - 12) { const hh = Math.max(7, H - 12 - y); rect(bx, y, w, hh, 'rgba(0,0,0,.8)'); if (window.RK15 && RK15.miniFit) RK15.miniFit(menuMsg.s, cx, y + Math.max(1, (hh - 4) / 2), w - 6, '#ff9a8a', .7); else textMini(menuMsg.s, cx, y + 1, '#ff9a8a'); return; }
+ rect(bx, y, w, 12, 'rgba(0,0,0,.8)');
+ if (textW(menuMsg.s, 1) <= w - 6) text(menuMsg.s, cx, y + 3, 1, '#ff9a8a', 'center');
+ else if (window.RK15 && RK15.miniFit) RK15.miniFit(menuMsg.s, cx, y + 4, w - 6, '#ff9a8a', .75);
+ else textMini(menuMsg.s, cx, y + 4, '#ff9a8a');
 }
 
 function drawMatchup() {
@@ -14207,11 +14223,13 @@ function drawMatchup() {
   roster: rosterFn,
   headY: 22,
   midY: 46,
+  clashBelow: 1,
   feetY: fy286,
   hdA: dy286 > 0 ? 'rgba(5,10,14,.9)' : null
  });
  text('QUICK GAME - REAL ROSTERS', W / 2, 5, 1, '#ffd23a', 'center', '#000');
  text('TEAM OVR ' + teamOvr(u, 'real') + ' - ' + teamOvr(o, 'real'), W / 2, 113 - dy286, 1, '#cfe', 'center');
+ if (window.UNI21 && UNI21.on() && UNI21.clash()) text('KITS LOOK ALIKE', W / 2, 121 - dy286, 1, '#ff9a8a', 'center', '#000'); // 1.4: under the team OVR line, not on top of it
  const by = H - 22, cx = W / 2;
  button('BACK', 6, 4, 40, 14, () => {
   screen = 'pickOpp';
@@ -14314,12 +14332,11 @@ function drawMenu() {
   const lastY = bars[bars.length - 1].y + bars[bars.length - 1].h;
   if (menuMsg) {
    menuMsg.t -= 1 / 60;
-   rect(bx, Math.min(lastY + 4, H - 26), bw, 12, 'rgba(0,0,0,.8)');
-   text(menuMsg.s, tcx, Math.min(lastY + 4, H - 26) + 3, 1, '#ff9a8a', 'center');
+   menuMsg597(bx, Math.min(lastY + 4, H - 26), bw, tcx);
    if (menuMsg.t <= 0) menuMsg = null;
   }
   rect(2, H - 11, 47, 9, 'rgba(0,0,0,.45)');
-  text('V40.1.4', 4, H - 9, 1, '#7dff7a');
+  text('V1.5', 4, H - 9, 1, '#7dff7a');
   if (modal) drawLobbyCard(); else drawMuteBtn();
   if (tutAsk) drawTutAsk();
   return;
@@ -14337,12 +14354,11 @@ function drawMenu() {
  text('QUICK ' + record.w + '-' + record.l + '  TITLES ' + LS.get('titles', 0), bx, H - 10, 1, '#cfe');
  if (menuMsg) {
   menuMsg.t -= 1 / 60;
-  rect(bx, H - 26, bw, 12, 'rgba(0,0,0,.8)');
-  text(menuMsg.s, tcx, H - 23, 1, '#ff9a8a', 'center');
+  menuMsg597(bx, H - 26, bw, tcx);
   if (menuMsg.t <= 0) menuMsg = null;
  }
  rect(2, H - 11, 47, 9, 'rgba(0,0,0,.45)');
- text('V40.1.4', 4, H - 9, 1, '#7dff7a');
+ text('V1.5', 4, H - 9, 1, '#7dff7a');
  if (window.V17) try {
   V17.drawHome(L, modal || !!ASK22);
  } catch (e) {
@@ -15142,6 +15158,10 @@ function dd2314Entries(world) {
 let DD2314 = null;
 
 function szDrop2314(by, onPick) {
+ if (!window.__rl_no566sz && (gridNA16 || window.__gscCollab) && !qpcs26Tab.cl && !(gridWorld16 && WTEAMS.length)) {
+  DD2314 = null;
+  return;
+ }
  const world = !!(gridWorld16 && WTEAMS.length) && !qpcs26Tab.cl;
  if (qpcs26Tab.cl && qpcs26On() && qpcs26Avail()) {
   DD2314 = null;
@@ -15388,7 +15408,7 @@ function drawPickOpp() {
   screen = 'matchup';
   panelDirty();
  }, {
-  exclude: menuSel.team,
+  exclude: window.__rl_no572same ? menuSel.team : null, // 1.4: any team can play itself (like Good Stick)
   back: () => {
    screen = 'pickTeam';
   },
@@ -15424,7 +15444,7 @@ function drawPickOpp() {
       bg: '#ff9a3d'
      });
     }
-   } else if (!(no32qpOk() && (qpcs26Tab.cl || gridWorld16 && WTEAMS.length && !gridNA16))) {
+   } else if (!(no32qpOk() && (qpcs26Tab.cl || gridWorld16 && WTEAMS.length && !gridNA16)) && (window.__rl_no566sz || !gridNA16 && !window.__gscCollab)) {
     const sl = szLabel15(), sid = szAvail15() ? szId15() : null;
     if (sl && sid !== menuSel.team) {
      const lab = textW(sl) + 8 <= W / 2 - 66 ? sl : 'SEASON TEAM';
@@ -16908,7 +16928,7 @@ function dsetNext(G) {
  return i >= 0 && i + 1 < cs.length ? setDefense('custom', cs[i + 1].id) : setDefense('man');
 }
 
-const PEN_LEN = 30;
+var PEN_LEN = 30; // 1.5f: var - v599rules sets the per-league 1-minute value
 
 const PEN_SCALE = .8;
 

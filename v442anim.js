@@ -368,6 +368,16 @@
  function head(g2, hx, hy, c, tall, s) {
   hx = Math.round(hx);
   hy = Math.round(hy);
+  if (!window.__rl_no600dodgehead && !window.__rl_no590stick) { // 1.5f: the NEW 10x14 half-pixel head (v590stick art) in dodges / hand-drawn carries too, its mesh centre on the ball spot (hx, hy)
+   const H6 = ['..WWWWWW..', '.WmnmnmnW.', 'Wmnmmmnmmg', 'Wwwwwwwwwg', 'Wmmmnmmmng', 'Wwwwwwwwwg', '.Wnmmmnmg.', '.Wmnmnmng.', '..Wmnmmg..', '..Wnnnng..', '...Wnng...', '...Wnng...', '....WW....', '....WW....'];
+   const v = String(c.M || '#fff').replace('#', ''), rgb = [0, 2, 4].map(i => parseInt(v.length === 3 ? v[i / 2] + v[i / 2] : v.substr(i, 2), 16) || 0), gry = Math.max(...rgb) - Math.min(...rgb) < 28;
+   const P = gry ? { W: '#f4f4f4', w: '#e1e4e6', g: '#b0b0b0', m: '#a9b2b8', n: '#848b90' } : { W: c.M, w: c.M, g: c.n, m: c.m, n: c.n };
+   const x0 = hx + .5 - 2.5, y0 = hy + .5 - 2.5, on = (q, r) => r >= 0 && r < 14 && q >= 0 && q < 10 && H6[r][q] !== '.';
+   g2.fillStyle = '#0d0d0d';
+   for (let r = -1; r <= 14; r++) for (let q = -1; q <= 10; q++) if (!on(q, r) && (on(q - 1, r) || on(q + 1, r) || on(q, r - 1) || on(q, r + 1))) g2.fillRect(x0 + q / 2, y0 + r / 2, .5, .5);
+   for (let r = 0; r < 14; r++) for (let q = 0; q < 10; q++) { const ch = H6[r][q]; if (ch === '.') continue; g2.fillStyle = P[ch]; g2.fillRect(x0 + q / 2, y0 + r / 2, .5, .5); }
+   return;
+  }
   if (tall) {
    const fl = (s || 1) < 0;
    for (let r = 0; r < HEADPOCK.length; r++) for (let q = 0; q < 6; q++) {
@@ -427,7 +437,7 @@
   }
   glove(g2, Bx, By, pal);
   glove(g2, Tx, Ty, pal);
-  head(g2, Hx, Hy - 1, c, tall, s);
+  if (!(window.STICK590 && STICK590.headAt && STICK590.headAt(g2, Hx, Hy + 2, bx, by, c, c.glow || (window.__v17sc && window.__v17sc.glow)))) head(g2, Hx, Hy - 1, c, tall, s); // 1.5e: the new head
  }
  /* ---------- shot: wind-up (aim pull-back), release, follow-through, recovery ---------- */
  const CARRY = { h: [ 5, -24 ], t: [ 4, -14 ], b: [ 1, -11 ] }, COCK = { h: [ -15, -21 ], t: [ -5, -16 ], b: [ 0, -12 ] };
@@ -645,7 +655,7 @@
    /* v4044: back-facing steps keep the stick out at his side (never straight up his back), head by the shoulder */
    const Hx = x + s * hr[0], Hy = y + hr[1], Bx = x + s * (hr[0] - 2);
    seg(g, Bx, y - 8, Hx, Hy + 2, c.X);
-   head(g, Hx, Hy - 1, c, true, s);
+   if (!(window.STICK590 && STICK590.headAt && STICK590.headAt(g, Hx, Hy + 2, Bx, y - 8, c, c.glow || (window.__v17sc && window.__v17sc.glow)))) head(g, Hx, Hy - 1, c, true, s);
    glove(g, x + s * (hr[0] - 1) + (s > 0 ? 1 : 0), y - 16, pal);
    glove(g, x + s * (hr[0] - 2) + (s > 0 ? 1 : 0), y - 11, pal);
   }
@@ -685,7 +695,7 @@
    const Kp = keyAt(sh.type, Math.max(0, sh.e - j * .025));
    g2.globalAlpha = .22 * (3 - j);
    seg(g2, x + s * Kp.t[0], y + Kp.t[1], x + s * Kp.h[0], y + Kp.h[1] + 1, '#e8f6ff');
-   head(g2, x + s * Kp.h[0], y + Kp.h[1] - 1, { M: '#e8f6ff', m: '#cfe9f5', n: '#a8c8d8' });
+   if (!(window.STICK590 && STICK590.headAt && STICK590.headAt(g2, x + s * Kp.h[0], y + Kp.h[1] + 1, x + s * Kp.t[0], y + Kp.t[1], { M: '#e8f6ff', m: '#cfe9f5', n: '#a8c8d8' }))) head(g2, x + s * Kp.h[0], y + Kp.h[1] - 1, { M: '#e8f6ff', m: '#cfe9f5', n: '#a8c8d8' });
    g2.globalAlpha = 1;
   }
   stick2(g2, x + lean * s, y + (sh ? (shotPose(sh.e) || [ 0, 0, 0 ])[2] : w > .6 ? 1 : 0), s, { h: [ K.h[0] - lean, K.h[1] ], t: [ K.t[0] - lean, K.t[1] ], b: [ K.b[0] - lean, K.b[1] ] }, pal, c);

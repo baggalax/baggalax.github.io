@@ -65,7 +65,7 @@ const V33 = (() => {
    try {
     if (window.C30 && C30.parse) {
      const c = C30.parse(id);
-     if (c && !c.made) return false;
+     if (c && !c.made && window.__rl_no600cu) return false; // 1.5 B72: unnamed custom cards count right away (kill: __rl_no600cu)
     }
    } catch (e) {}
    return !!p.leg || !!(window.V22 && V22.okSub(id));
@@ -147,6 +147,11 @@ const V33 = (() => {
    g['N/A'] = (c['N/A'] || []).slice();
   } catch (e) {}
   if (!g['N/A'].length && typeof GH_REG !== 'undefined') g['N/A'] = Object.keys(GH_REG);
+  // 1.4: every N/A team in the game (new ones too, e.g. Turkey Trotters), only the ones you own, never collab teams
+  try {
+   if (typeof GH_REG !== 'undefined') for (const id of Object.keys(GH_REG)) if (!g['N/A'].includes(id)) g['N/A'].push(id);
+   g['N/A'] = g['N/A'].filter(id => { const t = T(id); return t && t.lg !== 'COLLAB' && !t.gsc501 && (!window.V493 || !V493.naOwned || V493.naOwned(id)); });
+  } catch (e) {}
   for (const k in g) g[k] = g[k].filter(id => !kindOf(id) && T(id) && T(id).id === id);
   try {
    const ids = window.GSC501 && GSC501.ids ? GSC501.ids().filter(id => T(id) && T(id).id === id) : [];
@@ -1510,7 +1515,8 @@ V33.regAll();
    }
   }
   const d = st[op + 'szn'] && st[op + 'szn'].nm33;
-  if (d && typeof d === 'object' && opTid && d.tid === opTid) apply(d, myTid); else restore();
+  const opA = N.alias72 ? N.alias72(opTid, op) : opTid; // 1.5 B72: the opponent's EDIT NAMES go to the remote-only copy when their card team id is also one of yours (net.js alias72)
+  if (d && typeof d === 'object' && opTid && d.tid === opTid) apply(opA !== opTid ? Object.assign({}, d, { tid: opA }) : d, myTid); else restore();
  }
  setInterval(() => {
   try {

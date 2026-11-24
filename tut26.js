@@ -374,7 +374,18 @@
   const V = window.V17;
   if (!V || !V.PACKS) return null;
   const out = new Set;
-  for (const k in V.PACKS) out.add('pack:' + k);
+  // 1.4: only packs that are really in the shop right now (Live-Ops). Rebuy bundles (r581) are never "new".
+  const LO = window.LIVEOPS, LK = { tk565: 'pack_turkey565', vets489: 'pack_vets489' };
+  if (LO && !LO.ready) return null;
+  const known = new Set();
+  try { (LO && LO.catalog && LO.catalog() || []).forEach(c => { if (c && c.id) known.add(c.id); }); } catch (e) {}
+  const live = k => { const id = LK[k] || 'pack_' + k; if (!LO || !LO.shopOn || !known.has(id)) return true; try { return !!LO.shopOn(id); } catch (e) { return true; } };
+  const offB = new Set();
+  for (const k in V.PACKS) {
+   const pk = V.PACKS[k];
+   if (pk && (pk.r581 || !live(k))) { if (pk.bundle && !pk.r581) pk.bundle.forEach(x => offB.add('item:' + x)); continue; }
+   out.add('pack:' + k);
+  }
   const U = window.UNI21;
   try {
    if (U && U.on && U.on()) {
@@ -385,9 +396,11 @@
   } catch (e) {}
   try {
    for (const it of V.I) if (!it.trophy && !it.crew && !it.leg20 && it.sec !== 'trophy' && V.vis16(it)) out.add('item:' + it.id);
+   offB.forEach(x => out.delete(x));
+   if (LO && LO.shopOn && known.has('pack_halloween') && !LO.shopOn('pack_halloween') && V.hw16 && V.hw16.pack && V.hw16.pack.bundle) V.hw16.pack.bundle.forEach(x => out.delete('item:' + x));
   } catch (e) {}
   try {
-   if (window.V27 && V27.shopIds) for (const x of V27.shopIds()) out.add(x);
+   if (window.V27 && V27.shopIds) for (const x of V27.shopIds()) if (x !== 'v27:relax' || !LO || !LO.shopOn || !known.has('pack_relax') || LO.shopOn('pack_relax')) out.add(x);
   } catch (e) {}
   return Array.from(out);
  }
@@ -449,7 +462,7 @@
     id: id,
     img: img,
     n: pk.n,
-    sub: pk.bundle ? 'BUNDLE - ' + pk.cost + ' CHINOS' : pk.cost ? pk.cost + ' CHINOS' : '',
+    sub: pk.bundle ? 'BUNDLE - ' + pk.cost + ' DIMES' : pk.cost ? pk.cost + ' DIMES' : '',
     minis: pk.bundle ? pk.bundle.map(x => {
      try {
       return V.iconUrl(x);

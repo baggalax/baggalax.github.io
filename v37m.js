@@ -486,7 +486,7 @@
   if (noTeamHere() && SIGN[M.page]) {
    const s = SIGN[M.page], sw = Math.min(L - 124, Math.max(textW(s, 1), textW('NO SEASON TEAM', 1)) + 10);
    rect(Math.round(L / 2 - sw / 2), 3, sw, 10, '#05080b');
-   text(s.slice(0, Math.floor((sw - 6) / 4)), L / 2, 5, 1, '#aab3ba', 'center');
+   if (!window.__rl_no597sign && textW(s, 1) > sw - 6 && window.RK15 && RK15.miniFit) RK15.miniFit(s, L / 2, 6, sw - 6, '#aab3ba', .75); else text(s.slice(0, Math.floor((sw - 6) / 4)), L / 2, 5, 1, '#aab3ba', 'center'); // 1.5e (QA6): fit, never cut ('NO WORLD GAMES TEAM YE')
   }
   return r;
  };

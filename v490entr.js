@@ -438,7 +438,7 @@
    for (const a of S.actors) if (a.vis) (a.h > 1 || a.p.y >= S.gy - 4 ? front : behind).push(a);
    behind.sort((p, q) => p.p.y - q.p.y); front.sort((p, q) => p.p.y - q.p.y);
    for (const a of behind) drawActor(S, a);
-   drawVehicle(S, t);
+   W0.__e490side = S.side; try { drawVehicle(S, t); } finally { W0.__e490side = null; } // 1.5f: which team's vehicle is drawing (v590fix's Flying Dutchman swap is the player's side only)
    drawFx(S);
    for (const a of front) drawActor(S, a);
   }
@@ -446,12 +446,13 @@
 
  /* ---------- run state ---------- */
  let RUN = null, lastMs = 0;
+ V.art = { jet: () => jet(1, '#8a96a6'), tank: () => tank(0, 0), rocket: () => rocket(0, '#c8ccd2'), ship: () => ship(0), heliM: () => heliM(0), heliC: () => heliC() }; // 1.5: RUN OUTS locker tiles (v590fix)
  V.state = () => RUN ? { mode: RUN.mode, t: +RUN.t.toFixed(2), kinds: RUN.shows.map(s => s.kind) } : null;
  function start(G, mode) {
   const ks = sidesOf(G), shows = [];
   for (let s = 0; s < 2; s++) if (ks[s]) shows.push(mkShow(G, ks[s], s, mode));
   if (!shows.length) return false;
-  RUN = { G, mode, t: 0, shows, cap: shows.map(S => NAME[S.kind] + ' ' + (mode === 'in' ? CAP_IN : CAP_OUT)[S.kind]).join('  -  ') };
+  RUN = { G, mode, t: 0, shows, cap: shows.map(S => S.side === 0 && S.kind === 'navy' && W0.__f590dutch && !W0.__rl_no598run ? 'THE FLYING DUTCHMAN ' + (mode === 'in' ? 'RISES' : 'SAILS AWAY') : NAME[S.kind] + ' ' + (mode === 'in' ? CAP_IN : CAP_OUT)[S.kind]).join('  -  ') }; // 1.5f: the player's Dutchman gets its own caption
   lastMs = performance.now();
   if (mode === 'in') V.plays++; else V.exits++;
   V.last = { mode, kinds: shows.map(S => S.kind), at: Date.now() };

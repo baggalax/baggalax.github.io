@@ -78,7 +78,7 @@
  function nearOn() {
   const c = car(); if (!c || SCR() !== 'live') return false;
   try { if (!canShoot()) return false; } catch (e) { return false; }
-  return c.x < GX && Math.hypot(GX - c.x, CY - c.y) <= SH.CFG.tapR + K.preR;
+  return c.x < GX && Math.hypot(GX - c.x, CY - c.y) <= SH.CFG.tapR + (W0.__rl_no582fake ? K.preR : 0);   // v582 (fix 7): FAKE shows with the circles (kill: __rl_no582fake)
  }
  function btnShown() { const G = G0(); return !!G && fakeOn(G) && !F.used && (F.armed || nearOn()); }
  const BR = 12;

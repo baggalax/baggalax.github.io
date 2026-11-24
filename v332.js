@@ -113,7 +113,7 @@ const V332 = (() => {
   try {
    if (!window.V22 || !V22.on()) return false;
    const ids = V22.ownedIds ? V22.ownedIds() : [];
-   if (ids.some(id => PP(id) && !(window.C30 && C30.parse && C30.parse(id) && !C30.parse(id).made))) return true;
+   if (ids.some(id => PP(id) && !(window.__rl_no600cu && window.C30 && C30.parse && C30.parse(id) && !C30.parse(id).made))) return true; // 1.5 B72
    return !!(window.V20 && V20.ownedLeg && V20.ownedLeg().length);
   } catch (e) {
    return false;

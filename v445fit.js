@@ -5,7 +5,7 @@
  if (window.__rl_no445fit) return;
  if (typeof RL12 === 'undefined' || !window.V17 || !V17.bakeGear) return;
  const R = RL12, off = () => !!window.__rl_no445fit;
- const PRICE = 200, LSK = 'fit45', IDS = { whale: 'fit45_whale', crown: 'fit45_crown' };
+ const PRICE0 = 200, PRC568 = () => { try { const p = window.LIVEOPS && LIVEOPS.price && LIVEOPS.price('pack_fit45'); return p != null ? p : PRICE0; } catch (e) { return PRICE0; } }, LSK = 'fit45', IDS = { whale: 'fit45_whale', crown: 'fit45_crown' };
  const NAME = { whale: 'THE WHALE', crown: 'THE CROWN' };
  const KH = '#d2bc8a', KHs = '#a8925f', KHz = '#e2d0a2';
  const FIT = { whale: { jersey: '#ff8cc6', navy: '#1d2a5e', navys: '#121a3e', white: '#f4f4f4', whites: '#c4c4cc', flop: '#7a4f2a' },
@@ -133,7 +133,8 @@
   if (alpha != null) { const a = gx.globalAlpha; gx.globalAlpha = alpha; gx.drawImage(c, x - ax - pad, y - f[1] - pad); gx.globalAlpha = a; }
   else gx.drawImage(c, x - ax - pad, y - f[1] - pad);
  }
- const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !kit.g27 && !off());
+ const g27x = k => !!(k && k.g27 && (window.__rl_no563fit || !(window.__rl_no598fitall ? /^(gsc[HA]|tk565[HA])$/ : /^(?!rk15)/).test(k.g27))); // 1.5f (Charlie: Whale would not go on): the fit beats every special set kit (Veterans, skeleton, white, collab ...); only a ranked uni blocks it, and wearing the fit already drops the ranked uni (v590uni wornKey)
+ const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !g27x(kit) && !off());
  const skinOfP = p => { try { return typeof skinOf === 'function' ? skinOf(p && p.pl) : 0; } catch (e) { return 0; } };
 
  const draw0 = R.draw;
@@ -181,12 +182,13 @@
  };
 
  /* ---------- which team wears it: the user's team in offline games, when switched on in the locker ---------- */
- const fitKit = (kit, w) => Object.assign({}, kit, { fit45: w });
+ // v1.3: a Good Stick kit wearing the fit loses its gscH/gscA marker, so the Good Stick jersey art (sleeves, logo) can't clip through the fit
+ const fitKit = (kit, w) => { const k = Object.assign({}, kit, { fit45: w }); if (!window.__rl_no563fit && (window.__rl_no598fitall ? /^(gsc[HA]|tk565[HA])$/ : /^(?!rk15)./).test(k.g27 || '')) delete k.g27; return k; };
  if (window.UNI21 && typeof UNI21.gameKits === 'function') {
   const gk0 = UNI21.gameKits;
   UNI21.gameKits = function(user, opp, userHome, mode, meta) {
    const r = gk0.apply(this, arguments);
-   try { const w = wearing(); if (w && !off() && !(meta && meta.online) && mode !== 'online' && r && r[0] && !r[0].g27) r[0] = fitKit(r[0], w); } catch (e) {}
+   try { const w = wearing(); if (w && !off() && !(meta && meta.online) && mode !== 'online' && r && r[0] && !g27x(r[0])) r[0] = fitKit(r[0], w); } catch (e) {}
    return r;
   };
  }
@@ -195,13 +197,14 @@
  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
  const coin = '<span class="coin17"></span>';
  function myTeam() {
+  try { if (!window.__rl_no598fitteam && window.V524 && V524.team) { const t = V524.team(); if (t) return t; } } catch (e) {} // 1.5f: the lobby you came from
   try { if (typeof season !== 'undefined' && season && season.team) return season.team; } catch (e) {}
   try { const q = JSON.parse(localStorage.getItem('rl_qteam16') || 'null'); if (q) return q; } catch (e) {}
   try { if (typeof TEAMS !== 'undefined' && TEAMS[0]) return TEAMS[0].id; } catch (e) {}
   return null;
  }
  function teamKit(tid) {
-  try { if (tid && window.UNI21 && UNI21.on && UNI21.on()) { const k = UNI21.kitOf(tid, UNI21.savedK(tid)); if (k && !k.g27) return k; } } catch (e) {}
+  try { if (tid && window.UNI21 && UNI21.on && UNI21.on()) { const k = UNI21.kitOf(tid, UNI21.savedK(tid)); if (k && !g27x(k)) return k; } } catch (e) {}
   try { if (tid && typeof lobbyKit === 'function') return lobbyKit(tid); } catch (e) {}
   return { jersey: '#1d2a5e', trim: '#ffffff', helm: '#1d2a5e' };
  }
@@ -251,9 +254,9 @@
   const st = ST(); if (!st) return false;
   const have = pick();
   if (have) { (V17.toast || (() => {}))(have === w ? 'YOU ALREADY OWN ' + NAME[w] : 'YOU PICKED ' + NAME[have] + ' - ' + NAME[w] + ' IS LOCKED', '#ff9a8a'); return false; }
-  if ((st.chinos | 0) < PRICE) { (V17.toast || (() => {}))('NOT ENOUGH DIMES - ' + NAME[w] + ' IS ' + PRICE, '#ff9a8a'); return false; }
-  st.chinos -= PRICE;
-  if (st.stats) st.stats.spent = (st.stats.spent || 0) + PRICE;
+  if ((st.chinos | 0) < PRC568()) { (V17.toast || (() => {}))('NOT ENOUGH DIMES - ' + NAME[w] + ' IS ' + PRC568(), '#ff9a8a'); return false; }
+  st.chinos -= PRC568();
+  if (st.stats) st.stats.spent = (st.stats.spent || 0) + PRC568();
   st.inv = st.inv || {}; st.inv[IDS[w]] = 1;
   lsSet({ pick: w, t: Date.now(), wear: false });
   try { V17.save(); } catch (e) {}
@@ -262,7 +265,7 @@
  }
  function setWear(w) {
   const have = pick();
-  if (have !== w) { try { V17.toast(have ? 'YOU PICKED ' + NAME[have] : 'GET ' + NAME[w] + ' IN THE SHOP - ' + PRICE + ' DIMES', '#ff9a8a'); } catch (e) {} return; }
+  if (have !== w) { try { V17.toast(have ? 'YOU PICKED ' + NAME[have] : 'GET ' + NAME[w] + ' IN THE SHOP - ' + PRC568() + ' DIMES', '#ff9a8a'); } catch (e) {} return; }
   const s = lsGet(); s.pick = have; s.t = s.t || Date.now(); s.wear = !(s.wear === true); lsSet(s);
   try { V17.toast(s.wear ? 'YOUR TEAM WEARS ' + NAME[w] + ' - TEAM HELMET + GLOVES STAY' : NAME[w] + ' OFF - BACK TO THE TEAM UNIFORM', '#7dff7a'); } catch (e) {}
  }
@@ -274,26 +277,26 @@
   let low;
   if (have === w) low = '<div class="fk45">OWNED - ' + (wearing() === w ? 'YOUR TEAM WEARS IT' : 'WEAR IT IN THE LOCKER ROOM') + '</div>';
   else if (have) low = '<div class="fl45">YOU PICKED ' + NAME[have] + '</div>';
-  else low = '<div class="fb45">' + btnH('PREVIEW ' + SH[w], 'v45prev', w, 'g', 'PREVIEW') + btnH('PICK ' + SH[w] + ' 200', 'v45pick', w, ok ? 'y' : 'd', 'PICK ' + SH[w] + ' – ' + coin + PRICE) + '</div>';
+  else low = '<div class="fb45">' + btnH('PREVIEW ' + SH[w], 'v45prev', w, 'g', 'PREVIEW') + btnH('PICK ' + SH[w] + ' ' + PRC568(), 'v45pick', w, ok ? 'y' : 'd', 'PICK ' + SH[w] + ' – ' + coin + PRC568()) + '</div>';
   return '<div class="fh45 ' + (w === 'whale' ? 'fw45' : 'fc45') + '"><b class="fn45">' + NAME[w] + '</b><div class="fld45">' +
    [front, side].map(im => im ? '<img alt="" src="' + im.u + '" style="width:' + im.w * 3 + 'px">' : '').join('') + '</div>' + low + '</div>';
  }
  function card() {
   const st = ST(); if (!st) return '';
   css();
-  const have = pick(), ok = !have && (st.chinos | 0) >= PRICE, tid = myTeam();
-  return '<div class="fit45" id="fit45tile"><div class="ft45">THE WHALE OR THE CROWN</div><div class="fs45">PICK ONE FOR ' + PRICE + ' DIMES. YOU CAN ONLY EVER OWN ONE - THE OTHER LOCKS FOR GOOD. YOUR TEAM KEEPS ITS HELMET + GLOVES.</div><div class="fr45">' + half('whale', have, ok, tid) + half('crown', have, ok, tid) + '</div></div>';
+  const have = pick(), ok = !have && (st.chinos | 0) >= PRC568(), tid = myTeam();
+  return '<div class="fit45" id="fit45tile"><div class="ft45">THE WHALE OR THE CROWN</div><div class="fs45">PICK ONE FOR ' + PRC568() + ' DIMES. YOU CAN ONLY EVER OWN ONE - THE OTHER LOCKS FOR GOOD. YOUR TEAM KEEPS ITS HELMET + GLOVES.</div><div class="fr45">' + half('whale', have, ok, tid) + half('crown', have, ok, tid) + '</div></div>';
  }
  function popHtml() {
   if (!pop || !FIT[pop.w]) return '';
-  const w = pop.w, o = w === 'whale' ? 'crown' : 'whale', tid = myTeam(), st = ST(), have = pick(), ok = !have && st && (st.chinos | 0) >= PRICE;
+  const w = pop.w, o = w === 'whale' ? 'crown' : 'whale', tid = myTeam(), st = ST(), have = pick(), ok = !have && st && (st.chinos | 0) >= PRC568();
   let inner;
   if (pop.k === 'prev') {
    const fr = ['d8S_idle_R', 'idle', 'run1'].map(n => playerUrl(w, n, tid));
    inner = '<div class="pv45"><div class="pt45" style="color:' + FIT[w].jersey + '">' + NAME[w] + '</div><div class="fld45">' + fr.map(im => im ? '<img alt="" src="' + im.u + '" style="width:' + im.w * 5 + 'px">' : '').join('') + '</div><div class="pl45"><span>FRONT</span><span>SIDE</span><span>RUNNING</span></div><div class="pd45">' + DESC[w] + '</div></div>';
-   inner += '<div class="row" style="justify-content:center;gap:8px">' + btnH('BACK', 'v45close', null, 'g') + (have ? '' : btnH('PICK ' + SH[w] + ' 200', 'v45pick', w, ok ? 'y' : 'd', 'PICK ' + SH[w] + ' – ' + coin + PRICE)) + '</div>';
+   inner += '<div class="row" style="justify-content:center;gap:8px">' + btnH('BACK', 'v45close', null, 'g') + (have ? '' : btnH('PICK ' + SH[w] + ' ' + PRC568(), 'v45pick', w, ok ? 'y' : 'd', 'PICK ' + SH[w] + ' – ' + coin + PRC568())) + '</div>';
   } else {
-   inner = '<div class="pv45"><div class="pt45">PICK ' + NAME[w] + '?</div><div class="pd45">YOU CAN ONLY OWN ONE. ' + NAME[o] + ' LOCKS FOR GOOD.<br>COSTS ' + PRICE + ' DIMES.</div></div>' +
+   inner = '<div class="pv45"><div class="pt45">PICK ' + NAME[w] + '?</div><div class="pd45">YOU CAN ONLY OWN ONE. ' + NAME[o] + ' LOCKS FOR GOOD.<br>COSTS ' + PRC568() + ' DIMES.</div></div>' +
     '<div class="row" style="justify-content:center;gap:8px">' + btnH('BACK', 'v45close', null, 'g') + btnH('YES PICK ' + SH[w], 'v45yes', w, ok ? 'y' : 'd', 'YES, PICK ' + SH[w]) + '</div>';
   }
   return '<div class="pop17" data-a="v45close" data-v="bg"><div class="pbox17 pv45" data-a="v17noop">' + inner + '</div></div>';
@@ -304,7 +307,7 @@
   const have = pick(), wr = wearing(), tk = teamKit(myTeam());
   const tile = w => {
    const own = have === w, lk = !own, rr = own ? (wr === w ? 'WEARING' : 'TAP TO WEAR') : 'LOCKED';
-   const sub = own ? '' : '<small class="wh17">' + (have ? 'YOU PICKED ' + NAME[have] : 'SHOP - ' + PRICE + ' DIMES') + '</small>';
+   const sub = own ? '' : '<small class="wh17">' + (have ? 'YOU PICKED ' + NAME[have] : 'SHOP - ' + PRC568() + ' DIMES') + '</small>';
    return '<button type="button" class="c17 uni17' + (lk ? ' lk' : '') + (own && wr === w ? ' wr17' : '') + '" data-a="v45wear" data-v="' + w + '" aria-label="' + esc(NAME[w] + (own ? wr === w ? ' (WEARING)' : '' : ' (LOCKED)')) + '"><div class="art"><img src="' + iconUrl(w, tk.helm || '#1d2a5e') + '" alt=""></div><div class="nm">' + NAME[w] + '</div><div class="rr">' + rr + '</div>' + sub + '</button>';
   };
   return '<div class="sec17 uni2319 fit45sec"><div class="sh17">WHALE / CROWN <span>' + (have ? 1 : 0) + ' / 1</span></div><div class="grid17">' + tile('whale') + tile('crown') + '</div></div>';
@@ -333,5 +336,5 @@
    v45wear(v) { if (FIT[v]) setWear(v); }
   });
  }
- window.V445 = { on: () => !off(), pick: pick, wearing: wearing, buy: buy, setWear: setWear, bakeFit: bakeFit, padFrame: padFrame, fit: fit, FIT: FIT, PRICE: PRICE };
+ window.V445 = { on: () => !off(), pick: pick, wearing: wearing, buy: buy, setWear: setWear, bakeFit: bakeFit, padFrame: padFrame, fit: fit, FIT: FIT, get PRICE() { return PRC568(); } };
 })();

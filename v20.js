@@ -307,13 +307,27 @@ const V20 = (() => {
  function atX(c) {
   return !!c && (window.__rl_no2002f6 ? c.x > GX - 2 && Math.abs(c.y - CY) < CREASE + 16 : c.x > GX - 4 && Math.abs(c.y - CY) < CREASE + 26);
  }
+ // 1.5f (Charlie): THE HIGH FLYER (LEG-0) is QUICK PLAY ONLY for now. Every other mode (online ranked / bot / Play a Friend /
+ // online season, season, World Games, college, career, ultimate, tournaments) keeps the player without the move. Online both
+ // phones run this same check on the same match flags, so it cannot desync. Kill switch: window.__rl_no598hf
+ function hfQuick(G) {
+  if (window.__rl_no598hf) return true;
+  try {
+   if (G && G.tutorial) return true; // the tutorial's HIGH FLYER lesson still teaches it
+   if (!G || G.mode !== 'quick') return false;
+   const m = G.meta || {};
+   if (G.online || m.online || m.ll15 || (window.RLNET && (RLNET.inGame || RLNET.code))) return false;
+   if (G.vets489 || G.tbowl570 || G.practice || G.brave) return false;
+   return true;
+  } catch (e) { return false; }
+ }
  function airReady() {
   const G = game, c = G && G.carrier;
-  return !off() && !window.__rl_no2002f6 && !!c && !!c.pl && c.pl.id === 'LEG-0' && (G.air20 ? G.air20.who === c && !G.air20.firing : atX(c) && canShoot());
+  return !off() && hfQuick(G) && !window.__rl_no2002f6 && !!c && !!c.pl && c.pl.id === 'LEG-0' && (G.air20 ? G.air20.who === c && !G.air20.firing : atX(c) && canShoot());
  }
  function preShot(held, corner) {
   const G = game, c = G && G.carrier;
-  if (off() || !c || !c.pl || c.pl.id !== 'LEG-0') return false;
+  if (off() || !c || !c.pl || c.pl.id !== 'LEG-0' || !hfQuick(G)) return false;
   if (G.air20 && G.air20.firing) return false;
   if (G.air20) return true;
   if (!atX(c)) return false;
@@ -424,7 +438,7 @@ const V20 = (() => {
   };
   if (!fresh) {
    G.backs20 = (G.backs20 || 0) + 1;
-   back206('oldman_back') || groan();
+   /* 1.5d (Charlie): old-player complaint voice + groan removed */
   }
  }
  function g1Tick(dt) {}
@@ -443,7 +457,7 @@ const V20 = (() => {
    t0: menuT
   };
   G.backs20 = (G.backs20 || 0) + 1;
-  back206('oldman_groan') || groan();
+  /* 1.5d (Charlie): old-player complaint sound removed */
  }
  function groan() {
   try {
@@ -722,12 +736,7 @@ const V20 = (() => {
      rect(x - 5, y - 9, 2, 3, hand);
      rect(x - 6, y - 8, 1, 1, '#000');
     }
-    const s = B.g1 ? e < 2.2 ? 'OH MY BACK!' : 'NOT AT MY AGE...' : e < 1.3 ? 'OH MY BACK...' : 'NOT AT MY AGE...', w = textW(s) + 8, bx = x - Math.round(w / 2), by = y - 48 - Math.round(Math.sin(e * 3) * 1);
-    rect(bx - 1, by - 1, w + 2, 12, '#000');
-    rect(bx, by, w, 10, '#ffffff');
-    rect(x - 2, by + 10, 4, 2, '#ffffff');
-    rect(x - 1, by + 12, 2, 2, '#ffffff');
-    text(s, x, by + 2, 1, '#0b1a20', 'center');
+    // 1.5d (Charlie): the old-player complaint speech bubble is removed; the hand-on-back pose stays
    }
   }
  }
@@ -1056,14 +1065,14 @@ const V20 = (() => {
  const noSkip = tr => tr === 'cp' || tr === 'air';
  const GAR34 = () => !window.__rl_v124gb && !window.__rl_no34gar;
  const LEGTXT = {
-  'LEG-0': GAR34() ? 'HIGH FLYER: FROM X (BEHIND THE CAGE) TAP THE NET - HE JUMPS OVER THE BACK OF THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT (DISTANCE-SHOT ODDS). LEGEND RATINGS, A LITTLE SLOWER (SPEED 78). GRABS HIS BACK AFTER HE SCORES. TOP LEVEL OF THE SEASON 1 GAME PASS.' : 'AIR DIVE: FROM X (BEHIND THE CAGE) TAP THE NET - HE JUMPS OVER THE BACK OF THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT (DISTANCE-SHOT ODDS). LEGEND RATINGS, A LITTLE SLOWER (SPEED 78). GRABS HIS BACK AFTER HE SCORES. TOP LEVEL OF THE SEASON 1 GAME PASS.',
+  'LEG-0': GAR34() ? (window.__rl_no598hf ? '' : 'HIGH FLYER: QUICK PLAY ONLY. ') + 'HIGH FLYER: FROM X (BEHIND THE CAGE) TAP THE NET - HE JUMPS OVER THE BACK OF THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT (DISTANCE-SHOT ODDS). LEGEND RATINGS, A LITTLE SLOWER (SPEED 78). GRABS HIS BACK AFTER HE SCORES. TOP LEVEL OF THE SEASON 1 GAME PASS.' : 'AIR DIVE: FROM X (BEHIND THE CAGE) TAP THE NET - HE JUMPS OVER THE BACK OF THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT (DISTANCE-SHOT ODDS). LEGEND RATINGS, A LITTLE SLOWER (SPEED 78). GRABS HIS BACK AFTER HE SCORES. TOP LEVEL OF THE SEASON 1 GAME PASS.',
   'LEG-1': 'A LEGEND FROM THE OLD DAYS - THE HIGHEST OVERALL OF ANYONE, LEGENDS INCLUDED.',
   'LEG-2': 'BUILT LIKE A TRUCK, FAST AS A DEER, WITH A CANNON FOR A SHOT. NO TEAM YET.',
   'LEG-3': 'A LOCKDOWN LONG POLE FROM BACK IN THE DAY. NO TEAM YET.'
  };
  const LEGSUB = ' SUB HIM ONTO ANY TEAM IN QUICK PLAY + ONLINE GAMES (YOUR LINEUP). UNLOCKED = HE IS IN YOUR SEASON DRAFTS (ONLINE DRAFTS: IF ANYONE IN THE LOBBY HAS HIM, EVERYONE CAN PICK HIM).';
  const SPEC22 = {
-  'LEG-0': GAR34() ? 'SPECIAL: THE HIGH FLYER - FROM X (BEHIND THE CAGE) TAP THE NET: HE JUMPS OVER THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT. GRABS HIS BACK AFTER HE SCORES. LEGEND RATINGS, SPEED 78.' : 'SPECIAL: THE AIR DIVE - FROM X (BEHIND THE CAGE) TAP THE NET: HE JUMPS OVER THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT. GRABS HIS BACK AFTER HE SCORES. LEGEND RATINGS, SPEED 78.',
+  'LEG-0': GAR34() ? 'SPECIAL: THE HIGH FLYER (QUICK PLAY ONLY) - FROM X (BEHIND THE CAGE) TAP THE NET: HE JUMPS OVER THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT. GRABS HIS BACK AFTER HE SCORES. LEGEND RATINGS, SPEED 78.' : 'SPECIAL: THE AIR DIVE - FROM X (BEHIND THE CAGE) TAP THE NET: HE JUMPS OVER THE CREASE, SHOOTS IN MID-AIR, DIVES OUT THE FRONT. GRABS HIS BACK AFTER HE SCORES. LEGEND RATINGS, SPEED 78.',
   'LEG-1': 'A LEGEND FROM THE OLD DAYS - THE HIGHEST OVERALL OF ANYONE, LEGENDS INCLUDED.',
   'LEG-2': 'BUILT LIKE A TRUCK, FAST AS A DEER, WITH A CANNON FOR A SHOT. NO TEAM YET.',
   'LEG-3': 'SPECIAL: A LONG POLE - A LOCKDOWN DEFENDER. NO BACK-GRAB (THAT\'S OLD FOXWORTH\'S). NO TEAM YET.'
@@ -1098,6 +1107,7 @@ const V20 = (() => {
   cpStroke: cpStroke,
   shot: shot,
   preShot: preShot,
+  hfQuick: hfQuick,
   onGoal: onGoal,
   drawWorld: drawWorld,
   drawSettings: drawSettings,

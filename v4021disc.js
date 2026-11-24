@@ -1,6 +1,6 @@
 (function() {
  if (window.__rl_no4021disc || window.__rl_v124gb) return;
- var TXT = 'ALL NAMES ARE FICTIONAL. NOT AFFILIATED WITH ANY LEAGUE, TEAM OR PLAYER.';
+ var TXT = 'ALL NAMES ARE FICTIONAL. NOT AFFILIATED WITH ANY LEAGUE, TEAM OR PLAYER. NOT AFFILIATED WITH ANY SCHOOL, LEAGUE OR THE NCAA.';
  var css = document.createElement('style');
  css.textContent = '#ed31 .disc4021{flex:0 0 auto;margin-top:auto;padding:1px 2px 0;text-align:center;font:bold 8px/1.2 ui-monospace,Menlo,Consolas,monospace;' + 'letter-spacing:.3px;color:#7f97a0;text-transform:uppercase;pointer-events:none;-webkit-user-select:none;user-select:none;white-space:normal;opacity:.95}';
  document.head.appendChild(css);

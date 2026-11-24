@@ -174,7 +174,41 @@
  // ---------- 1 + 4. the N/A tab: Ghosts + the six service teams ----------
  const VX = () => { try { return !W0.__rl_no489vets && W0.VETS489 && VETS489.ids && VETS489.ids.length ? VETS489 : null; } catch (e) { return null; } };
  const gridOk = () => { try { return (screen === 'pickTeam' || screen === 'pickOpp') && menuSel && menuSel.mode !== 'season' && !(W0.RLNET && RLNET.lobby); } catch (e) { return false; } };
- const vetsOn = () => { const X = VX(); try { return !!X && gridOk() && (X.owns() || X.live()); } catch (e) { return false; } };
+ const vetsOn = () => { const X = VX(); try { return !!X && gridOk() && (X.owns() || X.live() || vbAny()); } catch (e) { return false; } };
+ // 564: per-team Veterans buy (100 dimes, team + base uniforms only)
+ const VB_COST = 100, vbOff = () => off() || !!W0.__rl_no564vetbuy;
+ const vbMap = () => { let m = {}; try { m = JSON.parse(lsGet('vb564own', '{}') || '{}') || {}; } catch (e) {} const S = ST(); if (S && S.vb564) for (const k in S.vb564) m[k] = S.vb564[k]; return m; };
+ const vbOwn = id => !vbOff() && !!vbMap()[id];
+ const vbAny = () => !vbOff() && Object.keys(vbMap()).length > 0;
+ let askVet = null;
+ V.vbOwn = vbOwn; V.VB_COST = VB_COST;
+ function buyVet(id) {
+  if (vbOff()) return false;
+  const X = VX(), S = ST();
+  if (!X || !S || !X.ids.includes(id)) return false;
+  if (X.owns() || vbOwn(id)) { toast17('YOU ALREADY HAVE THIS TEAM', '#7dff9a'); return false; }
+  if ((+S.chinos || 0) < VB_COST) { toast17('NOT ENOUGH DIMES - ' + VB_COST + ' DIMES', '#ff9a8a'); return false; }
+  S.chinos -= VB_COST;
+  if (S.stats) S.stats.spent = (+S.stats.spent || 0) + VB_COST;
+  S.vb564 = S.vb564 || {}; S.vb564[id] = Date.now();
+  lsSet('vb564own', JSON.stringify(S.vb564));
+  try { V17.save(); } catch (e) { fail('vbsave', e); }
+  try { SFX && SFX.cheer && SFX.cheer(); } catch (e) {}
+  toast17('TEAM UNLOCKED - BASE UNIFORMS ONLY', '#7dff9a');
+  return true;
+ }
+ V.buyVet = buyVet;
+ // 1.4: does the player own this N/A team? (card team uniform list, v33). Ghosts / NAX_REG teams (Turkey Trotters...) /
+ // Veterans teams, same rules as the N/A grid.
+ V.naOwned = id => {
+  try {
+   if (id === 'GHO') return !!(W0.GHO16 && GHO16.owned && GHO16.owned());
+   const X = VX();
+   if (X && X.ids.includes(id)) return !!(X.owns() || vbOwn(id));
+   for (const e of (W0.NAX_REG || [])) { const tm = e.tm && e.tm(); if (tm && tm.id === id) return !e.lock(); }
+  } catch (e) { return false; }
+  return true;
+ };
  const vetLocked = () => { const X = VX(); try { return !!X && screen === 'pickTeam' && menuSel.mode !== 'browse' && !X.owns(); } catch (e) { return false; } };
  // PRO: the service teams are not PRO teams any more
  try {
@@ -231,8 +265,9 @@
   rect(cx + cw - 7, cy + 3, 2, 5, '#c8102e'); rect(cx + cw - 5, cy + 3, 2, 5, '#ffffff'); rect(cx + cw - 3, cy + 3, 2, 5, '#1c3f8c');
   if (lk) {
    g.globalAlpha = .55; rect(cx, cy, cw, chh, '#05060a'); g.globalAlpha = 1;
-   lockIcon(mx, cy + Math.max(2, Math.round(chh / 2) - 8));
-   if (live) hit('TEAM-' + tm.id, cx, cy, cw, chh, () => toast17('VETERANS DAY TEAMS: IN THE HONOR PACK (YARD SALE)', '#ffd84d'), tm.name + ' (LOCKED)');
+   lockIcon(mx, cy + Math.max(2, Math.round(chh / 2) - 12));
+   if (!vbOff()) text(VB_COST + ' DIMES', mx, cy + chh - 14, 1, '#ffcc33', 'center');
+   if (live) hit('TEAM-' + tm.id, cx, cy, cw, chh, () => { if (vbOff()) toast17('VETERANS DAY TEAMS: IN THE HONOR PACK (YARD SALE)', '#ffd84d'); else askVet = tm.id; }, tm.name + ' (LOCKED) - ' + VB_COST + ' DIMES');
    return;
   }
   if (live) hit('TEAM-' + tm.id, cx, cy, cw, chh, () => onPick(tm.id), tm.name);
@@ -251,25 +286,70 @@
   button('BACK', bx + 12, by + bh - 28, 70, 19, () => { ask = false; }, { bg: '#c9d6d9' });
   button('YES BUY', bx + bw - 92, by + bh - 28, 80, 19, () => { ask = false; buyGho(); }, { bg: have >= GHO_COST ? '#ffd23a' : '#3a4a55', fg: have >= GHO_COST ? '#0b1a20' : '#cfe' });
  }
+ function vetAskBox() {
+  const tm = T(askVet), S = ST(), have = S ? (+S.chinos || 0) : 0, bw = Math.min(W - 24, 250), bh = 112, bx = Math.round(W / 2 - bw / 2), by = 26, mx = Math.round(W / 2);
+  if (!tm) { askVet = null; return; }
+  g.globalAlpha = .72; rect(0, 0, W, H, '#000'); g.globalAlpha = 1;
+  rect(bx - 2, by - 2, bw + 4, bh + 4, '#000');
+  rect(bx, by, bw, bh, '#141a22');
+  rect(bx, by, bw, 2, '#ffd84d');
+  text(String(tm.name).replace(/\u00a0/g, ' ') + ' - TEAM ONLY', mx, by + 8, 1, '#ffe14d', 'center');
+  text(VB_COST + ' DIMES - YOU HAVE ' + have, mx, by + 20, 1, have >= VB_COST ? '#e8f4f6' : '#ff9a8a', 'center');
+  text('YOU GET THE TEAM + ITS BASE UNIFORMS.', mx, by + 32, 1, '#e8f4f6', 'center');
+  text('PACK UNIFORMS (CAMO, FIGHTER PILOT,', mx, by + 44, 1, '#ff9a3a', 'center');
+  text('ASTRONAUT, ETC) ARE NOT INCLUDED.', mx, by + 54, 1, '#ff9a3a', 'center');
+  button('BACK', bx + 12, by + bh - 28, 70, 19, () => { askVet = null; }, { bg: '#c9d6d9' });
+  button('YES BUY', bx + bw - 92, by + bh - 28, 80, 19, () => { const id = askVet; askVet = null; buyVet(id); }, { bg: have >= VB_COST ? '#ffd23a' : '#3a4a55', fg: have >= VB_COST ? '#0b1a20' : '#cfe' });
+ }
  function naGrid(onPick, opts) {
   const t = Date.now();
-  if (t - lastDraw > 600) ask = false;
+  if (t - lastDraw > 600) { ask = false; askVet = null; }
   lastDraw = t;
-  const live = !ask;
+  const live = !ask && !askVet;
   let vets = [];
-  if (vetsOn()) vets = VX().ids.map(id => T(id)).filter(tm => tm && tm.id !== opts.exclude && (!opts.only || opts.only.includes(tm.id)));
-  if (!vets.length) {
-   const cw = 150, chh = 92;
-   ghoTile(onPick, opts, Math.round(W / 2 - cw / 2), 30, cw, chh, live);
-  } else {
-   const gx = 8, gy = 26, gw = 118, gh = 112;
-   ghoTile(onPick, opts, gx, gy, gw, gh, live);
-   const vx0 = gx + gw + 6, avail = W - 8 - vx0, cols = 3, gap = 3, cw = Math.floor((avail - gap * (cols - 1)) / cols), chh = Math.floor((gh - gap) / 2);
-   const lk = vetLocked();
-   vets.forEach((tm, i) => vetTile(tm, onPick, vx0 + i % cols * (cw + gap), gy + Math.floor(i / cols) * (chh + gap), cw, chh, lk, live));
-   text(lk ? 'VETERANS DAY TEAMS: IN THE HONOR PACK' : 'VETERANS DAY TEAMS', Math.round(vx0 + avail / 2), H - 20, 1, '#ffd84d', 'center', '#000');
-  }
+  if (vetsOn()) vets = VX().ids.map(id => T(id)).filter(tm => tm && tm.id !== opts.exclude && (!opts.only || opts.only.includes(tm.id)) && (VX().owns() || VX().live() || vbOwn(tm.id)));
+  // one grid for every N/A team: same tile shape as the other leagues (4 across), Ghosts + Turkey Trotters + the service teams
+  const extras = [];
+  try { for (const e of (W0.NAX_REG || [])) { const tm = e.tm(); if (tm && e.show() && tm.id !== opts.exclude && (!opts.only || opts.only.includes(tm.id))) extras.push({ tm: tm, e: e }); } } catch (e) { fail('nax', e); }
+  const cols = 4, gap = 4, cw = Math.floor((W - 16 - gap * (cols - 1)) / cols), chh = 52, x0 = 8, y0 = 26;
+  const items = [ { gho: 1 } ].concat(extras.map(x => ({ x: x }))).concat(vets.map(tm => ({ vet: tm })));
+  const tile = (o, cx, cy) => {
+   const mx = cx + Math.round(cw / 2);
+   let tm, sub, lk = false, l1 = '', l2 = '', tap = null, pick = null, taken = false, ac = '#7f9aa6';
+   if (o.gho) {
+    tm = G.tm; const own = G.owned(); taken = opts.exclude === G.ID; sub = 'LEGENDS'; ac = GREEN;
+    if (!own) { lk = true; l1 = GHO_COST + ' DIMES'; tap = () => { ask = true; }; } else pick = () => onPick(G.ID);
+   } else if (o.x) {
+    tm = o.x.tm; sub = o.x.e.sub || 'N/A'; ac = o.x.e.accent || tm.c1;
+    const ll = o.x.e.lock();
+    if (ll) { lk = true; l1 = ll[0]; l2 = ll[1] || ''; tap = o.x.e.onLocked; } else pick = () => onPick(tm.id);
+   } else {
+    tm = o.vet; sub = 'VETERANS DAY'; lk = vetLocked() && !vbOwn(tm.id);
+    try { if (typeof accent === 'function') ac = accent(tm); } catch (e) { ac = tm.c1; }
+    if (lk) { l1 = vbOff() ? 'HONOR PACK' : VB_COST + ' DIMES'; tap = () => { if (vbOff()) toast17('VETERANS DAY TEAMS: IN THE HONOR PACK (YARD SALE)', '#ffd84d'); else askVet = tm.id; }; } else pick = () => onPick(tm.id);
+   }
+   rect(cx, cy + 2, cw, chh, '#000');
+   rect(cx, cy, cw, chh, '#1a2430');
+   rect(cx, cy, cw, 2, ac);
+   badge(tm, mx - 13, cy + 5, 2);
+   const nm = fitTxt(tm.name, cw - 2) ? tm.name : tm.abbr || tm.id;
+   text(nm, mx, cy + 37, 1, '#fff', 'center');
+   if (!lk) text(sub, mx, cy + 44, 1, '#7f9aa6', 'center');
+   if (o.vet) { rect(cx + cw - 7, cy + 3, 2, 5, '#c8102e'); rect(cx + cw - 5, cy + 3, 2, 5, '#ffffff'); rect(cx + cw - 3, cy + 3, 2, 5, '#1c3f8c'); }
+   if (taken) { g.globalAlpha = .55; rect(cx, cy, cw, chh, '#05060a'); g.globalAlpha = 1; text('TAKEN', mx, cy + 20, 1, '#ff9a8a', 'center'); return; }
+   if (lk) {
+    g.globalAlpha = .55; rect(cx, cy, cw, chh, '#05060a'); g.globalAlpha = 1;
+    lockIcon(cx + 11, cy + 6);
+    text(l1, mx, cy + 44, 1, '#ffcc33', 'center');
+    if (live) hit('TEAM-' + tm.id, cx, cy, cw, chh, tap, tm.name + ' (LOCKED)');
+    return;
+   }
+   if (live) hit('TEAM-' + tm.id, cx, cy, cw, chh, pick, tm.name);
+  };
+  items.forEach((o, i) => tile(o, x0 + i % cols * (cw + gap), y0 + Math.floor(i / cols) * (chh + gap)));
+  if (vets.length) text(vetLocked() && !vbOff() ? 'VETERANS DAY TEAMS: ' + VB_COST + ' DIMES EACH (BASE UNIS)' : vetLocked() ? 'VETERANS DAY TEAMS: IN THE HONOR PACK' : 'VETERANS DAY TEAMS', Math.round(W / 2), H - 41, 1, '#ffd84d', 'center', '#000');
   if (ask) askBox();
+  if (askVet) vetAskBox();
  }
  if (G && typeof G.grid === 'function') {
   const GG0 = G.grid;

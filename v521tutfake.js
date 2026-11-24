@@ -121,7 +121,7 @@
  function live() { const Tt = mine(); return !!Tt && Tt.doneT <= 0 && SCR() === 'live'; }
  function car() { const G = G0(); return G && G.carrier && G.ball && G.ball.state === 'held' && G.carrier.team === 'O' ? G.carrier : null; }
  function circOn() { try { return SCR() === 'live' && canShoot() && !SH.S.aim && SH.circlesOn() && SH.inTap(); } catch (e) { return false; } }
- function nearOn() { const c = car(); if (!c) return false; try { return c.x < GX && Math.hypot(GX - c.x, CY - c.y) <= SH.CFG.tapR + 10; } catch (e) { return false; } }
+ function nearOn() { const c = car(); if (!c) return false; try { return c.x < GX && Math.hypot(GX - c.x, CY - c.y) <= SH.CFG.tapR + (W0.__rl_no582fake ? 10 : 0); } /* v582 fix 7 */ catch (e) { return false; } }
  function say(s, col, life) { X.msg = { s: s, col: col || '#ffe14d', until: rt() + (life || 1.8) }; }
  function btnShown() { return live() && !!car() && (X.stage === 'arm' || X.stage === 'fake') && nearOn(); }
 

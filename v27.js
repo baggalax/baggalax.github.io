@@ -178,7 +178,7 @@
    id: id,
    img: img,
    n: 'RELAX PAL',
-   sub: 'LEGENDARY CHIRP - 30 CHINOS'
+   sub: 'LEGENDARY CHIRP'
   };
  }
  const CQ = 'v27claims';

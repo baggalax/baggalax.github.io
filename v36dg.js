@@ -352,6 +352,12 @@
     t: HIT.kbT
    };
    d.fallDir = kx >= 0 ? 1 : -1;
+   if (!W.__rl_no562bull) { // v1.3: a bulled defender (esp. the one YOU control) must not keep chasing / facing the carrier: stop in place, straight knockback, clean recovery
+    d.tx = d.x; d.ty = d.y; d.mvx = 0; d.mvy = 0; d.lunge = null; d.chkT0 = null;
+    const kl = Math.hypot(f[0], f[1]) || 1;
+    d.kb = { vx: f[0] / kl * BULL.kb / HIT.kbT, vy: f[1] / kl * BULL.kb / HIT.kbT, t: HIT.kbT };
+    if (d === G.dctl) { try { if (G.dManual && G.dManual.p === d) G.dManual = null; } catch (e) {} }
+   }
    d.react = Math.max(d.react || 0, dn + .3);
    c.beatT = Math.max(c.beatT || 0, .9);
    G.dBeat = Math.max(G.dBeat || 0, .9);

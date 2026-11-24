@@ -130,7 +130,7 @@ const C30 = (() => {
   if (!d) return undefined;
   const p = {
    id: id,
-   n: d.made ? d.name : 'Custom',
+   n: d.made ? d.name : window.__rl_no600cu ? 'Custom' : 'Custom ' + (100 + parseInt(d.seed, 36) % 900), // 1.5 B72: an unnamed card is a real card with a default name (naming stays optional)
    pos: d.pos,
    r: ratings(d.seed, d.rar, d.pos),
    real: false,
@@ -597,7 +597,7 @@ const C30 = (() => {
   const se0 = V22.subExtra;
   if (typeof se0 === 'function') V22.subExtra = function() {
    const l = se0.apply(this, arguments);
-   return Array.isArray(l) ? l.filter(id => !isC30(id) || made(id)) : l;
+   return Array.isArray(l) ? l.filter(id => !isC30(id) || made(id) || !window.__rl_no600cu) : l; // 1.5 B72: unnamed cards count
   };
   const ph0 = V22.popHtml;
   if (typeof ph0 === 'function') V22.popHtml = function() {
@@ -646,7 +646,7 @@ const C30 = (() => {
    CP2319.draftExtra = function() {
     const r = dx0.apply(this, arguments);
     try {
-     if (r && r.leg && on() && !Array.isArray(window.__cp2319Pool)) r.gho = (r.gho || []).concat(V22.ownedIds().filter(id => isC30(id) && made(id) && !(r.gho || []).includes(id)));
+     if (r && r.leg && on() && !Array.isArray(window.__cp2319Pool)) r.gho = (r.gho || []).concat(V22.ownedIds().filter(id => isC30(id) && (made(id) || !window.__rl_no600cu) && !(r.gho || []).includes(id)));
     } catch (e) {
      console.error(e);
     }

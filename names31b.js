@@ -1016,6 +1016,7 @@
   }
  }
  window.ED31 = {
+  nameProblem: nameProblem, // 1.4: v572na uses the same bad-word filter
   open: open,
   openPlayer: openOne,
   canRename: canOne,

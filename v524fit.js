@@ -21,6 +21,13 @@
  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
  const v46 = () => !!(W.V446 && V446.on && V446.on());
  function myTeam() {
+  // 1.5f (Jonny H1 / M1): the team of the LOBBY YOU CAME FROM first (Locker League card team, card-team / quick / season
+  // lobby). Before, a Locker League card team got season.team / the quick team / TEAMS[0] ("UTAH WEARS IT"), so the
+  // Whale went on the wrong team and the card team kept its ranked uni. Kill switch: window.__rl_no598fitteam
+  if (!W.__rl_no598fitteam) {
+   try { const L = W.RK15LL, sc = typeof screen !== 'undefined' ? screen : ''; if (sc === 'gear17' && typeof GEAR17 !== 'undefined' && GEAR17 && GEAR17.tid) return GEAR17.tid; if (L && L.extraBack && L.extraBack.tid && sc !== 'menu') return L.extraBack.tid; } catch (e) {}
+   try { const n = W.V581G && V581G.lobbyNow && V581G.lobbyNow(); if (n && n.tid) return n.tid; } catch (e) {}
+  }
   try { if (typeof season !== 'undefined' && season && season.team) return season.team; } catch (e) {}
   try { const q = JSON.parse(localStorage.getItem('rl_qteam16') || 'null'); if (q) return q; } catch (e) {}
   try { if (typeof TEAMS !== 'undefined' && TEAMS[0]) return TEAMS[0].id; } catch (e) {}

@@ -123,6 +123,7 @@
   const tg0 = W0.teamGrid, b0 = W0.button, t0 = W0.text;
   W0.button = function (label, x, y, w, h) {
    if (rec && h === 11 && ((y === 3 && TABS[label]) || (label === 'COLLAB' && y === 16 && x === 2))) { rec.btn.push(Array.prototype.slice.call(arguments)); if (label === 'COLLAB') rec.cb = true; return; }
+   if (rec && y <= 6 && x < 120 && !W0.__rl_no566sz) rec.leftX = Math.max(rec.leftX || 0, x + w);   // a button left of the title (SEASON team): keep the title clear of it
    return b0.apply(this, arguments);
   };
   W0.text = function (s, x, y, sc) {
@@ -177,9 +178,9 @@
   }
   if (me.titleArgs) {
    const t = me.titleArgs.slice();
-   const s = String(t[0]), L = 2, R = left - 4;
+   const s = String(t[0]), L = (me.leftX || 0) + 4, R = left - 4;
    const tw = n => (typeof textW === 'function' ? textW(s, n) : s.length * 4 * n);
-   if (Wd / 2 + tw(2) / 2 <= R) t0.apply(null, t);
+   if (Wd / 2 + tw(2) / 2 <= R && Wd / 2 - tw(2) / 2 >= L) t0.apply(null, t);
    else if (R - L >= tw(2)) { t[1] = Math.round((L + R) / 2); t[2] = 4; t[3] = 2; t[5] = 'center'; t0.apply(null, t); }
    else { t[1] = Math.round((L + R) / 2); t[2] = 6; t[3] = 1; t[5] = 'center'; t0.apply(null, t); }
   }

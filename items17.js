@@ -1206,6 +1206,9 @@ const V17 = (() => {
   try {
    dd232();
   } catch (e) {}
+  try {
+   if (window.TW600) TW600.sync(ST); // 1.5 B65: per-copy tape durability (v600tape.js)
+  } catch (e) {}
   LS.set(SAVE_KEY, ST);
  }
  const has = id => (ST.inv[id] || 0) > 0;
@@ -1403,6 +1406,7 @@ const V17 = (() => {
   if (toasts.length > 4) toasts.shift();
  }
  function drawToasts() {
+  try { if (!window.__rl_no598toast && typeof window.TOAST598 === 'function' && window.TOAST598(toasts)) return; } catch (e) {} // 1.5f: lobbies draw toasts as the TOP layer (v598fix), over the DOM player / crew cards
   let y = 30;
   for (let i = toasts.length - 1; i >= 0; i--) {
    const t = toasts[i], e = menuT - t.t0;
@@ -2005,6 +2009,10 @@ const V17 = (() => {
   if (on287o() && (ST.b287 && ST.b287[k] || P.bundle.every(id => unlocked(id)))) return true;
   return P.bundle.every(id => has(id));
  };
+ // 1.4 (Charlie): an owned bundle can be bought again - you only get the items that can stack (sticks, tape, cleats,
+ // gear...), never the team, uniforms, cards, cellys or trophies again. Kill switch: window.__rl_no580rebuy.
+ const dup580 = it => !!it && !!it.slot && GEAR332.has(it.slot) && !it.crew && !it.leg20 && !it.pc27 && !it.st28 && !it.tew25 && !it.b35 && !it.trophy && it.sec !== 'uni21';
+ const rebuy580 = k => { const P = PACKS[k]; return !window.__rl_no580rebuy && !!(P && P.bundle) && P.bundle.some(id => dup580(BY[id])); };
  function buyBundle2504(kind) {
   const P = PACKS[kind];
   if (!on2504() || !P || !P.bundle) return null;
@@ -2013,7 +2021,8 @@ const V17 = (() => {
    toast(P.n + ' NOT READY - TRY AGAIN', '#ff9a8a');
    return null;
   }
-  if (bundleOwned2504(kind)) {
+  const again = bundleOwned2504(kind);
+  if (again && !rebuy580(kind)) {
    toast('YOU ALREADY OWN ALL OF THE ' + P.n, '#ff9a8a');
    return null;
   }
@@ -2023,6 +2032,8 @@ const V17 = (() => {
   }
   ST.chinos -= P.cost;
   ST.stats.spent += P.cost;
+  // 1.4: things you already own (team, uniforms, cards, celly...) are not given again; stackable gear always is
+  if (!window.__rl_no580rebuy) { const k580 = cards.filter(id => !unlocked(id) || dup580(BY[id])); if (k580.length) cards.splice(0, cards.length, ...k580); }
   const news = cards.map(id => !unlocked(id)), q332 = cards.map(id => bq332(BY[id]));
   cards.forEach((id, i) => grantQ332(id, q332[i]));
   if (on287o()) {
@@ -2138,12 +2149,12 @@ const V17 = (() => {
  }
  function buyPass() {
   if (ST.pass.owned) return false;
-  if (ST.chinos < 50) {
-   toast('THE PASS IS 50 CHINOS - WIN GAMES FOR +10', '#ff9a8a');
+  if (ST.chinos < LOP568('pack_pass', 50)) {
+   toast('THE PASS IS ' + LOP568('pack_pass', 50) + ' CHINOS - WIN GAMES FOR +10', '#ff9a8a');
    return false;
   }
-  ST.chinos -= 50;
-  ST.stats.spent += 50;
+  ST.chinos -= LOP568('pack_pass', 50);
+  ST.stats.spent += LOP568('pack_pass', 50);
   ST.pass.owned = true;
   save();
   passSync(true);
@@ -3586,17 +3597,24 @@ const V17 = (() => {
    item: leg.length ? leg[ri(r, leg.length)] : null,
    txt: '3-STEP: ' + steps.map(s => s.txt).join(', THEN ')
   };
+  // V56.5c: the Baggatwaan Glow (won by a Baggatwaan winner only) and Turkey Trotters pack items are never a weekly reward.
+  // Swapped AFTER the pick so the random rolls (and every other week's rewards) stay exactly the same. Kill: __rl_no18tew.
+  const bad18 = id => !window.__rl_no18tew && !!(id && BY[id] && (BY[id].tew25 || BY[id].tk565));
+  const swap18 = (id, L) => { if (!bad18(id)) return id; const ok = L.filter(x => !bad18(x)); return ok.length ? ok[L.indexOf(id) % ok.length] : null; };
+  out[3].item = swap18(out[3].item, leg);
   if (!out[3].item) {
    out[3].pay = 50;
   }
   const rare = itemPool18(1), com = itemPool18(0);
   if (ri(r, 2) === 0 && rare.length) {
-   out[2].item = rare[ri(r, rare.length)];
-   out[2].pay = 0;
+   const p2 = out[2].pay;
+   out[2].item = swap18(rare[ri(r, rare.length)], rare);
+   out[2].pay = out[2].item ? 0 : p2;
   }
   if (ri(r, 3) === 0 && com.length) {
-   out[0].item = com[ri(r, com.length)];
-   out[0].pay = 0;
+   const p0 = out[0].pay;
+   out[0].item = swap18(com[ri(r, com.length)], com);
+   out[0].pay = out[0].item ? 0 : p0;
   }
   for (const c of out) c.pack = c.k === 'steps' ? PACK27.last : PACK27.early;
   return out;
@@ -3906,6 +3924,11 @@ const V17 = (() => {
   if (it.crew) return [ 0, 'CREW ARE ONE OF EACH - NOT FOR SALE' ];
   if (it.leg20) return [ 0, 'LEGACY PLAYERS ARE KEPT FOREVER' ];
   if (it.st28) return [ 0, 'STADIUMS ARE KEPT FOREVER' ];
+  if (!window.__rl_no598sell) { // 1.5f (Charlie): uniforms, player cards and reward-only unlocks are never sold
+   if (it.sec === 'uni21' || /^uni21\|/.test(id)) return [ 0, 'UNIFORMS ARE KEPT FOREVER' ];
+   if (it.sec === 'pc27' || it.pc27) return [ 0, 'PLAYER CARDS ARE KEPT FOREVER' ];
+   if (it.sec === 'tk565team' || /^team_/.test(id) || it.ach || it.reward) return [ 0, 'REWARDS ARE KEPT FOREVER' ];
+  }
   const own = ST.inv[id] || 0;
   if (own <= 0) return [ 0, 'YOU HAVE NONE (X0)' ];
   let n = own - inUse(id);
@@ -3927,14 +3950,16 @@ const V17 = (() => {
    return 0;
   }
   q = Math.min(q, mx);
-  const pay = q * SELL_PRICE[BY[id].rar];
+  const bar598 = window.LSB598 && !window.__rl_no598bar ? LSB598.sold(id, q, BY[id].rar) : null; // 1.5f: LOCKER SALES BAR (v598bar.js) replaces the flat price
+  const pay = bar598 ? bar598.dimes : q * SELL_PRICE[BY[id].rar];
   ST.inv[id] -= q;
   ST.seen[id] = true;
   ST.chinos += pay;
   ST.stats.earned += pay;
   ST.stats.sold += q;
   save();
-  toast('SOLD ' + q + ' ' + BY[id].n + ' +' + pay + ' CHINOS', '#ffe14d');
+  if (bar598) { try { LSB598.snap(); } catch (e) {} }
+  toast(bar598 ? 'SOLD ' + q + ' ' + BY[id].n + ' +' + bar598.ptsTxt + ' SALES BAR' + (pay ? ' - BAR FULL +' + pay + ' DIMES' : '') : 'SOLD ' + q + ' ' + BY[id].n + ' +' + pay + ' CHINOS', '#ffe14d');
   try {
    checkAch();
   } catch (e) {}
@@ -4109,6 +4134,7 @@ const V17 = (() => {
   for (let i = 0; i <= n; i++) x.fillRect(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), 1, 1);
  }
  function stickIcon(x, shaft, head, mesh, glow, fo) {
+  if (!window.__rl_no590stick && !window.__rl_v124gb) return stickIcon590(x, shaft, head, mesh, glow, fo); // 1.5: new stick head (v590stick)
   if (glow) {
    x.fillStyle = hexA(glow, .35);
    for (let i = 0; i <= 12; i++) x.fillRect(3 + i - 1, 17 - i - 1, 3, 3);
@@ -4124,6 +4150,25 @@ const V17 = (() => {
    x.fillStyle = (i + j) % 2 ? mesh : shade(mesh, .8);
    x.fillRect(13 + i, 3 + j, 1, 1);
   }
+ }
+ // 1.5 (Charlie approved board 1.5-9): the new stick head on every stick item icon. Off: window.__rl_no590stick.
+ function stickIcon590(x, shaft, head, mesh, glow, fo) {
+  // 1.5c (TestFlight 3): the head sits ON the shaft line (rotated 45 degrees with it, throat on the shaft top), no black outline
+  // on glow sticks, the glow wraps the whole head incl. its top. Head pixels are inverse-mapped so the rotated art has no holes.
+  const H = [ '.WWWWW.', 'WmnmnmW', 'WwwwwwW', 'WnmnmnW', 'WwwwwwW', '.WmnmW.', '..WnW..', '..WnW..', '...W...' ];
+  const P = { W: head, w: shade(head, .9), m: mesh, n: shade(mesh, .8) };
+  const ax = fo ? 9.5 : 10, ay = 10, ux = Math.SQRT1_2, uy = -Math.SQRT1_2, px = Math.SQRT1_2, py = Math.SQRT1_2, on = new Map();
+  for (let Y = 0; Y < 20; Y++) for (let X = 0; X < 20; X++) {
+   const vx = X + .5 - ax, vy = Y + .5 - ay, along = vx * ux + vy * uy, across = vx * px + vy * py;
+   const r = 8 - Math.floor(along), q = Math.floor(across + 3.5);
+   if (r < 0 || r > 8 || q < 0 || q > 6) continue; const ch = H[r][q]; if (ch !== '.') on.set(X + ',' + Y, ch);
+  }
+  const ring = (rad, col, base) => { base = base || on; x.fillStyle = col; const seen = new Set(); base.forEach((_, k) => { const [X, Y] = k.split(',').map(Number); for (let a = -rad; a <= rad; a++) for (let b = -rad; b <= rad; b++) { const kk = (X + a) + ',' + (Y + b); if (!base.has(kk) && !seen.has(kk) && X + a >= 0 && Y + b >= 0 && X + a < 20 && Y + b < 20) { seen.add(kk); x.fillRect(X + a, Y + b, 1, 1); } } }); };
+  if (glow) { const all = new Map(on); for (let i = 0; i <= 8; i++) { all.set((2 + i) + ',' + (18 - i), 1); all.set((3 + i) + ',' + (18 - i), 1); } ring(window.__rl_no597crisp ? 2 : 1, hexA(glow, window.__rl_no597crisp ? .35 : .62), all); } /* 1.5e: crisp 1px ring */ // one even ring round shaft + head (top included)
+  line1(x, 2, 18, 10, 10, shaft);
+  line1(x, 3, 18, 11, 10, shade(shaft, .75));
+  if (!glow) ring(1, '#0d0d0d');
+  on.forEach((ch, k) => { const [X, Y] = k.split(',').map(Number); x.fillStyle = P[ch]; x.fillRect(X, Y, 1, 1); });
  }
  const CREW_LOOK = {
   trainer_0: {
@@ -5463,13 +5508,28 @@ const V17 = (() => {
      for (let x = lo; x <= hi; x++) if (rows[y][x] === 'w') rows[y][x] = 'H';
     }
     const bx = hp.filter(p => p[1] === y1).map(p => p[0]), blo = Math.min(...bx), bhi = Math.max(...bx);
+    /* v582 (fix 4): the ear flaps never paint over face skin (that hid an eye: 'SoS' broke, one green eye on the ghost kits);
+       front view: one flap on each side of the face outline, mirrored on the helmet's widest row. Kill: __rl_no582eye */
+    const e582 = !window.__rl_no582eye;
     const flap = x => {
      for (let d = 1; d <= 2; d++) {
       const ch = at(x, y1 + d);
-      if (ch === '.' || ch === 'o' || isJ(ch) || ch === 'S' || ch === 's' || ch === 'Z') set(x, y1 + d, 'h');
+      if (ch === '.' || ch === 'o' || isJ(ch) || !e582 && (ch === 'S' || ch === 's' || ch === 'Z')) set(x, y1 + d, 'h');
      }
     };
-    if (front) {
+    if (front && e582) {
+     let wy = y0, wn = 0;
+     for (let y = y0; y <= y1; y++) { const n = hp.filter(p => p[1] === y).length; if (n > wn) { wn = n; wy = y; } }
+     const wx = hp.filter(p => p[1] === wy).map(p => p[0]), hlo = Math.min(...wx), hhi = Math.max(...wx);
+     for (let d = 1; d <= 2; d++) {
+      let lx = -1;
+      for (let x = hlo - 1; x <= hlo + 1; x++) if (at(x, y1 + d) === 'o') { lx = x; break; }
+      if (lx < 0) continue;
+      set(lx, y1 + d, 'h');
+      const rx = hlo + hhi - lx, rc = at(rx, y1 + d);
+      if (rc === 'o') set(rx, y1 + d, 'h');
+     }
+    } else if (front) {
      flap(blo + 1);
      flap(bhi - 1);
     } else flap(blo + 1);
@@ -5617,9 +5677,18 @@ const V17 = (() => {
     }
    }));
   }
+  if (sp && sp.glow && !pad && !window.__rl_no597glow && !gray) { /* 1.5d: unpadded bakes (lobby / profile / versus hero, cards, fits) had no glow at all - ring drawn inside the canvas bounds */
+   x.fillStyle = hexA(sp.glow, .4); const on = new Set();
+   rows.forEach((r, y) => r.forEach((ch, xx) => { if (ch === 'X' || isHead(ch)) { const X = flip ? w - 1 - xx : xx; for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) { const qx = X + a, qy = y + b; if (qx >= 0 && qy >= 0 && qx < w && qy < h) on.add(qx + ',' + qy); } } }));
+   on.forEach(k => { const [X, y] = k.split(',').map(Number); x.fillRect(X, y, 1, 1); });
+  }
   if (sp && sp.glow) {
    x.fillStyle = hexA(sp.glow, .4);
-   rows.forEach((r, y) => r.forEach((ch, xx) => {
+   if (!window.__rl_no590glow && !window.__rl_v124gb) { // 1.5: one even 1px glow ring around the whole stick (each pixel once, so the shaft is no brighter or wider than the head)
+    const on = new Set();
+    rows.forEach((r, y) => r.forEach((ch, xx) => { if (ch === 'X' || isHead(ch)) { const X = flip ? w - 1 - xx : xx; for (let a = -1; a <= 1; a++) for (let b = -1; b <= 1; b++) on.add((X + a) + ',' + (y + b)); } }));
+    on.forEach(k => { const [X, y] = k.split(',').map(Number); x.fillRect(X + pad, y + pad, 1, 1); });
+   } else rows.forEach((r, y) => r.forEach((ch, xx) => {
     if (ch === 'X' || isHead(ch)) {
      const X = flip ? w - 1 - xx : xx;
      x.fillRect(X - 1 + pad, y - 1 + pad, 3, 3);
@@ -5629,7 +5698,9 @@ const V17 = (() => {
   const g27 = kit.g27 && RL12.g27 ? RL12.g27 : null, rs27 = g27 ? rows.map(r => r.join('')) : null;
   rows.forEach((r, y) => r.forEach((ch, xx) => {
    if (ch === '.') return;
-   const col = T[xx + ',' + y] || g27 && g27(kit, ch, xx, y, rs27, name) || pal[ch];
+   /* v582 (fix 5): equipped item colors (cleats K, leather helmet H/h/w) beat the special-kit recolors (skeleton, white ghost, turkey...). Kill: __rl_no582itm */
+   const it582 = !window.__rl_no582itm && (ch === 'K' && gr.cleats && BY[gr.cleats] || gr.leather20 && (ch === 'H' || ch === 'h' || ch === 'w') && (window.__rl_no590fix8 || !(kit.g27 === 'white' || kit.g27 === 'skel'))); // 1.5: ghost white / skeleton helmets stay black + white
+   const col = T[xx + ',' + y] || !it582 && g27 && g27(kit, ch, xx, y, rs27, name) || pal[ch];
    if (!col) return;
    x.fillStyle = col;
    x.fillRect((flip ? w - 1 - xx : xx) + pad, y + pad, 1, 1);
@@ -5646,6 +5717,7 @@ const V17 = (() => {
    x.putImageData(im, 0, 0);
   }
   cv2.pad17 = pad;
+  cv2.__glow597 = sp && sp.glow && !gray && !window.__rl_no597glow ? hexA(sp.glow, .4) : null; /* 1.5d: v590stick reads the glow colour from here, not from pixels */
   if (gearBakes.size > 1600) gearBakes.clear();
   gearBakes.set(key, cv2);
   return cv2;
@@ -5986,8 +6058,9 @@ const V17 = (() => {
   try {
    if (!o.gearOnly && !e37) drawTrophies(L, Math.round(L * .48));
    if (!e37) {
-    BOXES.forEach(([s, lab], i) => gearBox(s, lab, 3, 17 + i * 20, 20, 17, pid, live, st.locked));
-    gearBox('stick', 'STICK', L - 23, 17, 20, 37, pid, live, st.locked);
+    const sy598 = o.gearOnly && !window.__rl_no598lob && typeof GEAR17 !== 'undefined' && GEAR17 && GEAR17.ll15 ? 2 : 0; // 1.5f: Locker League slots start at y 19 (clear of the PASS notch bar)
+    BOXES.forEach(([s, lab], i) => gearBox(s, lab, 3, 17 + sy598 + i * 20, 20, 17, pid, live, st.locked));
+    gearBox('stick', 'STICK', L - 23, 17 + sy598, 20, 37 - sy598, pid, live, st.locked);
     gearBox('tape', 'TAPE', L - 23, 58, 20, 14, pid, live, st.locked);
     {
      const used = pid && eqOf(pid).tape && !mlike() ? ST.tape[(EQ === 'world' ? 'w:' : '') + pid] || 0 : null, bx = L - 23, by = 74;
@@ -5999,7 +6072,7 @@ const V17 = (() => {
     }
     gearBox('celly', 'CELLY', L - 23, 81, 20, 17, pid, live, st.locked);
    }
-   if (!o.gearOnly) {
+   if (!o.gearOnly && (!(tray || pop) || window.__rl_no595hide)) { // 1.5c: the lobby buttons step aside while the gear tray / a popup is open (they blocked its paging buttons)
     const cw = Math.max(40, textW(String(ST.chinos)) + 30);
     if (live) hit('CHINOS', 1, 1, cw + 2, 13, () => {
      pop = {
@@ -6013,6 +6086,17 @@ const V17 = (() => {
     text(String(ST.chinos), 14, 5, 1, '#ffe14d');
     textMini('CHINOS', 14 + textW(String(ST.chinos)) + 3 + 11, 5.5, '#cfe');
     if (e37 && window.V38H && V38H.on()) V38H.drawLeft(L, live); else {
+     if (!window.__rl_no595top) { // 1.5c (Jonny HIGH 1): the top-right cluster fits its boxes at every size - no clipped text, no badge on the STICK slot
+      const B = (x, y, w, h, bg) => { if (window.RK15 && RK15.btn) RK15.btn(x, y, w, h, bg, null, { noLabel: 1 }); else { rect(x, y + 1, w, h, '#000'); rect(x, y, w, h, bg); rect(x, y, w, 1, 'rgba(255,255,255,.4)'); } };
+      const lv = Math.min(PASS.length, ST.pass.stars), ready = !ST.pass.owned ? lv > 0 : ST.pass.got < lv, cl = chalSync(), left = cl.filter(c => !ST.wk.done[c.id]).length;
+      lobby.passLv = lv; lobby.passReady = ready; lobby.passNotch = lv >= PASS.length ? 5 : (ST.pass.notch || 0) % 5;
+      if (live) hit('SHOP', L - 59, 1, 31, 12, () => openShop(), 'STRING SHOP'); B(L - 59, 1, 31, 12, '#7dff7a'); const FM = (t, cx, y, mw, c) => { if (window.RK15 && RK15.miniFit) RK15.miniFit(t, cx, y, mw, c, .75); else textMini(t, cx, y, c); }; FM('YARD SALE', L - 43.5, 4.5, 29, '#0b1a20');
+      if (dailyReady() || stickReady()) { const b = Math.floor(menuT * 3) % 2; rect(L - 31, 0, 3, 3, b ? '#ff3b3b' : '#ffe14d'); } /* 1.5d: badge on the corner, never on the text */
+      if (live) hit('PASS', L - 27, 1, 25, 12, () => openPass(), 'PASS'); B(L - 27, 1, 25, 12, '#ffcc33'); FM('PASS', L - 14.5, 2.5, 21, '#0b1a20'); if (window.RK15 && RK15.miniFit) RK15.miniFit('LV' + lv, L - 14.5, 7.5, 21, '#5a3d00', .55); else textMini('LV' + lv, L - 14.5, 7.5, '#5a3d00', .55); /* 1.5d: two mini lines inside the 9px plate (the size-1 PASS + LV line overflowed it) */
+      if (ready) { const b = Math.floor(menuT * 3) % 2; rect(L - 5, 0, 3, 3, b ? '#ff3b3b' : '#ffe14d'); }
+      if (live) hit('WEEKLY', L - 59, 14, 31, 10, () => openChal(), 'WEEKLY'); B(L - 59, 14, 31, 10, '#b9a8ff'); FM('WEEKLY', left ? L - 46.5 : L - 43.5, 17, left ? 21 : 28, '#0b1a20');
+      if (left) { rect(L - 35, 15, 6, 8, '#05080b'); text(String(left), L - 34, 16, 1, '#ffe14d'); }
+     } else {
      if (live) hit('SHOP', L - 58, 2, 28, 11, () => openShop(), 'STRING SHOP');
      rect(L - 58, 3, 28, 11, '#000');
      rect(L - 58, 2, 28, 11, '#7dff7a');
@@ -6056,6 +6140,7 @@ const V17 = (() => {
        text(String(left), L - 30, 13, 1, '#ffe14d');
       }
      }
+     }
      smallBtn('LOCKER ROOM', 2, 146, 50, 11, () => openLocker(), '#8fe3f0', live);
      if (ed32()) smallBtn('EDIT NAMES', 2, 134, 50, 11, () => ED31.open(), '#b9a8ff', live);
      smallBtn('TEAM CREW', L - 46, 146, 44, 11, () => openCrew(), '#ff9a4a', live);
@@ -6065,8 +6150,8 @@ const V17 = (() => {
       rect(cx, cy + 1, 44, 11, '#000');
       rect(cx, cy, 44, 11, '#ff9a4a');
       rect(cx, cy, 44, 1, 'rgba(255,255,255,.4)');
-      text('CHIRP', cx + 22, cy + 1, 1, '#0b1a20', 'center');
-      textMini('LOADOUT', cx + 22, cy + 7, '#0b1a20');
+      if (window.RK15 && RK15.miniFit && !window.__rl_no597chirp) { RK15.miniFit('CHIRP', cx + 22, cy + 2, 40, '#0b1a20', .75); RK15.miniFit('LOADOUT', cx + 22, cy + 6.5, 40, '#0b1a20', .55); } /* 1.5d: LOADOUT was cut by the plate's bottom shade */
+      else { text('CHIRP', cx + 22, cy + 1, 1, '#0b1a20', 'center'); textMini('LOADOUT', cx + 22, cy + 7, '#0b1a20'); }
       lobby.cload2402 = {
        x: cx,
        y: cy,
@@ -6450,12 +6535,13 @@ const V17 = (() => {
   }) + '<small>' + esc(BY[id].d || '') + '</small></div>').join('');
   return '<div class="hd"><div><div class="tt">HALLOWEEN PACK</div><div class="st">YOU GET ALL OF THESE - ' + HW_IDS.length + ' ITEMS, ONE PRICE. ONE PER SAVE. ' + (window.__rl_no32hw ? 'GONE AFTER OCT 31 11:59 PM.' : 'LIMITED TIME.') + '</div></div><div class="sp"></div>' + bal() + btn('BACK', 'v17shop', null, 'g') + '</div>' + '<div class="scroll" id="hw16list"><div class="hwg16">' + cards + '</div></div><div class="row" style="justify-content:center">' + (own ? '<button type="button" class="d" aria-label="HALLOWEEN PACK OWNED">OWNED - ALL ' + HW_IDS.length + ' ARE YOURS</button>' : '<button type="button" data-a="v17buy" data-v="halloween" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY HALLOWEEN PACK">BUY ALL ' + HW_IDS.length + ' - ' + coinHtml + HW_PACK.cost + '</button>') + '</div>';
  }
- const RELAX27 = 'chirp_c173_relax_01', RELAX27C = 30;
+ const RELAX27 = 'chirp_c173_relax_01', RELAX27C0 = 30;
+ function LOP568(id, d) { try { const p = window.LIVEOPS && LIVEOPS.price && LIVEOPS.price(id); return p != null ? p : d; } catch (e) { return d; } }
  const relax27on = () => !window.__rl_no27relax && !window.__rl_no27 && !window.__rl_v124gb && !!BY[RELAX27];
  function relaxTile27() {
   if (!relax27on()) return '';
-  const own = has(RELAX27), ok = !own && ST.chinos >= RELAX27C;
-  return '<div class="hw16 rx27" id="relax27tile" style="border-color:#ffcc33;background:linear-gradient(90deg,rgba(255,204,51,.42),rgba(10,16,24,.9) 45%,rgba(255,122,192,.32));box-shadow:0 0 12px rgba(255,204,51,.5)"><img class="hwp16" alt="" src="' + iconUrl(RELAX27) + '" style="width:84px;height:84px;filter:drop-shadow(0 0 8px #ffcc33)">' + '<div class="hwb16"><b style="color:#ffd84d;font-size:20px">RELAX PAL</b><small style="color:#fff0c2;font-size:10px">THE ONE LEGENDARY CHIRP - KNOX YELLS \'RELAX PAL\'. FITS ANY MOMENT IN YOUR CHIRP LOADOUT. BUY IT ONCE, YOURS FOREVER.</small></div>' + '<div class="hwc16">' + btn('HEAR IT', 'v17play', 'c173_relax_01', 'g') + (own ? '<button type="button" class="d" aria-label="RELAX PAL OWNED">OWNED</button>' : '<button type="button" data-a="v17relax27" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY RELAX PAL">' + coinHtml + RELAX27C + '</button>') + '</div></div>';
+  const own = has(RELAX27), ok = !own && ST.chinos >= LOP568('pack_relax', RELAX27C0);
+  return '<div class="hw16 rx27" id="relax27tile" style="border-color:#ffcc33;background:linear-gradient(90deg,rgba(255,204,51,.42),rgba(10,16,24,.9) 45%,rgba(255,122,192,.32));box-shadow:0 0 12px rgba(255,204,51,.5)"><img class="hwp16" alt="" src="' + iconUrl(RELAX27) + '" style="width:84px;height:84px;filter:drop-shadow(0 0 8px #ffcc33)">' + '<div class="hwb16"><b style="color:#ffd84d;font-size:20px">RELAX PAL</b><small style="color:#fff0c2;font-size:10px">THE ONE LEGENDARY CHIRP - KNOX YELLS \'RELAX PAL\'. FITS ANY MOMENT IN YOUR CHIRP LOADOUT. BUY IT ONCE, YOURS FOREVER.</small></div>' + '<div class="hwc16">' + btn('HEAR IT', 'v17play', 'c173_relax_01', 'g') + (own ? '<button type="button" class="d" aria-label="RELAX PAL OWNED">OWNED</button>' : '<button type="button" data-a="v17relax27" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY RELAX PAL">' + coinHtml + LOP568('pack_relax', RELAX27C0) + '</button>') + '</div></div>';
  }
  function buyRelax27() {
   if (!relax27on()) return false;
@@ -6463,12 +6549,12 @@ const V17 = (() => {
    toast('YOU ALREADY OWN RELAX PAL', '#ff9a8a');
    return false;
   }
-  if (ST.chinos < RELAX27C) {
-   toast('NOT ENOUGH CHINOS - RELAX PAL IS ' + RELAX27C, '#ff9a8a');
+  if (ST.chinos < LOP568('pack_relax', RELAX27C0)) {
+   toast('NOT ENOUGH CHINOS - RELAX PAL IS ' + LOP568('pack_relax', RELAX27C0), '#ff9a8a');
    return false;
   }
-  ST.chinos -= RELAX27C;
-  ST.stats.spent += RELAX27C;
+  ST.chinos -= LOP568('pack_relax', RELAX27C0);
+  ST.stats.spent += LOP568('pack_relax', RELAX27C0);
   grant(RELAX27, 1);
   save();
   toast('RELAX PAL IS YOURS - PICK IT IN YOUR CHIRP LOADOUT', '#ffcc33');
@@ -6484,7 +6570,7 @@ const V17 = (() => {
    return '<div class="pk17 ' + k + '"><img alt="" src="' + packUrl(k) + '"><b>' + P.n + '</b><small>' + ODDS[k] + '</small>' + '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ok ? k === 'legendary' ? 'y' : '' : 'd') + '" aria-label="BUY ' + P.n + '">' + price + '</button></div>';
   }).join('');
   const sr = stickReady(), fstick = '<div class="spk17 stick fs17"><img alt="" src="' + packUrl('stick') + '"><b>FREE STICK PACK</b><small>' + (sr ? 'FREE TODAY - SAME AS A STICK PACK' : 'CLAIMED TODAY - NEW ONE IN ' + nextDayIn()) + '</small>' + '<button type="button" data-a="v17buy" data-v="stickfree" class="' + (sr ? 'y' : 'd') + '" aria-label="' + (sr ? 'CLAIM FREE STICK PACK' : 'FREE STICK PACK CLAIMED') + '">' + (sr ? 'FREE' : 'NEXT IN ' + nextDayIn()) + '</button></div>';
-  return head('STRING SHOP', 'CARD PACKS COST CHINOS (+10 FOR EVERY WIN). CARDS: GRAY COMMON - BLUE RARE - GOLD LEGENDARY') + '<div class="scroll" id="shopList">' + hwTile() + relaxTile27() + bundles2504() + '<div class="sh17 fst17">FREE STICK PACK <span>ONE FREE EVERY DAY - RESETS AT MIDNIGHT</span></div><div class="shop17 sp17">' + fstick + '</div><div class="shop17">' + packs + '<div class="pk17 pass"><div class="bp17">GAME<br>PASS</div><b>SEASON 1 GAME PASS</b><small>' + (ST.pass.owned ? 'OWNED - LEVEL ' + Math.min(ST.pass.stars, PASS.length) + ' / ' + PASS.length : '21 LEVELS: OLD FOXWORTH (LEVEL 21), 3 LEGENDARIES, 3 CREW, CARD PACKS + MORE') + '</small>' + btn(ST.pass.owned ? 'OPEN' : '50 CHINOS', 'v17pass', null, ST.pass.owned ? 'g' : 'y') + '</div></div>' + (window.V38P ? V38P.shopHtml(coinHtml) : '') + '<div class="sh17 spt17">SPECIFIC PACKS <span>ONLY THAT KIND OF CARD - SAME ODDS AS A BASIC PACK - 5 CARDS</span></div><div class="shop17 sp17">' + SPEC_KEYS.map(k => {
+  return head('STRING SHOP', 'CARD PACKS COST CHINOS (+10 FOR EVERY WIN). CARDS: GRAY COMMON - BLUE RARE - GOLD LEGENDARY') + '<div class="scroll" id="shopList">' + hwTile() + relaxTile27() + bundles2504() + '<div class="sh17 fst17">FREE STICK PACK <span>ONE FREE EVERY DAY - RESETS AT MIDNIGHT</span></div><div class="shop17 sp17">' + fstick + '</div><div class="shop17">' + packs + '<div class="pk17 pass"><div class="bp17">GAME<br>PASS</div><b>SEASON 1 GAME PASS</b><small>' + (ST.pass.owned ? 'OWNED - LEVEL ' + Math.min(ST.pass.stars, PASS.length) + ' / ' + PASS.length : '21 LEVELS: OLD FOXWORTH (LEVEL 21), 3 LEGENDARIES, 3 CREW, CARD PACKS + MORE') + '</small>' + btn(ST.pass.owned ? 'OPEN' : LOP568('pack_pass', 50) + ' CHINOS', 'v17pass', null, ST.pass.owned ? 'g' : 'y') + '</div></div>' + (window.V38P ? V38P.shopHtml(coinHtml) : '') + '<div class="sh17 spt17">SPECIFIC PACKS <span>ONLY THAT KIND OF CARD - SAME ODDS AS A BASIC PACK - 5 CARDS</span></div><div class="shop17 sp17">' + SPEC_KEYS.map(k => {
    const P = PACKS[k], fp = ST.freePacks[k] || 0, ok = fp > 0 || ST.chinos >= P.cost;
    return '<div class="spk17 ' + k + '"><img alt="" src="' + packUrl(k) + '"><b>' + P.n + '</b><small>' + ODDS[k] + '</small><button type="button" data-a="v17buy" data-v="' + k + '" class="' + (fp > 0 ? 'y' : ok ? '' : 'd') + '" aria-label="BUY ' + P.n + '">' + (fp > 0 ? 'OPEN FREE (' + fp + ')' : coinHtml + P.cost) + '</button></div>';
   }).join('') + '</div></div>';
@@ -6502,7 +6588,7 @@ const V17 = (() => {
   return Object.keys(B2504).filter(k => PACKS[k]).map(k => {
    const P = PACKS[k], own = bundleOwned2504(k), ok = !own && ST.chinos >= P.cost, c = B2504C[k];
    const minis = P.bundle.filter(id => BY[id]).map(id => '<span class="hwi16" style="border-color:' + rarC(BY[id]) + '"><img alt="" src="' + iconUrl(id) + '"></span>').join('');
-   return '<div class="hw16 b2504" id="' + k + 'tile" style="border-color:' + c[0] + ';background:linear-gradient(90deg,' + c[1] + ',rgba(10,16,24,.9) 45%,' + c[2] + ');box-shadow:0 0 10px ' + c[1] + '"><img class="hwp16" alt="" src="' + packUrl(k) + '" style="filter:drop-shadow(0 0 6px ' + c[0] + ')">' + '<div class="hwb16"><b style="color:' + c[3] + '">' + P.n + '</b><small style="color:' + c[4] + '">YOU GET ALL ' + P.bundle.length + ': ' + B2504[k].d + '.</small><div class="hwr16">' + minis + '</div></div>' + '<div class="hwc16">' + btn('SEE WHAT\'S INSIDE', 'v17b2504', k, 'g') + (own ? '<button type="button" class="d" data-a="v17b2504" data-v="' + k + '" aria-label="' + P.n + ' OWNED">OWNED</button>' : '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY ' + P.n + '">' + coinHtml + P.cost + '</button>') + '</div></div>';
+   return '<div class="hw16 b2504" id="' + k + 'tile" style="border-color:' + c[0] + ';background:linear-gradient(90deg,' + c[1] + ',rgba(10,16,24,.9) 45%,' + c[2] + ');box-shadow:0 0 10px ' + c[1] + '"><img class="hwp16" alt="" src="' + packUrl(k) + '" style="filter:drop-shadow(0 0 6px ' + c[0] + ')">' + '<div class="hwb16"><b style="color:' + c[3] + '">' + P.n + '</b><small style="color:' + c[4] + '">YOU GET ALL ' + P.bundle.length + ': ' + B2504[k].d + '.</small><div class="hwr16">' + minis + '</div></div>' + '<div class="hwc16">' + btn('SEE WHAT\'S INSIDE', 'v17b2504', k, 'g') + (own && !rebuy580(k) ? '<button type="button" class="d" data-a="v17b2504" data-v="' + k + '" aria-label="' + P.n + ' OWNED">OWNED</button>' : own ? '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ST.chinos >= P.cost ? 'y' : 'd') + '" aria-label="BUY ' + P.n + ' AGAIN - GEAR ONLY"><span class="coin17"></span>' + P.cost + ' AGAIN</button>' : '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY ' + P.n + '">' + coinHtml + P.cost + '</button>') + '</div></div>';
   }).join('');
  }
  function renderB2504() {
@@ -6512,7 +6598,7 @@ const V17 = (() => {
   const cards = P.bundle.filter(id => BY[id]).map(id => '<div class="hwx16">' + cardHtml(id, {
    count: unlocked(id) ? spare(id) : null
   }) + '<small>' + esc(BY[id].d || '') + '</small></div>').join('');
-  return '<div class="hd"><div><div class="tt">' + P.n + '</div><div class="st">YOU GET ALL OF THESE - ' + P.bundle.length + ' ITEMS, ONE PRICE. PIECES YOU ALREADY HAVE STAY YOURS.</div></div><div class="sp"></div>' + bal() + btn('BACK', 'v17shop', null, 'g') + '</div>' + '<div class="scroll" id="b2504list"><div class="hwg16">' + cards + '</div></div><div class="row" style="justify-content:center">' + (own ? '<button type="button" class="d" aria-label="' + P.n + ' OWNED">OWNED - ALL ' + P.bundle.length + ' ARE YOURS</button>' : '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY ' + P.n + '">BUY ALL ' + P.bundle.length + ' - ' + coinHtml + P.cost + '</button>') + '</div>';
+  return '<div class="hd"><div><div class="tt">' + P.n + '</div><div class="st">YOU GET ALL OF THESE - ' + P.bundle.length + ' ITEMS, ONE PRICE. PIECES YOU ALREADY HAVE STAY YOURS.</div></div><div class="sp"></div>' + bal() + btn('BACK', 'v17shop', null, 'g') + '</div>' + '<div class="scroll" id="b2504list"><div class="hwg16">' + cards + '</div></div><div class="row" style="justify-content:center">' + (own && !rebuy580(k) ? '<button type="button" class="d" aria-label="' + P.n + ' OWNED">OWNED - ALL ' + P.bundle.length + ' ARE YOURS</button>' : own ? '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ST.chinos >= P.cost ? 'y' : 'd') + '" aria-label="BUY AGAIN - ONLY THE GEAR"><span class="coin17"></span>' + P.cost + ' - BUY AGAIN (GEAR ONLY)</button>' : '<button type="button" data-a="v17buy" data-v="' + k + '" class="' + (ok ? 'y' : 'd') + '" aria-label="BUY ' + P.n + '">BUY ALL ' + P.bundle.length + ' - ' + coinHtml + P.cost + '</button>') + '</div>';
  }
  function renderPack() {
   const P = lastPack;
@@ -6853,10 +6939,10 @@ const V17 = (() => {
   const own = ST.inv[it.id] || 0, used = inUse(it.id), un = unlocked(it.id), [mx, why] = sellMax(it.id), price = SELL_PRICE[it.rar];
   let inner;
   if (P.kind === 'sell' && mx > 0) {
-   const q = Math.max(1, Math.min(mx, P.q || 1));
+   const q = Math.max(1, Math.min(mx, P.q || 1)), bar598 = window.LSB598 && !window.__rl_no598bar ? LSB598.preview(it.id, q, it.rar) : null;
    inner = '<div class="pt17">SELL ' + esc(it.n) + '</div><div class="pcard17">' + cardHtml(it.id, {
     count: spare(it.id)
-   }) + '<div class="pi17"><span>YOU OWN X' + own + (used ? ' (' + used + ' EQUIPPED)' : '') + '</span><span>' + rarN(it) + ' = ' + price + ' CHINO' + (price > 1 ? 'S' : '') + ' EACH</span><span>YOU CAN SELL ' + mx + '</span>' + '<div class="row qty17">' + btn('-', 'v17sq', String(q - 1), 'g', q <= 1) + '<b id="sellQ">' + q + '</b>' + btn('+', 'v17sq', String(q + 1), 'g', q >= mx) + btn('MAX', 'v17sq', String(mx), 'g', q >= mx) + '</div>' + '<span class="pay17">' + coinHtml + '+' + q * price + ' CHINOS</span></div></div><div class="row" style="justify-content:center">' + btn('SELL ' + q + ' FOR ' + q * price, 'v17sell', it.id + '|' + q, 'y') + btn('CANCEL', 'v17pclose', null, 'g') + '</div>';
+   }) + '<div class="pi17"><span>YOU OWN X' + own + (used ? ' (' + used + ' EQUIPPED)' : '') + '</span><span>' + (bar598 ? bar598.each : rarN(it) + ' = ' + price + ' CHINO' + (price > 1 ? 'S' : '') + ' EACH') + '</span><span>YOU CAN SELL ' + mx + '</span>' + '<div class="row qty17">' + btn('-', 'v17sq', String(q - 1), 'g', q <= 1) + '<b id="sellQ">' + q + '</b>' + btn('+', 'v17sq', String(q + 1), 'g', q >= mx) + btn('MAX', 'v17sq', String(mx), 'g', q >= mx) + '</div>' + (bar598 ? '<span class="pay17">' + bar598.pay + '</span>' : '<span class="pay17">' + coinHtml + '+' + q * price + ' CHINOS</span>') + '</div></div><div class="row" style="justify-content:center">' + btn(bar598 ? 'SELL ' + q : 'SELL ' + q + ' FOR ' + q * price, 'v17sell', it.id + '|' + q, 'y') + btn('CANCEL', 'v17pclose', null, 'g') + '</div>';
   } else {
    const line = un ? effectText(it) : 'LOCKED - ' + (it.trophy ? it.d : it.crew ? 'FIND HIM IN CARD PACKS (CREW PACK) OR THE SEASON 1 GAME PASS' : it.leg20 ? it.id === __x("bGVnX2dhcnJ5") ? 'THE LAST LEVEL (21) OF THE SEASON 1 GAME PASS' : 'A VERY RARE PULL IN CARD PACKS (A LEGENDARY CARD)' : 'FIND IT IN CARD PACKS OR THE SEASON 1 GAME PASS');
    const what = it.sec === 'chirp' ? 'SAYS: ' + esc(it.n) + (it.vid && /^c172_/.test(it.vid) ? ' (KNOX)' : '') : esc(it.d) + (it.outfit && it.d.indexOf(it.outfit) < 0 ? ' ' + esc(it.outfit) : '');
@@ -6993,7 +7079,7 @@ const V17 = (() => {
    const id = t.id || (t.bundle ? t.ids[0] : t.k === 'stick_reg' ? 'stick_reg' : 'tape_white'), rar = passTierRar(t), got = ST.pass.owned && i < ST.pass.got, open = i < reach;
    return '<div class="bt17 r' + (t.id && lgx(BY[t.id]) ? 2 : rar) + (t.id && BY[t.id] && (BY[t.id].leg20 || lgx(BY[t.id])) ? ' lg23' : '') + (got ? ' got' : open ? ' open' : '') + '"><i>' + (i + 1) + '</i><img alt="" src="' + (t.pack ? packUrl(t.pack) : iconUrl(id, false)) + '"' + (t.pack ? ' class="pk"' : '') + '><small>' + esc(passTierName(t)) + '</small><em>' + (got ? 'GOT IT' : open ? ST.pass.owned ? '' : 'BUY TO CLAIM' : 'LOCKED') + '</em></div>';
   }).join('');
-  return head('SEASON 1 GAME PASS', (ST.pass.owned ? 'OWNED' : '50 CHINOS') + ' - TIER ' + reach + ' / ' + PASS.length + ' - +' + 3 * bp35x() + ' XP A WIN, +' + bp35x() + ' XP A LOSS, +3 / +5 XP A WEEKLY (5 XP = 1 LEVEL). ' + (PASS.v332 ? PASS.length + ' LEVELS IN SETS OF 5: A COMMON ITEM (GEAR X16), 2 CARD PACKS (OPEN THEM FREE IN THE SHOP), A RARE ITEM, A LEGENDARY ITEM OR LEGENDARY PACK. OLD FOXWORTH = LEVEL ' + PASS.length + '.' : '21 LEVELS: 3 LEGENDARIES (LVL 10, 15, 20), OLD FOXWORTH (LVL 21), 3 CREW, CARD PACKS (OPEN THEM FREE IN THE SHOP) + MORE.'), ST.pass.owned ? '' : btn('BUY 50', 'v17pass', null, 'y')) + notchBar18() + '<div class="pass17" id="passList">' + tiers + '</div>';
+  return head('SEASON 1 GAME PASS', (ST.pass.owned ? 'OWNED' : LOP568('pack_pass', 50) + ' CHINOS') + ' - TIER ' + reach + ' / ' + PASS.length + ' - +' + 3 * bp35x() + ' XP A WIN, +' + bp35x() + ' XP A LOSS, +3 / +5 XP A WEEKLY (5 XP = 1 LEVEL). ' + (PASS.v332 ? PASS.length + ' LEVELS IN SETS OF 5: A COMMON ITEM (GEAR X16), 2 CARD PACKS (OPEN THEM FREE IN THE SHOP), A RARE ITEM, A LEGENDARY ITEM OR LEGENDARY PACK. OLD FOXWORTH = LEVEL ' + PASS.length + '.' : '21 LEVELS: 3 LEGENDARIES (LVL 10, 15, 20), OLD FOXWORTH (LVL 21), 3 CREW, CARD PACKS (OPEN THEM FREE IN THE SHOP) + MORE.'), ST.pass.owned ? '' : btn('BUY 50', 'v17pass', null, 'y')) + notchBar18() + '<div class="pass17" id="passList">' + tiers + '</div>';
  }
  function notchN18() {
   return reachMax18() ? 5 : (ST.pass.notch || 0) % 5;
@@ -8791,6 +8877,7 @@ const V17 = (() => {
   drawP: drawP,
   draw12nsGear: draw12nsGear,
   handStickCols: handStickCols,
+  rebuy580: k => rebuy580(k),
   bakeHero: bakeHero,
   bakeGear: bakeGear,
   heroGear: heroGear,

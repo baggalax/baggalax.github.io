@@ -211,7 +211,7 @@
  const CACHE = new Map;
  function bake4(name, kit, flip, skin, num) {
   skin = Math.max(0, Math.min(RL12.SKIN.length - 1, skin | 0));
-  const key = name + '|' + kit.jersey + kit.trim + kit.helm + (flip ? 'L' : 'R') + skin + RL12.uniKey(kit) + '|' + (num || '');
+  const key = name + '|' + kit.jersey + kit.trim + kit.helm + (flip ? 'L' : 'R') + skin + RL12.uniKey(kit) + '|' + (num || '') + '|' + (kit.g27 || '');
   let c = CACHE.get(key);
   if (c) return c;
   if (CACHE.size > 3e3) CACHE.clear();
@@ -223,7 +223,7 @@
   for (let r = 0; r < h; r++) for (let q = 0; q < w; q++) {
    const ch = rows[r][q];
    if (ch === '.') continue;
-   x.fillStyle = um && RL12.uniColor(kit, um, q, r, ch) || pal[ch];
+   x.fillStyle = (kit.g27 && RL12.g27 && RL12.g27(kit, ch, q, r, rows, name)) || um && RL12.uniColor(kit, um, q, r, ch) || pal[ch];
    x.fillRect(flip ? w - 1 - q : q, r, 1, 1);
   }
   const np = num && isFB(name) ? numPos(name) : null;
@@ -251,7 +251,7 @@
  const draw0 = RL12.draw;
  RL12.draw = function(g, name, x, y, kit, faceRight, opts) {
   const f = FR[name];
-  if (off() || !f || !kit || kit.g27 || name.startsWith('prop_')) return draw0.apply(this, arguments);
+  if (off() || !f || !kit || (kit.g27 && !(!window.__rl_no597num && /^rk15/.test(String(kit.g27)))) || name.startsWith('prop_')) return draw0.apply(this, arguments); // 1.5e: Ranked / Jade / Davy unis get the back number too
   const num = cur ? cur.num : null;
   const useNum = !!(num && isFB(name) && numPos(name));
   if (!useNum && !armRows(name)) return draw0.apply(this, arguments);
@@ -293,6 +293,10 @@
   setCur: v => {
    cur = v;
   },
+  getNum: () => cur ? cur.num : null, // 1.5f: v598num (Whale / Crown back numbers)
+  isFB: isFB,
+  F5: F5,
+  F4: F4,
   cacheSize: () => CACHE.size
  };
 })();

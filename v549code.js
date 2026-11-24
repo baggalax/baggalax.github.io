@@ -61,6 +61,15 @@
    say('YOU ALREADY GOT THIS ONE ON THIS DEVICE');
    return { ok: false, why: 'mine' };
   }
+  const dm = Math.floor(+j.dimes || 0);
+  if (dm > 0 && dm <= 500 && !j.item && V17.addChinos) { // v1.3: a dimes code (BAGGALAX = 200), still one use in total on the server
+   F[rid] = { c: c, dimes: dm, t: Date.now() };
+   V17.addChinos(dm, 'CODE');
+   try { V17.save && V17.save(); } catch (e) { console.error(e); }
+   try { if (W.V23 && V23.put && V23.signedIn && V23.signedIn()) setTimeout(() => { try { V23.put(false, 'code549'); } catch (e) {} }, 400); } catch (e) {}
+   sfx('cheer'); say(dm + ' DIMES ADDED!', '#7dff7a');
+   return { ok: true, dimes: dm };
+  }
   const id = String(j.item || ''), n = Math.max(1, Math.min(5, +j.n || 1));
   if (!V17.BY || !V17.BY[id]) {
    say('UPDATE THE GAME TO USE THIS CODE');
@@ -115,6 +124,7 @@
    try {
     if (msg === 'REDEEM CODE' && v != null) {
      const c = norm(v);
+     if (c && W.RL562 && RL562.take(c)) return '';
      if (c && !LOCAL.has(c)) {
       redeem(c).catch(e => console.error(e));
       return '';
@@ -135,6 +145,7 @@
     const R1 = function (code) {
      if (code != null) {
       const c = norm(code);
+      if (c && W.RL562 && RL562.take(c)) return null;
       if (c && !LOCAL.has(c)) { redeem(c).catch(e => console.error(e)); return null; }
      }
      return R0.apply(this, arguments);

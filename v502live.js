@@ -27,7 +27,12 @@
     text: 'COLLAB. Good Stick Shortie, Goalie Stick, Good Stick Tape, and the Good Stick Co. team. Hidden until this id is in the shop list.',
     gives: [ 'stick_gsc_shortie', 'stick_gsc_goalie', 'tape_gsc', 'gsc_team' ] }
  ];
+ PAST_PACKS.push({ id: 'pack_turkey565', kind: 'pack', name: 'TURKEY TROTTERS PACK', price: 45, past: false, section: 'shop',
+    text: 'THANKSGIVING. Turkey Leg Lacrosse Stick, Chicken Dance celly, Turkey Trotters N/A player cards. Hidden until this id is in the shop list.',
+    gives: [ 'stick_tk565leg', 'celly_tk565chk' ] });
  const PAST_ITEMS = [
+  [ 'stick_tk565leg', 'TURKEY LEG STICK', 12, 'Thanksgiving rare stick. White bone shaft, brown drumstick head.' ],
+  [ 'celly_tk565chk', 'CHICKEN DANCE', 10, 'Thanksgiving celly.' ],
   [ 'stick_orange', 'ORANGE STICK', 5, 'Halloween pack stick. Looks only.' ],
   [ 'stick_spooky', 'SPOOKY STICK', 12, 'Halloween pack. Rare stick, purple head, green flame, breaks on 1.2% of checks.' ],
   [ 'tape_purple', 'PURPLE TAPE', 3, 'Halloween pack tape.' ],
@@ -56,6 +61,11 @@
  ];
  const MODES = [
   { id: 'mode_vets489', kind: 'mode', name: 'VETERANS TOURNAMENT', past: false, text: 'Six service teams. Win 3 games for the Honor Medal. The 1.3 clock is 96 hours from the first open on this device (the old 48 hours plus 2 days).' },
+  { id: 'mode_tbowl570', kind: 'mode', name: 'TURKEY BOWL', past: false, text: 'Play as the Turkey Trotters vs 4 teams you pick: round robin, then the top 2 play the final for the Turkey Bowl trophy. Only for Turkey Trotters pack owners. Also turns the Turkey Trotters team on.' },
+  { id: 'mode_turkey565', kind: 'mode', name: 'TURKEY TROTTERS (THANKSGIVING)', past: true, text: 'Turns on the Turkey Trotters N/A team, uniforms, cards and the Thanksgiving items. Hidden until this id is in the specials list.' },
+  { id: 'gift_wood565', kind: 'mode', name: 'GIFT: 1 WOODEN STICK FOR EVERYONE', past: true, text: 'Thanksgiving gift. Every player gets 1 Wooden Stick once while this id is in the specials list.' },
+  { id: 'gift_starter598', kind: 'mode', name: 'STARTER GIFT (1.5)', past: true, text: '10 random BASIC custom player cards + 1 random BASIC coach card, once per account AND once per device, shown with the pack reveal. Always on in 1.5 (v598new.js, kill switch __rl_no598gift).' },
+  { id: 'tut_welcome598', kind: 'mode', name: 'WELCOME TUTORIAL (1.5)', past: true, text: "Show-only tour: WHAT'S NEW, ONLINE, MAKING A CARD TEAM. BACK / NEXT / SKIP on every step, once per account (v598new.js, kill switch __rl_no598tut)." },
   { id: 'mode_ultimate', kind: 'mode', name: 'ULTIMATE TOURNAMENT', past: true, text: 'Always in PLAY. Listed so it can be featured under Special Games.' },
   { id: 'mode_world', kind: 'mode', name: 'WORLD GAMES', past: true, text: 'Always in PLAY. Listed so it can be featured under Special Games.' },
   { id: 'mode_college', kind: 'mode', name: 'COLLEGE TOURNAMENT', past: true, text: 'Always in PLAY. Listed so it can be featured under Special Games.' }
@@ -109,7 +119,10 @@
   const specials = Array.isArray(cfg.specials) ? cfg.specials : [];
   return shop.find(r => r && r.id === id) || specials.find(r => r && r.id === id) || null;
  }
- V.shopOn = id => { const r = (cfg.shop || []).find(x => x && x.id === id); return !!(r && rowOn(r, id)); };
+ // 1.5f (Charlie): THE WHALE OR THE CROWN is a permanent shop item. A Live-Ops shop list that simply does not mention it
+ // (an older liveops.json from the panel) no longer hides it; a row that is there but switched off still hides it.
+ const EVERGREEN598 = new Set(['pack_fit45']);
+ V.shopOn = id => { const r = (cfg.shop || []).find(x => x && x.id === id); if (!r && EVERGREEN598.has(id) && !W.__rl_no598ever) return true; return !!(r && rowOn(r, id)); };
  V.specialOn = id => { const r = (cfg.specials || []).find(x => x && x.id === id); return !!(r && rowOn(r, id)); };
  V.price = id => { const r = find(id); return r && r.price != null && isFinite(+r.price) ? +r.price : null; };
  V.section = id => { const r = find(id); return r && r.section ? String(r.section) : null; };
@@ -136,16 +149,43 @@
  V.goodstick = () => cfg.goodstick && typeof cfg.goodstick === 'object' ? cfg.goodstick : { enabled: false, roster: [] };
  V.activeSpecials = () => (cfg.specials || []).filter(r => r && rowOn(r, r.id));
 
+ // 1.5 B66 (Whale / Crown timer on iPhone): parse ISO, "YYYY-MM-DD HH:MM[:SS]" (WebKit says NaN), epoch s / ms,
+ // "MM/DD/YYYY[ HH:MM[ AM|PM]]". Returns ms or null. Times without a zone are read as UTC.
+ function parseT600(v) {
+  if (v == null || v === '') return null;
+  if (typeof v === 'number' && isFinite(v)) return v < 1e11 ? v * 1000 : v;
+  const s = String(v).trim(); if (!s) return null;
+  if (/^\d{9,13}$/.test(s)) { const n = +s; return n < 1e11 ? n * 1000 : n; }
+  let t = Date.parse(s); if (!isNaN(t)) return t;
+  let m = /^(\d{4})-(\d{1,2})-(\d{1,2})(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?)?\s*(Z|[+-]\d{2}:?\d{2})?$/i.exec(s);
+  if (m) { t = Date.UTC(+m[1], +m[2] - 1, +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0)); if (m[7] && m[7].toUpperCase() !== 'Z') { const z = /([+-])(\d{2}):?(\d{2})/.exec(m[7]); t -= (z[1] === '-' ? -1 : 1) * (+z[2] * 60 + +z[3]) * 60000; } return t; }
+  m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[ ,]+(\d{1,2}):(\d{2})\s*(AM|PM)?)?$/i.exec(s);
+  if (m) { let h = +(m[4] || 0); if (m[6]) { h = h % 12 + (m[6].toUpperCase() === 'PM' ? 12 : 0); } return Date.UTC(+m[3], +m[1] - 1, +m[2], h, +(m[5] || 0)); }
+  return null;
+ }
+ V.parseT600 = parseT600;
  function cleanList(list) {
   if (!Array.isArray(list)) return [];
   const out = [];
-  for (const row of list) {
+  for (let row of list) {
+   if (row && !W.__rl_no600lo && typeof row === 'object') { // 1.5 B66: a row the panel keyed by its display name ("the whale or the crown") -> the catalog id
+    const known = typeof row.id === 'string' && row.id && catalog().some(c => c.id === row.id);
+    if (!known) { const nm = String(row.name || row.id || '').trim().toUpperCase(); const c = nm && catalog().find(c => String(c.name || '').trim().toUpperCase() === nm); if (c) row = Object.assign({}, row, { id: c.id }); }
+   }
    if (!row || typeof row.id !== 'string' || !row.id) continue;
    const o = { id: row.id.slice(0, 80) };
    if (row.price != null && isFinite(+row.price) && +row.price >= 0) o.price = +row.price;
    if (typeof row.section === 'string') o.section = row.section.slice(0, 24);
-   if (typeof row.start === 'string' && !isNaN(Date.parse(row.start))) o.start = row.start;
-   if (typeof row.end === 'string' && !isNaN(Date.parse(row.end))) o.end = row.end;
+   if (W.__rl_no600lo) {
+    if (typeof row.start === 'string' && !isNaN(Date.parse(row.start))) o.start = row.start;
+    if (typeof row.end === 'string' && !isNaN(Date.parse(row.end))) o.end = row.end;
+   } else { // 1.5 B66: timers in any format the panel / a hand edit may use -> one ISO string (iOS WebKit Date.parse is strict)
+    const st = parseT600(row.start != null ? row.start : row.startsAt != null ? row.startsAt : row.from);
+    const tm = row.timer && typeof row.timer === 'object' ? row.timer : null;
+    const en = parseT600(row.end != null && row.end !== '' ? row.end : row.endsAt != null ? row.endsAt : row.ends != null ? row.ends : row.until != null ? row.until : row.expires != null ? row.expires : tm ? (tm.end != null ? tm.end : tm.ends) : null);
+    if (st != null) o.start = new Date(st).toISOString();
+    if (en != null) o.end = new Date(en).toISOString();
+   }
    if (row.windowHours != null && isFinite(+row.windowHours) && +row.windowHours > 0) o.windowHours = +row.windowHours;
    if (typeof row.anchor === 'string') o.anchor = row.anchor.slice(0, 40);
    if (row.enabled === false) o.enabled = false;
@@ -246,6 +286,8 @@
   Object.keys(PACK_META).forEach(id => push({ id: id, kind: 'pack', name: PACK_META[id][0], price: PACK_META[id][1], text: PACK_META[id][2], past: false, section: 'shop' }));
   PAST_PACKS.forEach(p => push(p));
   PAST_ITEMS.forEach(([id, name, price, text]) => push({ id: id, kind: 'item', name: name, price: price, text: text, past: true, section: 'shop' }));
+  // 1.5 B66: WALK THE PLANK (v600plank.js) - shop only, OFF until the panel has a row for it; default price 150 dimes
+  if (!W.__rl_no600plank) push({ id: 'celly_wplank', kind: 'item', name: 'WALK THE PLANK', price: 150, text: 'LEGENDARY CELLY. THE FLYING DUTCHMAN RISES, HE WALKS THE PLANK, SALUTES AND SPLASHES IN. COSMETIC ONLY. SHOP ONLY.', past: false, section: 'shop', rar: 'LEGENDARY' });
   MODES.forEach(m => push(m));
   try {
    const BY = W.V17 && V17.BY;
@@ -314,15 +356,38 @@
   if (!V.shopOn('pack_relax')) { const n = root.querySelector('#relax27tile'); if (n) n.remove(); }
   if (!V.shopOn('pack_fit45')) { const n = root.querySelector('#fit45tile'); if (n) n.remove(); }
   if (!V.shopOn('pack_pass')) { const n = root.querySelector('.pk17.pass'); if (n) n.remove(); }
+  try {
+   [ [ 'relax27tile', 'pack_relax' ], [ 'fit45tile', 'pack_fit45' ], [ 'b2504ctile', 'pack_b2504c' ], [ 'b2504ltile', 'pack_b2504l' ], [ 'vets489tile', 'pack_vets489' ], [ 'hw16tile', 'pack_halloween' ] ].forEach(m => {
+    const n = root.querySelector('#' + m[0]);
+    if (!n || n.querySelector('.lo502left') || !V.shopOn(m[1])) return;
+    const left = V.leftText(m[1]);
+    if (!left) return;
+    const b = doc.createElement('i');
+    b.className = 'lo502left tile';
+    b.textContent = left;
+    n.insertBefore(b, n.firstChild);
+   });
+  } catch (e) {}
   const singles = (cfg.shop || []).filter(r => r && V.shopOn(r.id) && V.catalog().some(c => c.id === r.id && c.kind === 'item'));
   let extra = '';
   if (singles.length) {
    extra = '<div class="sh17">BROUGHT BACK</div><div class="shop17">' + singles.map(r => {
     const c = catalog().find(x => x.id === r.id) || { name: r.id, price: 0 };
-    const price = r.price != null ? r.price : c.price;
+    const price = V.price(r.id) != null ? V.price(r.id) : c.price;
     const left = V.leftText(r.id);
     return '<div class="spk17"><b>' + c.name + '</b><small>' + (c.text || '') + (left ? ' ' + left : '') + '</small><button type="button" class="y" data-a="lo502buy" data-v="' + r.id + '">' + price + '</button></div>';
    }).join('') + '</div>';
+   // 1.5 B70 (v600shopart): with the Yard Sale on, single items are tiles INSIDE #shopList (art + rarity look), so they land
+   // in the big / med / small slot the panel chose (no slot = ITEMS). Kill switch: window.__rl_no600slot
+   const list600 = !W.__rl_no600slot && W.V580 && !W.__rl_no580 && W.SHOPART600 && root.querySelector('#shopList');
+   if (list600) {
+    const big = new Set(); try { const raw = W.__rlLiveForce || JSON.parse(localStorage.getItem('rl_' + KEY) || 'null'); ((raw && raw.layout && raw.layout.big) || []).forEach(q => { const id = q && (typeof q === 'string' ? q : q.id); if (id) big.add(id); }); } catch (e) {}
+    list600.insertAdjacentHTML('beforeend', singles.map(r => {
+     const c = catalog().find(x => x.id === r.id) || { name: r.id, price: 0 }, price = V.price(r.id) != null ? V.price(r.id) : c.price, left = V.leftText(r.id), L = SHOPART600.look(r.id);
+     return '<div class="spk17 lo600" data-lt600="' + L.title + '" style="background:' + L.bg + ';border-color:' + L.border + '"><img alt="" src="' + SHOPART600.art(r.id, big.has(r.id)) + '"><b>' + c.name + '</b><small>' + L.rar + ' - ' + (c.text || '') + (left ? ' ' + left : '') + '</small><button type="button" class="y" data-a="lo502buy" data-v="' + r.id + '">' + price + '</button></div>';
+    }).join(''));
+    extra = '';
+   }
   }
   const tab = V.tab || 'shop';
   const packHtml = W.GSC501 && GSC501.shopBlock ? GSC501.shopBlock() : '';
@@ -336,7 +401,8 @@
 
  function hook() {
   try {
-   if (typeof PANEL_RENDER === 'object' && typeof PANEL_RENDER.shop17 === 'function' && !PANEL_RENDER.shop17.__lo502) {
+   if (typeof PANEL_RENDER === 'object' && typeof PANEL_RENDER.shop17 === 'function' && !PANEL_RENDER.shop17.__lo502 && !V.wrapped502) {
+    V.wrapped502 = true;   // wrap once: wrapping again on top of v531's COLLAB-tab remover (every refresh) put the SHOP/COLLAB tabs back
     const r0 = PANEL_RENDER.shop17;
     const wrapped = function () {
      applyPrices();
@@ -375,7 +441,7 @@
       if (!Array.isArray(rows)) return rows;
       rows = rows.map(r => Array.isArray(r) ? r.filter(b => !(b && b.v489)) : r).filter(r => !Array.isArray(r) || r.length);
       if (!(W.M37 && M37.page === 'play' && W.V469 && V469.page === 'pick')) return rows;
-      const on = V.activeSpecials();
+      const on = V.activeSpecials().filter(s => !/^(gift_|mode_turkey565)/.test(s.id));
       const left = on.map(s => (catalog().find(c => c.id === s.id) || {}).name + (V.leftText(s.id) ? ' ' + V.leftText(s.id) : '')).join('  ');
       const btn = { label: 'SPECIAL GAMES', fn: () => openSpecials(on), bg: on.length ? '#5aa0ff' : '#5a6570', fg: on.length ? '#0b1a20' : '#9aa', m37: 1, h37: 28, t469: 'pick', big469: 1, lo502: 1, loOff: !on.length, loLeft: on.length ? left : 'NOTHING RIGHT NOW' };
       const i = rows.findIndex(r => r && r[0] && r[0].m37 === 'back');
@@ -416,6 +482,7 @@
    PANEL_ACT.lo502mode = id => {
     if (id === 'mode_vets489' && W.VETS489) VETS489.openTour();
     else if (id === 'mode_ultimate') screen = 'menu';
+    else if (id === 'mode_turkey565') V17.toast('PICK TURKEY TROTTERS IN QUICK PLAY (N/A TAB)', '#f2c230');
     else V17.toast(id, '#ffd23a');
    };
    screen = 'lo502';
@@ -452,6 +519,27 @@
   }
  }
  V.refresh = refresh;
+ try {
+  if (!document.getElementById('lo502css')) {
+   const st = document.createElement('style');
+   st.id = 'lo502css';
+   st.textContent = '.lo502left{display:inline-block;margin:2px 4px;padding:1px 5px;background:#c8102e;color:#fff;font-style:normal;font-size:9px;letter-spacing:.5px;border:1px solid #ffd84d}.lo502left.tile{position:absolute;top:2px;right:2px;z-index:3;margin:0}#relax27tile,#fit45tile,#b2504ctile,#b2504ltile,#vets489tile,#hw16tile,#tk565tile{position:relative}';
+   (document.head || document.documentElement).appendChild(st);
+  }
+ } catch (e) {}
+ try {
+  let bd = null, last = '';
+  setInterval(() => { try {
+   if (W.__rl_noLiveBadge) return;
+   const on = (typeof screen !== 'undefined') && (screen === 'shop17' || screen === 'shop');
+   if (!bd) { bd = document.createElement('div'); bd.style.cssText = 'position:fixed;left:4px;bottom:calc(4px + env(safe-area-inset-bottom,0px));z-index:99999;font:9px monospace;color:#fff;background:rgba(0,0,0,.6);padding:2px 4px;pointer-events:none;display:none'; document.body.appendChild(bd); }
+   bd.style.display = on ? 'block' : 'none';
+   if (!on) return;
+   const e = V.err && V.err.length ? String(V.err[V.err.length - 1]).slice(0, 40) : '';
+   const t = 'LIVE-OPS ' + (V.src || '?') + (V.ready ? '' : ' ...') + (V.src !== 'net' && e ? ' ' + e : '');
+   if (t !== last) { bd.textContent = t; last = t; }
+  } catch (x) {} }, 1000);
+ } catch (e) {}
  try {
   const o0 = V17.openShop;
   if (typeof o0 === 'function') V17.openShop = function () { refresh(); return o0.apply(this, arguments); };

@@ -207,7 +207,7 @@ var __x=self.__x||(self.__x=(function(){var c=Object.create(null);return functio
   }
   RE.lastIndex = 0;
   out = out.replace(RE, function(m, pre, w) {
-   return pre + TO[w];
+   return pre + (window.COL600 && COL600.NEW && COL600.NEW.has(w) ? w : TO[w]); // 1.5f: v600col's final names are never swapped back
   });
   out = accSwap(out);
   if (keep.length) out = out.replace(/\u0001(\d+)\u0002/g, function(m, i) {

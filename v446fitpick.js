@@ -24,6 +24,7 @@
    const any = !!(v && Object.keys(v.t).length); if ((o.wear === true) !== any) { o.wear = any; localStorage.setItem('rl_fit45', JSON.stringify(o)); } } catch (e) {}
  }
  function myTeam() {
+  try { if (!window.__rl_no598fitteam && window.V524 && V524.team) { const t = V524.team(); if (t) return t; } } catch (e) {} // 1.5f: the lobby you came from
   try { if (typeof season !== 'undefined' && season && season.team) return season.team; } catch (e) {}
   try { const q = JSON.parse(localStorage.getItem('rl_qteam16') || 'null'); if (q) return q; } catch (e) {}
   try { if (typeof TEAMS !== 'undefined' && TEAMS[0]) return TEAMS[0].id; } catch (e) {}
@@ -39,13 +40,22 @@
   return v;
  }
  const own = () => { try { return off() ? null : F.pick(); } catch (e) { return null; } };
- const wears = tid => !!(tid && own() && state().t[bse(tid)]);
+ // 1.5f (Charlie: card-team Whale would not stay on): a CARD team keeps its own switch under its own id. Before, it shared
+ // the switch of the pro team its uniform set comes from (bse), so picking another set, or that pro team, flipped it.
+ const isCT598 = tid => { try { return !window.__rl_no598fitct && !!(window.V33 && V33.isCT && V33.isCT(tid)); } catch (e) { return false; } };
+ const wears = tid => { if (!tid || !own()) return false; const t = state().t; return isCT598(tid) ? !!(t[tid] || t[bse(tid)]) : !!t[bse(tid)]; };
  function setOn(tid, on) {
-  const v = state(), b = bse(tid);
-  if (on) v.t[b] = 1; else delete v.t[b];
+  const v = state(), ct = isCT598(tid), b = ct ? tid : bse(tid);
+  if (on) v.t[b] = 1; else { delete v.t[b]; if (ct) delete v.t[bse(tid)]; }
   lsSet(v);
+  // 1.5f BUG (Charlie, season lobby): EQUIP THE WHALE did nothing on a card-team season team. Cause: card teams wear the
+  // default RANKED uni (a g27 kit), and a g27 kit always wins over the fit (heroKit / gameKits skip g27 kits), so the Whale
+  // was saved but never drawn - lobby, pregame or match. Fix: turning the fit on takes the ranked uni off that team (the
+  // same thing the UNIFORM picker already did). Kill switch: window.__rl_no598fitrk
+  if (on && !window.__rl_no598fitrk) { try { if (window.RK15U && RK15U.clearRanked) { RK15U.clearRanked(tid); if (b !== tid) RK15U.clearRanked(b); } } catch (e) {} }
  }
- const fitKit = (kit, w) => Object.assign({}, kit, { fit45: w });
+ // v1.3: a Good Stick kit wearing the fit loses its gscH/gscA marker, so the Good Stick jersey art (sleeves, logo) can't clip through the fit
+ const fitKit = (kit, w) => { const k = Object.assign({}, kit, { fit45: w }); if (!window.__rl_no563fit && (window.__rl_no598fitall ? /^(gsc[HA]|tk565[HA])$/ : /^(?!rk15)./).test(k.g27 || '')) delete k.g27; return k; };
  const strip = kit => { if (!kit || !kit.fit45) return kit; const k = Object.assign({}, kit); delete k.fit45; return k; };
 
  /* ---------- games: the team you play with wears it when it's on for that team (offline only, net untouched) ---------- */
@@ -56,7 +66,7 @@
    if (off() || !r || !r[0]) return r;
    const online = !!(meta && meta.online) || mode === 'online';
    const w = own();
-   if (!online && w && wears(user) && !r[0].g27) r[0] = fitKit(r[0], w);
+   if (!online && w && wears(user) && !g27x(r[0])) r[0] = fitKit(r[0], w);
    else if (r[0].fit45) r[0] = strip(r[0]);
   } catch (e) {}
   return r;
@@ -64,7 +74,7 @@
 
  /* ---------- menu heroes draw the fit (lobby, matchup, pregame) ---------- */
  const scr = () => { try { return typeof screen !== 'undefined' ? screen : ''; } catch (e) { return ''; } };
- const ELIG = { menu: 1, matchup: 1, pregame: 1 };
+ const ELIG = { menu: 1, matchup: 1, pregame: 1, gear17: !window.__rl_no597fit ? 1 : 0 }; // 1.5e: Crown / Whale show in the card-team + Locker League lobby too (gear17); before, EQUIP there changed nothing you could see
  function editable() {
   const s = scr();
   if (!ELIG[s]) return false;
@@ -78,11 +88,12 @@
    if (off() || i || !tid || !k) return k;
    const s = scr();
    if (s === 'pregame') return k; // game.uk already carries it (gameKits / the arrows below)
-   if (ELIG[s] && wears(tid) && !k.g27) return fitKit(k, own());
+   if (ELIG[s] && wears(tid) && !g27x(k)) return fitKit(k, own());
   } catch (e) {}
   return k;
  };
- const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !kit.g27 && !off());
+ const g27x = k => !!(k && k.g27 && (window.__rl_no563fit || !(window.__rl_no598fitall ? /^(gsc[HA]|tk565[HA])$/ : /^(?!rk15)/).test(k.g27))); // 1.5f (Charlie: Whale would not go on): the fit beats every special set kit (Veterans, skeleton, white, collab ...); only a ranked uni blocks it, and wearing the fit already drops the ranked uni (v590uni wornKey)
+ const isFit = kit => !!(kit && (kit.fit45 === 'whale' || kit.fit45 === 'crown') && !g27x(kit) && !off());
  let heroOn = 0;
  const lb0 = window.lobbyBake, lh0 = window.lobbyHero;
  if (typeof lb0 === 'function' && typeof lh0 === 'function' && typeof RL12 !== 'undefined') {
@@ -135,7 +146,7 @@
  function putFit(tid) {
   const w = own(); if (!w) return;
   setOn(tid, true);
-  if (scr() === 'pregame' && game && game.uk && !game.uk.g27) game.uk = fitKit(game.uk, w);
+  if (scr() === 'pregame' && game && game.uk && !g27x(game.uk)) game.uk = fitKit(game.uk, w);
   toast(tname(tid) + ' WEARS ' + NAME[w], '#7dff7a');
  }
  function step(tid, d) {
@@ -144,7 +155,9 @@
   if (wears(tid)) { setK(tid, d > 0 ? L[0] : L[L.length - 1]); return; }
   let vk; try { vk = scr() === 'pregame' ? (game.uk && game.uk.k21 != null ? game.uk.k21 : 0) : scr() === 'matchup' ? U.matchSel().v[0] : U.savedK(tid); } catch (e) { vk = 0; }
   const p = L.indexOf(vk);
-  if (p >= 0 && ((d > 0 && p === L.length - 1) || (d < 0 && p === 0))) { putFit(tid); return; }
+  // 1.5f (Charlie): the Whale / Crown is NOT part of the uniform set any more - the arrows wrap BASIC > ... > LAST > BASIC.
+  // It is put on from the UNIFORM button / picker or the locker WHALE + CROWN row only. Kill switch: window.__rl_no598cyc
+  if (window.__rl_no598cyc && p >= 0 && ((d > 0 && p === L.length - 1) || (d < 0 && p === 0))) { putFit(tid); return; }
   U.step(0, tid, d);
  }
  const dt0 = U.drawToggle;
@@ -193,7 +206,7 @@
   if (h.indexOf('fit45sec') < 0 && h.indexOf('uni2319" data-t="') < 0) return h;
   const tp = document.createElement('template'); tp.innerHTML = h;
   tp.content.querySelectorAll('.fit45sec').forEach(n => n.remove());
-  const w = window.__rl_446locker ? own() : null; // Charlie 7:38 PM: not in the locker, lobby arrows only
+  const w = window.__rl_446locker && window.__rl_no598cyc ? own() : null; // Charlie 7:38 PM: not in the locker, lobby arrows only; 1.5f: never appended to a team's uniform set
   if (w) tp.content.querySelectorAll('.sec17.uni2319[data-t]').forEach(sec => {
    const tid = sec.getAttribute('data-t'), grid = sec.querySelector('.grid17');
    if (!tid || !grid) return;

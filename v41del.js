@@ -28,6 +28,7 @@
     addCss();
     box = el('div', { id: 'del41' }); document.body.appendChild(box);
     ['touchstart', 'touchend', 'pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'keydown'].forEach(function (ev) { box.addEventListener(ev, function (e) { e.stopPropagation(); }); });
+    box.addEventListener('click', function (e) { if (e.target === box && !W.__rl_no597del) close(); }); // 1.5e: tap outside = cancel
   }
   function close() { if (box) { box.style.display = 'none'; box.textContent = ''; } D.open = false; }
   function acct() { try { return (W.V23 && V23.A && V23.A()) || {}; } catch (e) { return {}; } }
@@ -57,15 +58,27 @@
     var A = acct(); if (!A.tok) return;
     mount(); D.open = true; box.textContent = ''; box.style.display = 'flex';
     var b = el('div', { 'class': 'box' }); box.appendChild(b);
-    b.appendChild(el('h2', { text: 'DELETE ACCOUNT ' + String(A.u || '').toUpperCase() + '?' }));
+    b.appendChild(el('h2', { text: W.__rl_no597del ? 'DELETE ACCOUNT ' + String(A.u || '').toUpperCase() + '?' : 'DELETE YOUR ACCOUNT?' }));
+    if (!W.__rl_no597del) b.appendChild(el('div', { 'class': 'sm', text: 'THIS REMOVES YOUR CLOUD SAVE, FRIENDS AND RANK. (' + String(A.u || '').toUpperCase() + ')' }));
     b.appendChild(el('div', { 'class': 'sm', text: 'THIS ERASES FROM OUR SERVER: YOUR USERNAME + PIN, YOUR CLOUD SAVE, YOUR FRIENDS + REQUESTS, INVITES, TRADES, YOUR BIRTH YEAR AND YOUR INVITE CODE. IT CAN\'T BE UNDONE. DIMES YOU BOUGHT CAN\'T BE GIVEN BACK.' }));
     var pin = el('input', { type: 'password', id: 'del41pin', maxlength: '64', autocomplete: 'current-password', placeholder: 'TYPE YOUR PIN / PASSWORD' });
     b.appendChild(pin);
     var cb = el('input', { type: 'checkbox', id: 'del41wipe' });
     b.appendChild(el('label', {}, [cb, 'ALSO ERASE THE SAVE ON THIS PHONE (START FRESH)']));
     var err = el('div', { 'class': 'err', id: 'del41err' }); b.appendChild(err);
-    var go = bt('DELETE FOREVER', 'r', function () {
+    var really = function (run) { // 1.5e (Charlie): a SECOND are-you-sure, in the page; CANCEL is the big default
+      var b2 = el('div', { 'class': 'box' });
+      b2.appendChild(el('h2', { text: 'ARE YOU REALLY SURE?' }));
+      b2.appendChild(el('div', { 'class': 'sm', text: 'THIS CAN\'T BE UNDONE.' }));
+      var cx = bt('CANCEL', 'w', close, 'del41x2'); cx.style.cssText += ';font-size:15px;padding:10px 22px;min-width:46%';
+      var dz = bt('DELETE FOREVER', 'r', function () { box.textContent = ''; box.appendChild(b); run(); }, 'del41go2');
+      b2.appendChild(el('div', {}, [cx, dz]));
+      box.textContent = ''; box.appendChild(b2); try { cx.focus(); } catch (e) { }
+    };
+    var go = bt(W.__rl_no597del ? 'DELETE FOREVER' : 'YES, DELETE', 'r', function () {
       if (!pin.value) { err.textContent = 'TYPE YOUR PIN FIRST'; return; }
+      if (!W.__rl_no597del && !go.__sure) { really(function () { go.__sure = true; go.click(); }); return; }
+      go.__sure = false;
       go.disabled = true; err.textContent = 'DELETING...';
       D.call(pin.value).then(function (r) {
         D.log.push('del ' + JSON.stringify(r).slice(0, 120));

@@ -45,7 +45,8 @@
   const car = find(rows, 'CAREER') || find(rows, 'FRANCHISE MODE');
   if (V.page === 'reg') {
    const B = (e, lab) => [ tag(e, 'reg', { label: lab, big: true, sc: 2, h37: 16 }) ];
-   const out = [ B(wg, 'WORLD GAMES'), B(ps, 'PROFESSIONAL'), B(qg, 'QUICK MATCH'), B(on, 'ONLINE') ];
+   const out = [ B(wg, 'WORLD GAMES'), B(ps, 'PROFESSIONAL'), B(qg, 'QUICK MATCH') ];
+   if (Wn.__rl_no469online) out.push(B(on, 'ONLINE'));
    const co = find(rows, 'COLLEGE'), ul = find(rows, 'ULTIMATE');
    if (co) out.push(B(co, 'COLLEGE'));
    if (ul) out.push(B(ul, 'ULTIMATE'));
@@ -54,6 +55,8 @@
   }
   const out = [ [ { label: 'PLAY REGULAR', fn: () => { V.page = 'reg'; }, bg: '#7dff7a', m37: 1, h37: 40, t469: 'pick', big469: 1 } ] ];
   if (car) out.push([ { label: 'PLAY CAREER', fn: car.fn, bg: '#ffb14d', m37: 1, h37: 40, t469: 'pick', big469: 1 } ]);
+  // 1.4 (Charlie): ONLINE lives on this PLAY screen now, under PLAY CAREER (was in GAME MODES). Same fn as before.
+  if (!Wn.__rl_no469online) out.push([ tag(on, 'pick', { label: 'PLAY ONLINE', bg: '#2cc4dc', h37: 28, big469: 1 }) ]);
   if (back) out.push([ tag(back, 'pick') ]);
   return out;
  }
