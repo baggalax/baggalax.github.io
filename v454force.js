@@ -23,7 +23,7 @@
 (function () {
  'use strict';
  const W = window;
- const APP_VER = '1.5';
+ const APP_VER = '1.5.1';
  const URL0 = 'https://baggalax.github.io/config/minver.json';  // 1.3: moved to the website you control (old builds still read the old host)
  const STORE = 'https://apps.apple.com/us/app/bagga-lax/id6829999730';
  const TIMEOUT = 4000, EVERY = 10 * 60 * 1000;
